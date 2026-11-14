@@ -1,6 +1,6 @@
 # Implementation Plan: Export and import of the organisation profile and settings
 
-Design reference. When 62.56 runs is set in stream N5 of `docs/MASTER_EXECUTION_PLAN.md`, the only open plan.
+Design reference. When 62.56 runs is set in the session cards and gate G-SEED of `docs/MASTER_EXECUTION_PLAN.md`, the only open plan.
 
 **Spec**: [spec.md](./spec.md)
 **Tracker**: `docs/TODO.md` items 62.56a to 62.56f, Work Package 62

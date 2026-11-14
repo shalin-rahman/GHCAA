@@ -3,7 +3,8 @@ import path from 'node:path';
 
 // The report is plain HTML next to its screenshots, so it opens from disk with no server.
 // It is written again after every step, so a run that stops half way still leaves one.
-export const REPORT_DIR = path.resolve(__dirname, '../../../walkthrough-report');
+// The membership and event walkthroughs set WALKTHROUGH_REPORT, so each writes its own folder.
+export const REPORT_DIR = path.resolve(__dirname, '../../..', process.env['WALKTHROUGH_REPORT'] || 'walkthrough-report');
 export const SHOTS_DIR = path.join(REPORT_DIR, 'shots');
 export const FILES_DIR = path.join(REPORT_DIR, 'files');
 

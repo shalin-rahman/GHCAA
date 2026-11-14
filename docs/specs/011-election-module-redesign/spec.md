@@ -1,5 +1,9 @@
 # Election module — web and mobile client redesign
 
+Status, 2026-11-13: built and closed under tracker 37.1h. Two things changed after it was written:
+committee positions are rows in the `EcPosition` table, not a fixed enum (tracker 95.2), and the
+election rules and screens now follow spec 023. Read this file as history.
+
 ## Scope
 
 This specification covers new work: bringing the Angular (`GHCAA.Web`) and Flutter

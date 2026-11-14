@@ -2016,6 +2016,8 @@ Rules for touching the book are in `docs/book/README.md`; the short version is i
 
 ### Visual & E2E Testing (Playwright / Flutter Integration)
 
+Keep the walkthrough rows and each walkthrough README's "What the run covers" table in step with the code (plan rule 4).
+
 | Test / Script | Path | Purpose |
 |---|---|---|
 | `visual-check.ps1` | `scripts/visual-check.ps1` | Unified 4-stage runner for Visual/E2E tests |
@@ -2023,6 +2025,13 @@ Rules for touching the book are in `docs/book/README.md`; the short version is i
 | `registration_visual_test.dart` | `GHCAA.Mobile/test/registration_visual_test.dart` | Flutter Golden tests for registration wizard |
 | `member-journey.spec.ts` | `GHCAA.Web/tests/e2e/member-journey.spec.ts` | E2E Member login/dashboard journey |
 | `admin-workflow.spec.ts` | `GHCAA.Web/tests/e2e/admin-workflow.spec.ts` | E2E Admin approval workflow |
+| `full-membership-event-workflow.spec.ts` | `GHCAA.Web/tests/e2e/` | Quick single-browser check: register, pay, approve, create an event, register, approve participation |
+| Election walkthrough | `GHCAA.Web/tests/e2e/election-walkthrough/` | Whole election on the local stack, one browser per person, HTML report with screenshots; `scripts/run-election-walkthrough.bat` |
+| Membership walkthrough | `GHCAA.Web/tests/e2e/membership-walkthrough/` | Registration with approval: web and API applications, email codes, fee marked received, approve and reject, first login; `scripts/run-membership-walkthrough.bat` |
+| Event walkthrough | `GHCAA.Web/tests/e2e/event-walkthrough/` | Event participation with approval: seat limit and waitlist, member and guest registrations, approve and reject, pass, check-in; `scripts/run-event-walkthrough.bat` |
+| Walkthrough helpers | `GHCAA.Web/tests/e2e/election-walkthrough/` `api.ts`, `local.ts`, `report.ts`, `web.ts`, `payment-method.ts` | Shared by all three walkthroughs; `payment-method.ts` makes sure a cash method with no gateway is enabled |
+| `run-workflow-walkthrough.bat` | `scripts/` | Runner for the membership and event walkthroughs (`membership`, `event`, `restore`, `keep`, `headed`, `slow`) |
+| `local-election.py` | `scripts/` | Account takeover, code reading and clean-up for the walkthroughs; `sender`, `code-email` and `mail-error-email` serve applicants with no user row |
 
 ---
 

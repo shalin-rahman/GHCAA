@@ -8,5 +8,6 @@ description: Entry point for GHCAA tasks.
 - Start with `ghcaa-core-master` and `ghcaa-preflight`.
 - Use `graphify query/explain/path` before broad source reads.
 - Check `docs/PROJECT_MAP.md` and `docs/TODO.md` before patching.
+- Open work runs as session cards in `docs/MASTER_EXECUTION_PLAN.md`: take the next card in section 3, follow the rules in section 2, read only that card and its tracker entries.
 - Pull `ghcaa-date-standard` for dates, `ghcaa-design` for theme.
 - Before planning or changing code, check impact across API, web, mobile, and tests — never just one layer.

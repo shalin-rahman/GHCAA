@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/models/paged_list.dart';
 import '../../core/utils/ttl_cache.dart';
@@ -38,7 +39,13 @@ class EventsService {
     }
   }
 
+  /// Why the last registerForEvent call failed, from the server's reply, or null. The API answers
+  /// a refused registration (already registered, closed, full, members only) with 409 and the
+  /// reason in `detail` (84.102), so the screens can show it instead of a guess.
+  String? lastRegisterError;
+
   Future<bool> registerForEvent(int eventId, {double? amount, String? paymentRef, dynamic receipt}) async {
+    lastRegisterError = null;
     try {
       final response = await _dio.post('/events/register', data: {
         'eventId': eventId,
@@ -49,6 +56,7 @@ class EventsService {
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       debugPrint('EventsService.registerForEvent failed: $e');
+      if (e is DioException) lastRegisterError = ApiException.serverMessage(e.response?.data);
       return false;
     }
   }

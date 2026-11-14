@@ -28,12 +28,20 @@ export class Actor {
     private readonly report: Report,
   ) {}
 
-  static async open(browser: Browser, person: Person, role: string, report: Report): Promise<Actor> {
+  private password = PASSWORD;
+  private firstLoginPassword: string | null = null;
+
+  /**
+   * `login.password` is for someone who is not on the shared test password, such as a member
+   * approved a minute ago. `login.changeTo` answers the forced change on a first login.
+   */
+  static async open(browser: Browser, person: Person, role: string, report: Report, login?: { password: string; changeTo?: string }): Promise<Actor> {
     const context = await browser.newContext({ viewport: WINDOW_VIEWPORT });
     // Without this a selector that matches nothing waits until the 90-minute test timeout.
     context.setDefaultTimeout(60_000);
     const page = await context.newPage();
     const actor = new Actor(person, role, context, page, report);
+    if (login) { actor.password = login.password; actor.firstLoginPassword = login.changeTo ?? null; }
     page.on('dialog', d => d.accept());
     await actor.answerStepUp();
     await actor.login();
@@ -51,10 +59,22 @@ export class Actor {
     const config = this.page.waitForResponse(r => r.url().includes('/api/config'), { timeout: 10_000 }).catch(() => {});
     await this.page.goto('/login');
     await this.page.locator('#login-username').fill(this.person.username);
-    await this.page.locator('#login-password').fill(PASSWORD);
+    await this.page.locator('#login-password').fill(this.password);
     await this.page.locator('button.login-submit').click();
     await expect(this.page).not.toHaveURL(/\/login/, { timeout: 20_000 });
     await config;
+    // A first login lands on the change-password page and nothing else opens until it is done.
+    if (this.firstLoginPassword && /\/change-password/.test(this.page.url())) {
+      await this.shot('First login: the password must be changed');
+      await this.page.locator('input[name="oldPassword"]').fill(this.password);
+      await this.page.locator('input[name="newPassword"]').fill(this.firstLoginPassword);
+      await this.page.locator('input[name="confirmPassword"]').fill(this.firstLoginPassword);
+      const changed = this.page.waitForResponse(r => r.url().includes('/api/profile/change-password') && r.request().method() === 'POST', { timeout: 30_000 });
+      await this.page.locator('form button[type="submit"]').first().click();
+      await changed;
+      this.password = this.firstLoginPassword;
+      this.firstLoginPassword = null;
+    }
   }
 
   /** Drops the session and logs in again, so a new login picks up roles added since. */

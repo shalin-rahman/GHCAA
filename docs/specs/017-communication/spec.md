@@ -144,6 +144,7 @@ This spec covers direct messaging, admin broadcast communication, a member's own
 - FR-029: The topic's author or a SuperAdmin shall soft-delete a topic via DELETE `api/Forum/topics/{topicId}` (setting `IsActive = false`); the system shall still locate a topic whose category has since been deactivated, and shall reject the delete for any other member. [code+test]
 - FR-030: The post's author or a SuperAdmin shall soft-delete a post via DELETE `api/Forum/posts/{postId}` (setting `IsActive = false`), using the same category-bypass lookup as topic deletion. [code+test]
 - FR-031: An anonymous visitor shall submit a contact enquiry via POST `api/contact` with body `{FullName (required, max 150 chars), Email (required, valid email, max 200 chars), Subject (required, max 250 chars), Message (required, min 10, max 2000 chars)}`; the system shall persist the enquiry and return the fixed confirmation "Your enquiry has been filed in the secretariat records." regardless of whether the configured recipients' notification email succeeds. [code+test]
+- FR-032: Email shall go out through the sender an admin picks under Settings, Workflow, Email Sender (`Workflow.EmailProvider`: Gmail SMTP or the Brevo HTTPS API). `EmailServiceRouter` reads the choice on each send, so a switch needs no restart, and a blank or unknown value falls back to `EmailSettings:Provider`. Keys stay in environment variables. [code+test: `EmailServiceRouterTests`, `BrevoEmailServiceTests`; TODO 7.26]
 
 ### Key Entities
 

@@ -13,7 +13,7 @@ A digital platform for the Govt. Haraganga College Alumni Association (GHCAA), c
 | [Config-Driven Framework](docs/CONFIG_DRIVEN_FRAMEWORK.md) | Runtime organization configuration model |
 | [Render Deployment](docs/RENDER_DEPLOYMENT.md) | Combined API + web deployment guide |
 | [Task Backlog](docs/TODO.md) | Delivered and planned work, tracked by area |
-| [Execution Plans](docs/FORUM_PLAN_2026-05.md) | Phased implementation plans |
+| [Execution Plan](docs/MASTER_EXECUTION_PLAN.md) | The one open plan: session cards, owner gates and the migration order |
 
 ---
 
@@ -145,7 +145,7 @@ The platform follows Clean Architecture (Onion) principles so business logic sta
 ### Backend (.NET 9)
 
 - **Domain** (`GHCAA.Domain`) — pure C# entities (`Member`, `User`, `AlumniEvent`, ~45 entities), enums, and shared constants; no external dependencies.
-- **Application** (`GHCAA.Application`) — service interfaces (`IMemberService`, `IAuthService`), DTOs, FluentValidation validators, and security primitives (JWT key resolution); defines the business contracts.
+- **Application** (`GHCAA.Application`) — service interfaces (`IMemberService`, `IAuthService`), DTOs with DataAnnotations validation rules, and security primitives (JWT key resolution); defines the business contracts.
 - **Infrastructure** (`GHCAA.Infrastructure`) — ~37 service implementations, EF Core persistence with a multi-provider `ApplicationDbContext` (PostgreSQL + SQLite), per-entity `IEntityTypeConfiguration` mappings, payment gateways, and integrations (email, OTP, SMS, file storage). Services auto-register by convention.
 - **API** (`GHCAA.API`) — ~36 REST controllers, an 8-component middleware pipeline (correlation id, www redirect, exception handling, security headers, audit logging, security-stamp invalidation, XSRF, plus a Visual-profile test auth), two SignalR hubs (`ChatHub`, `NotificationHub`), and JWT authentication. Hosts the built Angular SPA from `wwwroot` in production.
 
@@ -187,7 +187,7 @@ The patterns below are the ones actually implemented, with their locations. Wher
 | Global query filters (soft delete) | Per-entity `IEntityTypeConfiguration` classes in [`GHCAA.Infrastructure/Data/Configurations/`](GHCAA.Infrastructure/Data/Configurations/) apply `HasQueryFilter(!IsArchived)`, registered via `ApplyConfigurationsFromAssembly` in [`ApplicationDbContext`](GHCAA.Infrastructure/Data/ApplicationDbContext.cs). |
 | DTOs (manual mapping) | Request/response DTOs live in [`GHCAA.Application/DTOs/`](GHCAA.Application/DTOs/); mapping is done explicitly in services (no AutoMapper, keeping mappings visible and dependency-free). |
 | Observer (real-time) | SignalR hubs [`ChatHub`](GHCAA.API/Hubs/ChatHub.cs) and [`NotificationHub`](GHCAA.API/Hubs/NotificationHub.cs) push messages and notifications to connected clients. |
-| Validation | FluentValidation validators registered by [`AddApplication()`](GHCAA.Application/DependencyInjection.cs). |
+| Validation | DataAnnotations rules on the DTOs in [`GHCAA.Application/DTOs/`](GHCAA.Application/DTOs/), checked by model binding. No FluentValidation. |
 
 Deliberate non-choices: there is **no** generic repository/Unit-of-Work layer — services use the EF Core `DbContext` directly, and `SaveChanges` serves as the unit of work. (A single [`FileUploadRepository`](GHCAA.Infrastructure/Repositories/FileUploadRepository.cs) exists for file uploads only.) Settings are bound directly from `IConfiguration` rather than the `IOptions<T>` pattern, and there is no CQRS/Mediator layer. These keep the codebase lightweight and easy to trace.
 
@@ -319,6 +319,8 @@ Each layer has its own suite and toolchain:
 
 Run the suites with `dotnet test` (backend), `npm test` (web), and `flutter test` (mobile).
 
+Three local walkthroughs run whole workflows against the local API and database, one browser per person, and write an HTML report with a screenshot per step and a refusal check per rule: the election (`scripts\run-election-walkthrough.bat`), registration with approval (`scripts\run-membership-walkthrough.bat`) and event participation with approval (`scripts\run-event-walkthrough.bat`). Each README under `GHCAA.Web/tests/e2e/*-walkthrough/` lists what its run covers and what is not covered yet.
+
 **On coverage:** CI runs every suite as a pass/fail gate rather than publishing a single headline coverage number — no authoritative figure is tracked in the repo, so none is claimed here. Coverage can be measured locally on the backend via the bundled `coverlet.collector` (`dotnet test --collect:"XPlat Code Coverage"`).
 
 ### Continuous Integration
@@ -352,7 +354,7 @@ Additional workflows handle release and infrastructure: `main.yml` (build/packag
 Delivered and planned work is tracked in the repository:
 
 - **[Task Backlog](docs/TODO.md)** — the master tracker. Completed areas are marked done; open items capture the remaining full-stack review findings and enhancements.
-- **[Execution Plans](docs/FORUM_PLAN_2026-05.md)** — phased implementation plans mapping backlog items to concrete steps.
+- **[Execution Plan](docs/MASTER_EXECUTION_PLAN.md)** — the one open plan. It orders every open backlog item as a session card with its steps and tests.
 
 At a glance:
 

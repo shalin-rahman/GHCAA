@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Events } from './events';
 import { EventsService } from '../../core/services/events.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { GatewaysService } from '../../core/services/gateways.service';
 
@@ -143,6 +143,20 @@ describe('Events Component', () => {
         // Check that registerForEvent was called with EVT-REG- prefix if it's an online gateway
         const callArgs = eventsServiceMock.registerForEvent.mock.calls[0][0];
         expect(callArgs.paymentReference).toContain('EVT-REG-');
+    });
+
+    // 84.102: the API now answers a refused registration with 409 and the reason in detail.
+    it('shows the server reason when a registration is refused', () => {
+        const mockEvent = { id: 1, title: 'Test', requiresPayment: true, registrationFee: 500 };
+        component.selectedEvent.set(mockEvent as any);
+        component.selectedPaymentMethod.set({ id: 2, method: 'ManualReceipt', gateway: 'None', isOnline: false, requiresReference: false } as any);
+        component.regForm.patchValue({ guestName: 'Guest User', guestEmail: 'guest@test.com', guestMobile: '01700000000', paymentReference: 'REF' });
+        eventsServiceMock.registerForEvent.mockReturnValueOnce(throwError(() => ({ status: 409, error: { detail: 'You are already registered for this event.' } })));
+
+        component.submitRegistration();
+
+        expect(component.formError()).toBe('You are already registered for this event.');
+        expect(component.isSubmitting()).toBe(false);
     });
 
     it('should initiate gateway for online payments', () => {

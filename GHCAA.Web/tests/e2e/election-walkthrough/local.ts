@@ -9,7 +9,8 @@ const SCRIPT = path.join(REPO_ROOT, 'scripts', 'local-election.py');
 const PYTHON = process.env['WALKTHROUGH_PYTHON'] || 'python';
 
 // A fixed path, so the next run finds and removes what an interrupted run left behind.
-export const STATE_FILE = path.join(os.tmpdir(), 'ghcaa-local-election', 'walkthrough-state.json');
+// The membership and event walkthroughs set WALKTHROUGH_STATE, so each keeps its own borrowed accounts.
+export const STATE_FILE = path.join(os.tmpdir(), 'ghcaa-local-election', process.env['WALKTHROUGH_STATE'] || 'walkthrough-state.json');
 
 export const PASSWORD = 'LocalVote#2026';
 
@@ -55,6 +56,23 @@ export const local = {
   mailError(userId: number, since: Date): string | null {
     return run(['mail-error', String(userId), '--since', since.toISOString()], true) || null;
   },
+
+  /** The mailbox the plus addresses are built on. */
+  sender: () => run(['sender']),
+
+  /** The newest emailed code for an address, for someone with no user row yet. */
+  codeFor(email: string, since: Date): string | null {
+    const out = run(['code-email', email, '--since', since.toISOString()], true);
+    return /^\d{6}$/.test(out) ? out : null;
+  },
+
+  mailErrorFor(email: string, since: Date): string | null {
+    return run(['mail-error-email', email, '--since', since.toISOString()], true) || null;
+  },
+
+  /** The election's form print records, oldest first. */
+  prints: (electionId: number) =>
+    JSON.parse(run(['prints', String(electionId)])) as { id: string; form: string; revoked: boolean }[],
 
   who(userIds: number[]): Map<number, Person> {
     const rows = JSON.parse(run(['who', userIds.join(',')])) as Record<string, { username: string; member_id: number | null; name: string }>;

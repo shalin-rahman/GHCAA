@@ -4,7 +4,7 @@
 > candidate consent, spoiled and unopposed seats) and 37.16e (officer conflict check), both still
 > `[TODO]` in `docs/TODO.md`. `CandidateConsentAt` and the conflict rule are not in the code yet.
 > Still open from the Phase 2 work: 37.1m and 37.14o (`[PARTIAL]`, printed receipt check). The
-> remaining work is ordered only in the stream E order of `docs/MASTER_EXECUTION_PLAN.md`, the
+> remaining work is ordered only in the session cards (phases A, C and E) of `docs/MASTER_EXECUTION_PLAN.md`, the
 > only open plan. The notes below are the earlier positions, kept for the record.
 >
 > **Status 2026-10-09:** Phase 2 is built on API, web and mobile, with 37.1t and 37.1u (FR-042,

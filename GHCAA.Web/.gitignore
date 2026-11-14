@@ -37,6 +37,7 @@ yarn-error.log
 /playwright-report
 /test-results
 /walkthrough-report
+/walkthrough-report-*
 /libpeerconnection.log
 testem.log
 /typings

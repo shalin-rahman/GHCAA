@@ -70,16 +70,16 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       // registerForEvent directly instead of routing through the gateway sheet (that flow was
       // pushing an SSLCommerz/DGePay charge for amount 0 and never actually registering the
       // member).
-      final success =
-          await ref.read(eventsServiceProvider).registerForEvent(eventId);
+      final events = ref.read(eventsServiceProvider);
+      final success = await events.registerForEvent(eventId);
       if (!context.mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration successful.')));
         ref.invalidate(eventsListProvider);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(events.lastRegisterError ??
               'Registration failed. It may already be registered, closed, or your session expired.'),
           backgroundColor: Colors.redAccent,
         ));

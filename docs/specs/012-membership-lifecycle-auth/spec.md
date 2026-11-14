@@ -316,6 +316,12 @@ Acceptance Scenarios:
   is on, the provider is enabled, and its client credentials are set. GET api/auth/providers
   returns nothing otherwise and the clients show no social buttons. Raised as AUTH-SOCIAL-001
   and 002 on 2026-10-04. Production keeps it off. [code+test, TODO 7.17]
+- FR-035: The access-token lifetime and the OTP attempt limit shall be read from configuration
+  (`Jwt:ExpiryMinutes`, `OtpSettings:MaxAttempts`). A missing, zero or negative value falls back
+  to 60 minutes and 5 attempts. [code+test: `TokenServiceTests`, `OtpServiceTests`; TODO 98.43]
+- FR-036: A second application with the Email, NID or mobile number of an existing member shall
+  be refused with 409 and the reason, before any row is written. [code+test:
+  `RegistrationControllerTests.Register_Duplicate_Returns409WithTheReason`, `MemberServiceTests`; TODO 84.102]
 
 ### Key Entities
 

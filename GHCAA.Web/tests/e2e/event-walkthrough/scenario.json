@@ -1,0 +1,22 @@
+{
+  "title": "Event walkthrough",
+  "admin": 2,
+  "superAdmin": 1,
+  "event": {
+    "title": "Alumni Evening",
+    "description": "An evening for members and their guests, with a short programme and dinner.",
+    "location": "College auditorium, Munshiganj",
+    "fee": 300,
+    "participantLimit": 2,
+    "hasWaitlist": true,
+    "allowNonMembers": true,
+    "startsInDays": 3,
+    "hours": 4
+  },
+  "members": [
+    { "user": 201, "web": true, "outcome": "approve" },
+    { "user": 202, "web": false, "outcome": "reject" },
+    { "user": 203, "web": false, "outcome": "waitlist" }
+  ],
+  "guest": { "name": "Walkthrough Guest", "mobile": "01712345678" }
+}

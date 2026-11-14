@@ -1,7 +1,7 @@
 # Spec 023 delivery plan for the remaining election work
 
-> **Status 2026-11-03:** design reference. The order of the open WP37 items is now the stream E
-> order in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan. The session order below is history.
+> **Status 2026-11-03:** design reference. The order of the open WP37 items is now the session
+> cards (phases A, C and E, rewritten 2026-11-13) in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan. The session order below is history.
 
 Written 2026-10-09 on Opus. It covers every open WP37 item that code can close, split into six
 sessions (S1 to S6). Each session runs on Sonnet from a cleared context and should need no
@@ -675,14 +675,22 @@ migration chain, to be confirmed on preprod.
 
 ### F2. Schema and the recount rules
 
+Checked 2026-11-13: `Election.RecountWindowEndsOn`, `Nomination.ConsentAt` and the recount request
+table (`ElectionRecountRequest`, one row per filing) were built under 37.14m and are not added again.
+The master plan's cards S24 and S26 list what F2 still adds; where they differ from this section,
+the cards hold.
+
 One hand-written migration with its Designer file, after
 `20261014120000_AddEventPhotoThumbnail`. It adds:
 
-- `Election.RecountWindowEndsOn` (nullable), `Election.PollingExtensionCount` (int, default 0).
-- `Nomination.ConsentAt` (nullable). ER-10 prints "not recorded" when null
+- `Election.PollingExtensionCount` (int, default 0), and the per-election limits `MaxPollingExtensions`,
+  `MaxExtensionHours` and `NominationReopenDays`. `Election.RecountWindowEndsOn` is already built (37.14m).
+- `Nomination.ConsentAt` is already built (37.14m). ER-10 prints "not recorded" when null
   (`ElectionDocumentService.cs:180`).
-- `ElectionRecountRequest` (election, seat, candidate, reason, filed at, status, decided by,
-  decided at), unique on election and seat.
+- `ElectionRecountRequest` is already built (37.14m), one row per filing. F2 adds no column; the
+  service allows one undecided request per seat.
+- `ElectionPurgeRecord` (election, title, declared on, requested by, approved by, purged at, summary),
+  for the ten-year purge (37.14f).
 - `ElectionConflictDeclaration` (appointment, candidate nomination, relation: spouse, parent,
   child, sibling, proposer, seconder; declared by, declared at).
 - `ElectionKeyCopy` (election, holder appointment, confirmed at). Used in F3.
@@ -825,14 +833,14 @@ wording, seeded from the profile, with admin create, edit and publish on the web
 pages and the generated forms read from it. Mobile reads the same API where it shows this
 content today (42.4). The numbering approved in F7 is applied here. Admin text reaches public pages, so `security-reviewer` checks it cannot carry script.
 
-### F12. Print record follow-ups (session 2b, 37.14u to 37.14x)
+### F12. Print record follow-ups (session 2b, 37.16i to 37.16l)
 
 Run 84.100 and 84.101 first, so ci-local covers every web spec and the contract check before the
-election changes land. Then 37.14v: the revoke claim is one conditional update, and only the caller
-whose update changed a row writes the audit entry. 37.14w adds a named rate-limit policy read from
-OrgConfig and reuses a print row when official, form and content hash match. 37.14x waits on the
-owner's answer. 37.14u comes after the API is settled, web first. No migration: the print table
-from 37.14t already has the columns these need. `code-reviewer` checks 37.14v and 37.14w.
+election changes land. Then 37.16j: the revoke claim is one conditional update, and only the caller
+whose update changed a row writes the audit entry. 37.16k adds a named rate-limit policy read from
+OrgConfig and reuses a print row when official, form and content hash match. 37.16l waits on the
+owner's answer. 37.16i comes after the API is settled, web first. No migration: the print table
+from 37.14t already has the columns these need. `code-reviewer` checks 37.16j and 37.16k.
 
 ### N1 to N8. Non-election areas
 

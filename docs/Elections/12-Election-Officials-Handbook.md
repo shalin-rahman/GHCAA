@@ -1145,6 +1145,14 @@ campaign and silence dates, roll totals, ballot counts and the audit entry count
 about one person, such as Name and Membership No., are always left for hand. A date that was never set
 prints "Not recorded".
 
+A filled copy prints only once the election has reached the step that fills the form (from 2026-11-13).
+ER-01 to ER-09 print from Announced, ER-10 to ER-16 from Nomination, ER-17 and ER-17A from Scrutiny,
+ER-18 from Withdrawal, ER-19 to ER-22 from the final candidate list, ER-23 to ER-25 from Polling,
+ER-26 to ER-28 from Counting, and ER-27C, ER-29 and ER-30 from Declared. The complaint forms ER-31 and
+ER-32 print at any time, and ER-33 onward after the declaration. A blank copy prints at any time. Each
+filled copy carries a QR code and a print number; the page it opens shows when it was printed, by which
+post and its content hash, and says so if the print was revoked.
+
 Also from 2026-10-23 (TODO 37.14q): ER-17 prints each nomination's scrutiny ticks and the decision.
 ER-28 prints the recount requests, ER-28A the decisions, and ER-28B the original count against the
 recount. ER-34 lists the handover items with their ticks, read on the election's own committee period,

@@ -4,6 +4,10 @@ Work item 84.52 in `docs/TODO.md`. This test runs one full election on the local
 writes an HTML report with a captioned screenshot for every step. Each person (admins,
 officials, candidates, voters) works in their own browser session.
 
+Two sibling walkthroughs reuse this folder's helpers (`api.ts`, `local.ts`, `report.ts`, `web.ts`):
+`../membership-walkthrough/` for registration and approval and `../event-walkthrough/` for event
+participation. A change to those helpers has to keep all three working; type-check all three.
+
 It runs against the local database only. It borrows real member accounts, so their emails
 are moved to plus addresses for the run and put back afterwards.
 
@@ -159,6 +163,37 @@ If the API is restarted while the web server keeps running, the web proxy can an
 | `WALKTHROUGH_SCENARIO=path` | Use another scenario file in place of `scenario.json`. |
 | `WALKTHROUGH_PYTHON=path` | The Python to run `scripts/local-election.py` with. |
 | `GHCAA_LOCAL_API=url` | The API base for direct calls. Default `http://localhost:5087/api`. |
+
+## What the run covers
+
+Keep this list and the run in step. A change to an election rule, route, form or screen adds or
+updates its step in `election.walkthrough.ts` and its row here in the same piece of work, with a
+refusal probe for each new rule. A feature the run cannot reach yet is listed under "Not covered"
+with the reason.
+
+| Section | Steps and refusals checked |
+|---|---|
+| Committee period and election | Period and election created, seats added, form details saved (venue, dates, recount window). |
+| Voter roll and officials | Roll frozen. Unfreeze refused without a reason; unfreeze with a reason, then frozen again (or the unfreeze window refuses it). Officials appointed by persona. |
+| Officials accept or decline | Declaration ticked and accepted; one scrutineer declines with a reason; an observer cannot change the phase; a revoked observer cannot read approvals. |
+| Publishing | Two-person publish, approved on the officials dashboard. |
+| Nominations | Filed on the member page; a member cannot propose themselves; consent saved; consent cannot be dated in the future. Filled ER-17 and ER-29 refused (409) and blank ER-17 printed. |
+| Scrutiny | Filled ER-17 prints once scrutiny opens. Checklist ticked, each nomination accepted or rejected with a reason. |
+| Withdrawal, list, campaign | One candidate withdraws; the list is final; campaign opens. |
+| Ballot key and readiness | Polling refused without a key; key made in the browser; readiness items attested. |
+| Polling and voting | Two-person open; a ballot before the opening time refused; web and API ballots with tracking codes; each API reply carries the receipt PDF; a second ballot refused. |
+| Close, count, declare | Two-person close; count with the key file; two-person declare; public results and tracking codes. |
+| Recounts | Requests recorded, allowed or refused, figures entered; a request dated after the window refused. |
+| Key destroyed, forms, audit | Destroy refused inside the recount window; a handover item ticked and an unknown item refused; every form filled and blank; public form check; an unknown form code not found; audit chain verified. |
+| Print records | A record per filled print; public check by print id; revoke with no reason refused, revoke, second revoke refused, unknown id not found; audit chain still whole. |
+| Archive | Two-person archive; public results after archiving. |
+
+Not covered yet, each waiting on its build: the print records list and revoke screen (37.16i), the
+print check's own rate limit and row reuse (37.16k), candidate photo approval (37.16h), officer
+conflict declarations (37.16e), key copy holders (37.14a), polling extension (37.12y), unopposed
+seats and paper counts (37.1p), the ten-year purge (37.14f), by-elections and vacant seats (95.4,
+95.5). Not covered by choice: test elections, the authenticator app, and the mobile screens, which
+have their own tests.
 
 ## Changing the input data
 

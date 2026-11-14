@@ -172,6 +172,8 @@ public sealed class ElectionFormPrintConfiguration : IEntityTypeConfiguration<El
         b.Property(x => x.ContentHash).HasMaxLength(64).IsRequired();
         b.Property(x => x.PrintedByRole).HasMaxLength(100).IsRequired();
         b.Property(x => x.RevokeReason).HasMaxLength(500);
+        // Two officials revoking at once: the second save fails instead of overwriting the first.
+        b.Property(x => x.RevokedAt).IsConcurrencyToken();
         b.HasIndex(x => new { x.ElectionId, x.FormCode });
         b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.PrintedByUserId).OnDelete(DeleteBehavior.Restrict);

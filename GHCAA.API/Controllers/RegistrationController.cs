@@ -65,7 +65,16 @@ namespace GHCAA.API.Controllers
             var certDto = certificate != null ? ToUploaded(certificate) : null;
             var paymentDto = paymentProof != null ? ToUploaded(paymentProof) : null;
 
-            var memberId = await _memberService.RegisterAsync(dto, photoDto, certDto, paymentDto, cancellationToken);
+            int memberId;
+            try
+            {
+                memberId = await _memberService.RegisterAsync(dto, photoDto, certDto, paymentDto, cancellationToken);
+            }
+            catch (RequestConflictException ex)
+            {
+                // 84.102: a duplicate application used to reach ExceptionMiddleware as a bare 500.
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
             return CreatedAtAction(nameof(GetStatus), new { id = memberId, email = dto.Email }, new { MemberId = memberId, Message = "Application submitted. OTP sent to email." });
         }
 

@@ -199,10 +199,10 @@ def username(uid):
         return c.fetchone()[0]
 
 
-def latest_code(uid, since=None):
+def latest_code(uid, since=None, address=None):
     with db() as conn, conn.cursor() as c:
         c.execute('select "Subject", "Body", "Status", "SentDate" from "EmailLogs" where lower("RecipientEmail") = lower(%s) '
-                  'order by "Id" desc limit 1', (plus_address(uid),))
+                  'order by "Id" desc limit 1', (address or plus_address(uid),))
         row = c.fetchone()
     # SentDate is timestamptz on PostgreSQL, so compare both sides as naive UTC.
     sent = row[3].astimezone(timezone.utc).replace(tzinfo=None) if row and row[3] and row[3].tzinfo else (row[3] if row else None)
@@ -212,11 +212,11 @@ def latest_code(uid, since=None):
     return match.group(1) if match else None
 
 
-def mail_error(uid, since=None):
+def mail_error(uid, since=None, address=None):
     """Why the newest email to the user failed, or None if none failed since `since`."""
     with db() as conn, conn.cursor() as c:
         c.execute('select "ErrorMessage", "SentDate" from "EmailLogs" where lower("RecipientEmail") = lower(%s) '
-                  'and "Status" = \'Failed\' order by "Id" desc limit 1', (plus_address(uid),))
+                  'and "Status" = \'Failed\' order by "Id" desc limit 1', (address or plus_address(uid),))
         row = c.fetchone()
     if row is None:
         return None
@@ -246,6 +246,23 @@ def code_cmd(args):
 
 def mail_error_cmd(args):
     print(mail_error(args.user_id, parse_since(args.since)) or "")
+
+
+# The membership walkthrough registers people who have no user row yet, so their codes are
+# looked up by address. `sender` gives the mailbox its plus addresses are built on.
+def sender_cmd(_args):
+    print(sender_address())
+
+
+def code_email_cmd(args):
+    found = latest_code(None, parse_since(args.since), address=args.email)
+    if not found:
+        fail(f"no code in EmailLogs for {args.email}")
+    print(found)
+
+
+def mail_error_email_cmd(args):
+    print(mail_error(None, parse_since(args.since), address=args.email) or "")
 
 
 def call(method, path, token=None, body=None, ok=(200, 201, 202, 204)):
@@ -544,6 +561,14 @@ def who(args):
     print(json.dumps(rows, ensure_ascii=False))
 
 
+def prints(args):
+    # The print id is only in the PDF's QR code, so the walkthrough reads it back here.
+    with db() as conn, conn.cursor() as c:
+        c.execute('select "Id", "FormCode", "RevokedAt" is not null from "ElectionFormPrints" '
+                  'where "ElectionId" = %s order by "PrintedAt"', (args.id,))
+        print(json.dumps([dict(id=str(r[0]), form=r[1], revoked=r[2]) for r in c.fetchall()]))
+
+
 def record(args):
     state = load_state()
     ids = state.setdefault(f"{args.kind}s", [])
@@ -705,6 +730,15 @@ def main():
     s.add_argument("user_id", type=int)
     s.add_argument("--since", help="only a failure after this ISO time (UTC)")
     s.set_defaults(fn=mail_error_cmd)
+    sub.add_parser("sender", help="the mailbox the plus addresses are built on").set_defaults(fn=sender_cmd)
+    s = sub.add_parser("code-email", help="newest emailed code for an address")
+    s.add_argument("email")
+    s.add_argument("--since", help="only a code sent after this ISO time (UTC)")
+    s.set_defaults(fn=code_email_cmd)
+    s = sub.add_parser("mail-error-email", help="why the newest email to an address failed, blank if none did")
+    s.add_argument("email")
+    s.add_argument("--since", help="only a failure after this ISO time (UTC)")
+    s.set_defaults(fn=mail_error_email_cmd)
     sub.add_parser("restore").set_defaults(fn=restore)
     s = sub.add_parser("accounts")
     s.add_argument("users", help="comma-separated user ids")
@@ -712,6 +746,9 @@ def main():
     s = sub.add_parser("who")
     s.add_argument("users", help="comma-separated user ids")
     s.set_defaults(fn=who)
+    s = sub.add_parser("prints", help="an election's form print records as JSON, oldest first")
+    s.add_argument("id", type=int)
+    s.set_defaults(fn=prints)
     s = sub.add_parser("record")
     s.add_argument("kind", choices=["election", "period"])
     s.add_argument("id", type=int)

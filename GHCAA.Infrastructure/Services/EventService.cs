@@ -229,26 +229,26 @@ namespace GHCAA.Infrastructure.Services
         public async Task<EventRegistration> RegisterForEventAsync(RegisterForEventDto dto, int? memberId, UploadedFileDto? receipt = null, CancellationToken cancellationToken = default)
         {
             var alumniEvent = await _context.AlumniEvents.FindAsync(new object[] { dto.EventId }, cancellationToken);
-            if (alumniEvent == null) throw new ArgumentException("Event not found");
+            if (alumniEvent == null) throw new KeyNotFoundException("Event not found");
 
             if (!alumniEvent.IsActive)
-                throw new InvalidOperationException("This event is not currently active.");
+                throw new RequestConflictException("This event is not currently active.");
 
             if (!alumniEvent.RequiresRegistration)
-                throw new InvalidOperationException("This event does not require registration.");
+                throw new RequestConflictException("This event does not require registration.");
 
             var now = DateTime.UtcNow;
             if (alumniEvent.RegistrationStartDate.HasValue && now < alumniEvent.RegistrationStartDate.Value)
-                throw new InvalidOperationException("Registration for this event has not opened yet.");
+                throw new RequestConflictException("Registration for this event has not opened yet.");
 
             if (alumniEvent.RegistrationEndDate.HasValue && now > alumniEvent.RegistrationEndDate.Value)
-                throw new InvalidOperationException("Registration for this event is closed.");
+                throw new RequestConflictException("Registration for this event is closed.");
 
             // 54.6: RegistrationEndDate is optional — an admin who never set one previously had no
             // gate at all once the event itself had already ended. The event's own EndDate is the
             // hard backstop regardless of whether a registration deadline was configured.
             if (now > alumniEvent.EndDate)
-                throw new InvalidOperationException("This event has already ended.");
+                throw new RequestConflictException("This event has already ended.");
 
             // Check for existing registration for this event
             bool alreadyRegistered = false;
@@ -263,12 +263,12 @@ namespace GHCAA.Infrastructure.Services
 
             if (alreadyRegistered)
             {
-                throw new InvalidOperationException("You are already registered for this event.");
+                throw new RequestConflictException("You are already registered for this event.");
             }
 
             if (!memberId.HasValue && !alumniEvent.AllowNonMembers)
             {
-                throw new InvalidOperationException("This event is for members only.");
+                throw new RequestConflictException("This event is for members only.");
             }
 
             string? receiptPath = null;
@@ -295,7 +295,7 @@ namespace GHCAA.Infrastructure.Services
                     // The old code only handled HasWaitlist; when HasWaitlist was false the cap was
                     // skipped entirely, allowing unlimited registrations. Reject instead.
                     if (!alumniEvent.HasWaitlist)
-                        throw new InvalidOperationException("This event has reached its participant limit.");
+                        throw new RequestConflictException("This event has reached its participant limit.");
                     initialStatus = EventRegistrationStatus.Waitlisted;
                 }
             }
@@ -345,7 +345,7 @@ namespace GHCAA.Infrastructure.Services
                     {
                         _context.EventRegistrations.Remove(registration);
                         await _context.SaveChangesAsync(cancellationToken);
-                        throw new InvalidOperationException("This event has reached its participant limit.");
+                        throw new RequestConflictException("This event has reached its participant limit.");
                     }
                 }
             }

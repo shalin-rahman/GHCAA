@@ -451,8 +451,8 @@ class EventDetailsScreen extends ConsumerWidget {
                           // registerForEvent logs-and-returns false on failure rather than throwing
                           // (a duplicate registration, a closed event, an expired session) — the result
                           // must be checked, or a failed registration reports "successful" to the member.
-                          final success = await ref
-                              .read(eventsServiceProvider)
+                          final events = ref.read(eventsServiceProvider);
+                          final success = await events
                               .registerForEvent(eventId,
                                   amount: requiresPayment
                                       ? double.tryParse(amountCtrl.text)
@@ -462,8 +462,8 @@ class EventDetailsScreen extends ConsumerWidget {
                           if (!success) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text(
+                                  .showSnackBar(SnackBar(
+                                content: Text(events.lastRegisterError ??
                                     'Registration failed. It may already be registered, closed, or your session expired.'),
                                 backgroundColor: Colors.redAccent,
                               ));

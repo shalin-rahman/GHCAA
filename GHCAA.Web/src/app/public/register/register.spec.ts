@@ -119,6 +119,20 @@ describe('Register Component', () => {
         expect(component.files['paymentProof']).toBe(mockFile);
     });
 
+    // 84.102: the interceptor shows the server's reason, so the page adds no second toast.
+    it('leaves a refused application to the interceptor toast', () => {
+        component.model.PaymentMethodId = 1;
+        component.model.DateOfBirth = '';
+        component.files['photo'] = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+        regServiceMock.register.mockReturnValue(throwError(() => ({ status: 409, error: { detail: 'Member with same Email, NID, or Mobile already exists.' } })));
+
+        component.onSubmit(mockForm);
+
+        expect(regServiceMock.register).toHaveBeenCalled();
+        expect(notificationServiceMock.error).not.toHaveBeenCalled();
+        expect(component.loading()).toBe(false);
+    });
+
     it('should fail submission if payment method is missing', () => {
         component.model.PaymentMethodId = 0;
         component.onSubmit(mockForm);

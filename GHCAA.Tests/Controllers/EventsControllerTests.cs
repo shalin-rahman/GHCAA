@@ -103,6 +103,51 @@ namespace GHCAA.Tests.Controllers
             _eventServiceMock.Verify(x => x.RegisterForEventAsync(It.IsAny<RegisterForEventDto>(), It.IsAny<int>(), It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        // 84.102: each refusal the service raises reaches the client as a 409 with its message,
+        // not as a bare 500 from ExceptionMiddleware.
+        [Category("FR-14")]
+        [TestCase("You are already registered for this event.")]
+        [TestCase("This event is for members only.")]
+        [TestCase("Registration for this event is closed.")]
+        [TestCase("This event has already ended.")]
+        [TestCase("This event has reached its participant limit.")]
+        public async Task RegisterForEventJson_ServiceRefuses_Returns409WithTheReason(string reason)
+        {
+            var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
+            _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, null, It.IsAny<CancellationToken>()))
+                             .ThrowsAsync(new RequestConflictException(reason));
+
+            var result = await _controller.RegisterForEventJson(dto, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo(reason));
+        }
+
+        [Category("FR-14")]
+        [Test]
+        public async Task RegisterForEventJson_UnknownEvent_Returns404()
+        {
+            var dto = new RegisterForEventDto { EventId = 999, PaymentReference = "123" };
+            _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, null, It.IsAny<CancellationToken>()))
+                             .ThrowsAsync(new KeyNotFoundException("Event not found"));
+
+            var result = await _controller.RegisterForEventJson(dto, CancellationToken.None);
+
+            Assert.That((result as ObjectResult)!.StatusCode, Is.EqualTo(404));
+        }
+
+        // Only the refusals above are mapped. Any other fault still reaches ExceptionMiddleware.
+        [Test]
+        public void RegisterForEventJson_OtherInvalidOperation_IsRethrown()
+        {
+            var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
+            _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, null, It.IsAny<CancellationToken>()))
+                             .ThrowsAsync(new InvalidOperationException("The instance is already being tracked."));
+
+            Assert.ThrowsAsync<InvalidOperationException>(() => _controller.RegisterForEventJson(dto, CancellationToken.None));
+        }
+
         [Test]
         public async Task GetMyRegistrations_ReturnsOk()
         {

@@ -1,6 +1,6 @@
 # White-label plan: one codebase, any institution
 
-Status: design reference. The open items are ordered in stream N5 of `docs/MASTER_EXECUTION_PLAN.md`, the only open
+Status: design reference. The open items are ordered in the session cards and gate G-SEED of `docs/MASTER_EXECUTION_PLAN.md`, the only open
 plan. Checked 2026-11-03: the API, web and mobile de-branding is done (62.6, 62.6b,
 62.7, 62.8, 62.15, 62.27). Open: 62.2 and 62.41 (partial), 62.42 and 62.56. docs/TODO.md Work
 Package 62 has the current state.

@@ -366,7 +366,7 @@ public class EventServiceTests : TestBase
         await _context.SaveChangesAsync();
 
         Func<Task> act = async () => await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P" }, 1, null);
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Registration for this event is closed.");
+        await act.Should().ThrowAsync<RequestConflictException>().WithMessage("Registration for this event is closed.");
     }
 
     [Category("FR-13")]
@@ -432,7 +432,7 @@ public class EventServiceTests : TestBase
         var dto = new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P", IsNonMember = true, GuestName = "Guest" };
         Func<Task> act = async () => await _service.RegisterForEventAsync(dto, null, null);
 
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("This event is for members only.");
+        await act.Should().ThrowAsync<RequestConflictException>().WithMessage("This event is for members only.");
     }
 
     [Category("FR-14")]

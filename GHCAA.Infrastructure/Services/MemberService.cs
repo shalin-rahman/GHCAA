@@ -140,7 +140,7 @@ namespace GHCAA.Infrastructure.Services
         private async Task EnsureNoDuplicateMemberAsync(MemberRegistrationDto dto, CancellationToken cancellationToken)
         {
             if (await _db.Members.AnyAsync(m => m.Email == dto.Email || m.NID == dto.NID || m.MobileNo == dto.MobileNo, cancellationToken))
-                throw new InvalidOperationException("Member with same Email, NID, or Mobile already exists.");
+                throw new RequestConflictException("Member with same Email, NID, or Mobile already exists.");
         }
 
         // 35.5: MembershipType is admin-assigned only. Whatever tier the client submits is

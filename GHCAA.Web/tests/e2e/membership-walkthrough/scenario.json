@@ -1,0 +1,42 @@
+{
+  "title": "Membership walkthrough",
+  "admin": 2,
+  "superAdmin": 1,
+  "applicants": [
+    {
+      "key": "approved",
+      "fullName": "Walkthrough Applicant One",
+      "fatherName": "Walkthrough Father One",
+      "motherName": "Walkthrough Mother One",
+      "dateOfBirth": "1990-06-15",
+      "gender": "Male",
+      "bloodGroup": "APositive",
+      "tShirtSize": "L",
+      "presentAddress": "12 College Road, Munshiganj",
+      "permanentAddress": "Village Haraganga, Munshiganj",
+      "emergency": { "name": "Walkthrough Contact One", "relation": "Sibling", "phone": "01898765432" },
+      "academic": { "degree": "HSC", "subject": "Science", "admissionYear": 2006, "passingYear": 2008 },
+      "professional": { "organization": "Walkthrough Test Ltd", "designation": "Software Engineer", "startDate": "2012-01-01" },
+      "web": true,
+      "outcome": "approve"
+    },
+    {
+      "key": "rejected",
+      "fullName": "Walkthrough Applicant Two",
+      "fatherName": "Walkthrough Father Two",
+      "motherName": "Walkthrough Mother Two",
+      "dateOfBirth": "1992-03-02",
+      "gender": "Female",
+      "bloodGroup": "BPositive",
+      "tShirtSize": "M",
+      "presentAddress": "34 Station Road, Dhaka",
+      "permanentAddress": "Village Haraganga, Munshiganj",
+      "emergency": { "name": "Walkthrough Contact Two", "relation": "Parent", "phone": "01798765432" },
+      "academic": { "degree": "HSC", "subject": "Arts & Humanities", "admissionYear": 2008, "passingYear": 2010 },
+      "professional": { "organization": "Walkthrough Trading", "designation": "Accountant", "startDate": "2015-07-01" },
+      "web": false,
+      "outcome": "reject",
+      "rejectReason": "The academic record does not match the college register."
+    }
+  ]
+}

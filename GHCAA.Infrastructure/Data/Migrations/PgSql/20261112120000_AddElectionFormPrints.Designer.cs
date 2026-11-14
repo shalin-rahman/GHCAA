@@ -1413,6 +1413,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("RevokedAt")
+                        .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("RevokedByUserId")

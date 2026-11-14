@@ -4,7 +4,7 @@ Written 2026-10-25 from a read of the code on branch `preprod`. Line numbers are
 and drift; grep for the named symbol before editing. The tracker entries are `docs/TODO.md`
 84.49, 84.50 and 84.51. This file says how to do them. The tracker says whether they are done.
 This file is a design reference. The order of all open work, these items included, is in
-stream E of [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the only open plan. Parts B1-B3, C and D are done. Part A and B4-B5 are open. The owner decided on
+the election session cards (phases A, C and E) of [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the only open plan. Parts B1-B3, C and D are done. Part A and B4-B5 are open. The owner decided on
 2026-11-02 to run the Part A device checks now, without waiting for the elections (84.50).
 
 This plan covers shared account, profile, and election-device fixes. The non-election backlog is

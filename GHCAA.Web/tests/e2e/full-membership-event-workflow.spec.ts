@@ -84,8 +84,9 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   await page.locator('input[name="fullName"]').fill(NEW_NAME);
   await page.locator('input[name="fatherName"]').fill('E2E Father');
   await page.locator('input[name="motherName"]').fill('E2E Mother');
-  await page.locator('input[name="dateOfBirth"]').fill('15-06-1990'); // Standard format
-  await page.locator('input[name="dateOfBirth"]').blur();
+  // The date field is the shared app-date-input; its text box carries the id, not the name.
+  await page.locator('#reg-dateOfBirth').fill('15-06-1990');
+  await page.locator('#reg-dateOfBirth').blur();
   
   await page.locator('input[name="nid"]').fill(NEW_NID);
   await page.locator('select[name="gender"]').selectOption('Male');
@@ -133,7 +134,8 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   // Wait for the actual content of Step 3, not the stepper
   await page.waitForSelector('h2:has-text("Registry Filing")', { timeout: 15000 });
   
-  const cashPayment = page.locator('.payment-card', { hasText: /Cash.*Manual Receipt/i }).first();
+  // Any manual method will do; the names come from the payment settings, so fall back to the first card.
+  const cashPayment = page.locator('.payment-card', { hasText: /Cash|Manual/i }).first().or(page.locator('app-payment-portal .payment-card').first()).first();
   await cashPayment.waitFor({ state: 'visible', timeout: 30000 });
   await cashPayment.click();
   
@@ -230,7 +232,7 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   const eventCard = page.locator('.event-card', { hasText: EVENT_TITLE }).first();
   await eventCard.locator('button', { hasText: /Secure Pass|Join Event/ }).click();
   await page.waitForSelector('text=Event Registration');
-  const eventCashPayment = page.locator('.payment-card', { hasText: /Cash.*Manual Receipt/i }).last();
+  const eventCashPayment = page.locator('.payment-card', { hasText: /Cash|Manual/i }).last().or(page.locator('app-payment-portal .payment-card').last()).first();
   await eventCashPayment.click();
   const [registrationResponse] = await Promise.all([
     page.waitForResponse(response => response.request().method() === 'POST' && response.url().includes('/api/events/register')),

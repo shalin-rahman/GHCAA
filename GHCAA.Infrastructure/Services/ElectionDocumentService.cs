@@ -144,8 +144,10 @@ public sealed class ElectionDocumentService(
     }
 
     // 37.14t. The phase a filled form needs, from the ER number. The bands follow formStage() in
-    // election-docs.ts. Complaint forms (31-32) can arise at any point. ER-27C, 29 and 30 carry
-    // the declared result, so they wait for Declared rather than Counting.
+    // election-docs.ts, except that the nomination band splits by the step that fills each form:
+    // ER-17 scrutiny, ER-18 withdrawal, ER-19 the final candidate list. Complaint forms (31-32) can
+    // arise at any point. ER-27C, 29 and 30 carry the declared result, so they wait for Declared.
+    // A code with no number is a custom form with no records behind it, so it never waits.
     public static ElectionPhase EarliestPhase(string formCode)
     {
         var digits = new string(formCode.SkipWhile(c => !char.IsDigit(c)).TakeWhile(char.IsDigit).ToArray());
@@ -156,7 +158,10 @@ public sealed class ElectionDocumentService(
         return number switch
         {
             <= 9 => ElectionPhase.Announced,
-            <= 19 => ElectionPhase.Nomination,
+            <= 16 => ElectionPhase.Nomination,
+            17 => ElectionPhase.Scrutiny,
+            18 => ElectionPhase.Withdrawal,
+            19 => ElectionPhase.CandidateList,
             <= 22 => ElectionPhase.CandidateList,
             <= 25 => ElectionPhase.Polling,
             <= 28 => ElectionPhase.Counting,
@@ -233,7 +238,16 @@ public sealed class ElectionDocumentService(
         var audit = new ElectionAuditWriter(db);
         await audit.AppendAsync(electionId, Constants.Elections.AuditActions.FormPrintRevoked, actorUserId,
             new { printId, formCode = print.FormCode, reason = print.RevokeReason }, cancellationToken);
-        await audit.SaveAsync(cancellationToken);
+        try
+        {
+            await audit.SaveAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Someone else revoked it between our read and our save.
+            db.ChangeTracker.Clear();
+            return Constants.Elections.Replies.AlreadyRecorded;
+        }
         return null;
     }
 

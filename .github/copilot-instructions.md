@@ -27,6 +27,8 @@ Run commands from the repository root unless a working directory is shown.
 | Playwright E2E tests | `cd GHCAA.Web; npx playwright install --with-deps chromium` then `npm run test:e2e` |
 | One Playwright file | `cd GHCAA.Web; npx playwright test tests/e2e/path/to/file.spec.ts` |
 | Local election walkthrough | `scripts\run-election-walkthrough.bat setup` then `resume`; see `GHCAA.Web/tests/e2e/election-walkthrough/README.md` |
+| Local membership walkthrough | `scripts\run-membership-walkthrough.bat`; see `GHCAA.Web/tests/e2e/membership-walkthrough/README.md` |
+| Local event walkthrough | `scripts\run-event-walkthrough.bat`; see `GHCAA.Web/tests/e2e/event-walkthrough/README.md` |
 | Mobile dependencies | `cd GHCAA.Mobile; flutter pub get` |
 | Mobile analysis | `cd GHCAA.Mobile; flutter analyze` |
 | Mobile tests | `cd GHCAA.Mobile; flutter test --exclude-tags golden --reporter expanded` |
@@ -162,7 +164,9 @@ comments alone unless they are wrong or out of date.
 ## Documentation book (docs/book/)
 
 `docs/book/` holds the project dissertation and is held to a stricter standard
-than the rest of `docs/`. Read `docs/book/README.md` before editing a chapter.
+than the rest of `docs/`. It changes only in track H of
+`docs/MASTER_EXECUTION_PLAN.md`, when the owner asks; a feature session adds a
+changed book fact to card H00 instead. Read `docs/book/README.md` before editing a chapter.
 After any change there, run `python docs/book/build/build.py --pdf --strict`;
 it must end `status : clean, ready to deliver`. After adding, removing, or
 moving a figure or table, run `python docs/book/build/renumber.py --apply`.
@@ -181,7 +185,9 @@ tracker figures quoted in the outline's Chapter 11 block.
    (for 84.49, 84.50 and 84.51, `docs/AUTH_AND_DEVICE_FIX_PLAN.md`). Build from
    its steps and checks, and settle its open decisions with the owner first.
    `docs/MASTER_EXECUTION_PLAN.md` is the only open plan and gives the order of
-   all open work.
+   all open work as session cards (2026-11-13): take the next card in its
+   section 3, read only that card and its tracker entries, and follow the
+   session rules in its section 2. Book edits wait for its track H.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,
@@ -193,6 +199,10 @@ tracker figures quoted in the outline's Chapter 11 block.
    passed unless it was actually run. Keep implemented mechanisms, executable
    test evidence, and empirical research claims distinct: a passing test does
    not by itself establish real-world effectiveness or performance.
+   A change to a workflow with a local walkthrough also adds or updates its step
+   there and the "What the run covers" table in its README, in the same change:
+   elections in `GHCAA.Web/tests/e2e/election-walkthrough/`, registration and
+   approval in `membership-walkthrough/`, events in `event-walkthrough/`.
 5. Update directly affected README/docs, `docs/TODO.md`, `PROJECT_MAP.md`, API
    contract snapshots, or other maintained project documentation in the same
    change when their information becomes stale. Do not leave documentation

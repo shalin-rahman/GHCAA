@@ -212,6 +212,8 @@ class FakeEventsService implements EventsService {
   @override
   Future<bool> registerForEvent(int eventId, {double? amount, String? paymentRef, dynamic receipt}) async => true;
   @override
+  String? lastRegisterError;
+  @override
   Future<bool> createEvent(Map<String, dynamic> data) async => true;
   @override
   Future<bool> deleteEvent(int id) async => true;

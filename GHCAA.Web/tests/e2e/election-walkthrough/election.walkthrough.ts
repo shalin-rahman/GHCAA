@@ -133,6 +133,14 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     return r;
   };
 
+  // 37.14t: a filled form prints only from the phase that fills it. A blank one prints at any time.
+  const printCheck = async (person: Person, title: string, eid: number, code: string, mode: 'Filled' | 'Blank', expected: number) => {
+    const d = await download(`/elections/${eid}/documents/${encodeURIComponent(code)}?mode=${mode}`, await token(person));
+    const ok = d.status === expected;
+    note(expected === 200 ? 'check' : 'refusal', person.name, title, `${code} ${mode.toLowerCase()} answered ${d.status}. Expected ${expected}.`, { ok });
+    if (!ok) report.bug(`${title}: the API answered ${d.status} where ${expected} was expected.`);
+  };
+
   const adminElection = async (eid: number) => {
     const list = (await call<any[]>('GET', '/admin/elections', await token(admin))).body;
     const e = list.find(x => field(x, 'Id') === eid);
@@ -344,6 +352,19 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     await toast(adminWeb.page, /voters frozen onto the roll/);
     await adminWeb.shot('Voter roll frozen', 'The toast gives the number of voters on the roll.');
 
+    // 37.12q: a frozen roll can be thrown away and frozen again while no nomination is on file.
+    await probe(admin, 'The roll cannot be unfrozen without a reason', 'POST', `/elections/${eid}/voter-roll/unfreeze`, { Reason: '  ' }, [400, 409]);
+    const unfrozen = await send('POST', `/elections/${eid}/voter-roll/unfreeze`, await token(admin), { Reason: 'Walkthrough: a member was approved after the freeze.' });
+    if (unfrozen.status === 200) {
+      const again = await call('POST', `/elections/${eid}/voter-roll/freeze`, await token(admin));
+      note('check', admin.name, 'Roll unfrozen with a reason, then frozen again',
+        `${field(unfrozen.body, 'Removed')} voters removed, ${field(again.body, 'Count')} frozen back onto the roll.`,
+        { ok: field<number>(again.body, 'Count') > 0 });
+    } else {
+      // The unfreeze window is an organisation setting, so a refusal here is the rule working.
+      note('check', admin.name, 'The unfreeze window refused the unfreeze', `POST voter-roll/unfreeze answered ${unfrozen.status}: ${field(unfrozen.body, 'Detail') ?? ''}`, { ok: unfrozen.status === 409 });
+    }
+
     const personas = (await call<any[]>('GET', '/admin/election-personas', a)).body;
     const persona = (re: RegExp, not: RegExp | null, fallback: number) =>
       personas.find(p => re.test(field(p, 'Name')) && !(not && not.test(field(p, 'Name'))))
@@ -463,9 +484,15 @@ test('election walkthrough', async ({ browser, baseURL }) => {
 
     await fillFormDetails(adminWeb, title, eid, opens, closes, recountEnds);
 
+    // 37.14t and 37.16l: the scrutiny sheet and the result forms cannot print filled yet.
+    await printCheck(admin, 'The scrutiny sheet cannot print filled during nominations', eid, 'ER-17', 'Filled', 409);
+    await printCheck(admin, 'The result declaration cannot print filled before the count', eid, 'ER-29', 'Filled', 409);
+    await printCheck(admin, 'The scrutiny sheet still prints blank', eid, 'ER-17', 'Blank', 200);
+
     // 6. Scrutiny
     report.section('Scrutiny', 'The scrutiny checklist is ticked for each nomination, then each one is accepted or rejected with a reason.');
     await toPhase(eid, title, 2, ccWeb, commWeb);
+    await printCheck(admin, 'The scrutiny sheet prints filled once scrutiny opens', eid, 'ER-17', 'Filled', 200);
     let decider: Actor | null = null;
     const firstId = Object.values(nominations)[0];
     for (const [who, route] of [[roWeb, `/officials/elections/${eid}`], [ccWeb, `/officials/elections/${eid}`], [adminWeb, '/admin/elections']] as const) {
@@ -672,6 +699,7 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     }
     // One at a time, as the owner asked to keep it. The API now retries two ballots that clash
     // (item 84.53 in docs/TODO.md, the concurrent-vote fix), but that is not tested on PostgreSQL yet.
+    const receipts: string[] = [];
     for (const v of S.votes.filter(x => !x.web)) tracking.push(await (async () => {
       const bearer = await token(P(v.voter));
       const ballot = (await call('GET', `/elections/${eid}/ballot`, bearer)).body;
@@ -681,8 +709,18 @@ test('election walkthrough', async ({ browser, baseURL }) => {
         NominationIds: v.choices[String(s.positionId)] ? [nominationOf(v.choices[String(s.positionId)])] : [],
       }));
       const r = await call('POST', `/elections/${eid}/vote`, bearer, { Seats: seats });
+      receipts.push(field<string>(r.body, 'ReceiptPdfBase64') ?? '');
       return [P(v.voter).name, 'API', field<string>(r.body, 'TrackingCode')];
     })());
+    // 37.14o: the cast reply carries the receipt PDF, with the code and no choices. "JVBERi" is "%PDF-" in base64.
+    const receiptLinks: { label: string; href: string }[] = [];
+    if (receipts[0]?.startsWith('JVBERi')) {
+      fs.writeFileSync(path.join(FILES_DIR, 'ballot-receipt.pdf'), Buffer.from(receipts[0], 'base64'));
+      receiptLinks.push({ label: 'ballot-receipt.pdf', href: 'files/ballot-receipt.pdf' });
+    }
+    note('check', 'Voters', 'Each ballot cast through the API came back with a receipt PDF',
+      `${receipts.filter(x => x.startsWith('JVBERi')).length} of ${receipts.length} replies carried a PDF.`,
+      { ok: receipts.length > 0 && receipts.every(x => x.startsWith('JVBERi')), links: receiptLinks });
     note('api', 'Voters', 'Ballots cast', undefined, { table: { head: ['Voter', 'Channel', 'Tracking code'], rows: tracking } });
     await probe(P(early.voter), 'A second ballot from the same member is refused', 'POST', `/elections/${eid}/vote`,
       { Seats: S.seats.map(s => ({ ElectionSeatId: c.seatIds[s.positionId], NominationIds: [] })) }, [409]);
@@ -834,6 +872,14 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     }
     fs.rmSync(c.keyFile, { force: true });
 
+    // 37.14m: the handover checklist sits on the committee term and prints on ER-34.
+    const handover = `/admin/governance/periods/${c.periodId}/handover-checks`;
+    await probe(admin, 'An unknown handover item is refused', 'PUT', handover, { Item: 999, IsChecked: true }, [400]);
+    const ticked = await send('PUT', handover, await token(admin), { Item: 0, IsChecked: true });
+    const ticks = Array.isArray(ticked.body) ? ticked.body : [];
+    note('check', admin.name, 'Handover item ticked for the incoming committee', `PUT ${handover} answered ${ticked.status}; ${ticks.filter(x => field(x, 'IsChecked')).length} item ticked.`,
+      { ok: ticked.status === 200 && ticks.some(x => field(x, 'IsChecked')) });
+
     const forms = (await call<any[]>('GET', '/election-content?kind=Form')).body.filter(x => field(x, 'Kind') === 'Form');
     const formRows: (string | number)[][] = [];
     const links: { label: string; href: string }[] = [];
@@ -853,6 +899,9 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     });
     // The verify route shares the credential-check rate limit, so only a few forms are opened.
     for (const f of forms.slice(0, 3)) await visitor.show(`/verify/election/${eid}/${encodeURIComponent(field<string>(f, 'Key'))}`, `QR check for form ${field(f, 'Key')}`);
+    const unknownForm = await send('GET', `/elections/${eid}/documents/ER-99/verification`);
+    note('refusal', 'Public visitor', 'A form code that does not exist is not found', `GET /elections/${eid}/documents/ER-99/verification answered ${unknownForm.status}. Expected 404.`, { ok: unknownForm.status === 404 });
+    if (unknownForm.status !== 404) report.bug(`An unknown form code answered ${unknownForm.status} on the public check.`);
 
     const audit = (await call('GET', `/elections/${eid}/audit/verify`, await token(admin))).body;
     note('check', admin.name, 'Audit chain verified', `${field(audit, 'Entries')} entries${field(audit, 'Ok') ? ', unbroken' : `, broken at ${field(audit, 'FirstBrokenSeq')}`}.`, { ok: !!field(audit, 'Ok') });
@@ -862,6 +911,38 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     });
     await ccWeb.goto('/officials');
     await ccWeb.shot('Officials dashboard after the declare');
+
+    // 37.14t: each filled download leaves a print record, and its QR code opens /verify/form/:id.
+    report.section('Print records', 'Every filled form is recorded when printed. Its QR code shows the record, and the Chief Commissioner can revoke one print so its QR code reads as withdrawn.');
+    const printed = local.prints(eid);
+    const filledOk = formRows.filter(r => r[2] === 'Filled' && r[3] === 200).length;
+    note('check', admin.name, 'A print record for each filled form', `${printed.length} records for ${filledOk} filled downloads.`, {
+      ok: printed.length >= filledOk && printed.length > 0,
+      table: { head: ['Form', 'Print id', 'Revoked'], rows: printed.map(p => [p.form, p.id, p.revoked ? 'yes' : 'no']) },
+    });
+    const first = printed[0];
+    if (!first) {
+      report.bug('Filled form downloads left no print record.');
+    } else {
+      const verification = `/elections/print-records/${first.id}/verification`;
+      const before = await send('GET', verification);
+      note('check', 'Public visitor', `Print record for ${first.form} reads as issued`, `GET ${verification} answered ${before.status}.`,
+        { ok: before.status === 200 && field(before.body, 'Revoked') === false });
+      await visitor.show(`/verify/form/${first.id}`, `QR check for the ${first.form} print`);
+
+      const revoke = `/elections/${eid}/print-records/${first.id}/revoke`;
+      await probe(cc, 'A revoke with no reason is refused', 'POST', revoke, { Reason: '  ' }, [400]);
+      await probe(cc, 'The Chief Commissioner revokes the print', 'POST', revoke, { Reason: 'Printed with the wrong venue.' }, [204]);
+      await probe(cc, 'A second revoke of the same print is refused', 'POST', revoke, { Reason: 'Again.' }, [409]);
+      await probe(cc, 'A revoke of an unknown print is not found', 'POST', `/elections/${eid}/print-records/00000000-0000-0000-0000-000000000001/revoke`, { Reason: 'No such print.' }, [404]);
+
+      const after = await send('GET', verification);
+      note('check', 'Public visitor', `Print record for ${first.form} reads as revoked`, `GET ${verification} answered ${after.status}.`,
+        { ok: after.status === 200 && field(after.body, 'Revoked') === true });
+      await visitor.show(`/verify/form/${first.id}`, `QR check for the revoked ${first.form} print`);
+      const chain = (await call('GET', `/elections/${eid}/audit/verify`, await token(admin))).body;
+      if (!field(chain, 'Ok')) report.bug('The audit chain broke after the print was revoked.');
+    }
 
     // 16. Archive
     report.section('Archive', 'Archiving closes the election for good. It is a two-person step.');

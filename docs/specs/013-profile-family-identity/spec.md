@@ -149,7 +149,7 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 - FR-019: `FamilyLinkController` shall require a non-blank `name` query parameter on `GET api/family-links/search` (aliased at `GET api/Family/search`), returning 400 for a blank value and otherwise the result of `FamilyLinkService.SearchByNameAsync`. [code]
 - FR-020: `SecureFilesController` shall serve a file on `GET api/secure-files/{*filePath}` only to the file's owning member or a caller in the Admin or SuperAdmin role, returning 403 for any other authenticated caller and 404 when no `FileUpload` row matches the path. [code+test]
 - FR-021: `SecureFilesController` shall reject any `filePath` containing `..` with a 404 before any file-system access. [code+test]
-- FR-022: `SecureFilesController` shall resolve `filePath` only against the public uploads root and the secure uploads root computed from `FileStorage:BasePhysicalPath`, returning 404 when the resolved path falls outside both roots or does not exist on disk. [code]
+- FR-022: `SecureFilesController` shall read `filePath` through `IFileStorageService`, which serves only the public uploads root and the secure uploads root on disk or in the S3 bucket, returning 404 when the path falls outside both roots or the file does not exist. [code+test: `SecureFilesControllerTests`; changed with TODO 7.28]
 
 ## Key Entities
 

@@ -232,7 +232,7 @@ public class MemberServiceTests : TestBase
 
         // Act & Assert
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<RequestConflictException>()
             .WithMessage("Member with same Email, NID, or Mobile already exists.");
     }
 

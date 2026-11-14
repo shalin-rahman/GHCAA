@@ -1,6 +1,7 @@
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -34,6 +35,31 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.Register(dto, null, null, null, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
+        }
+
+        // 84.102: a duplicate application answers 409 with the reason, not a bare 500.
+        [Category("FR-01")]
+        [Test]
+        public async Task Register_Duplicate_Returns409WithTheReason()
+        {
+            var dto = new MemberRegistrationDto { FullName = "Duplicate Test" };
+            _memberServiceMock.Setup(x => x.RegisterAsync(It.IsAny<MemberRegistrationDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new RequestConflictException("Member with same Email, NID, or Mobile already exists."));
+
+            var result = await _controller.Register(dto, null, null, null, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Member with same Email, NID, or Mobile already exists."));
+        }
+
+        [Test]
+        public void Register_OtherInvalidOperation_IsRethrown()
+        {
+            _memberServiceMock.Setup(x => x.RegisterAsync(It.IsAny<MemberRegistrationDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new InvalidOperationException("Some other fault."));
+
+            Assert.ThrowsAsync<InvalidOperationException>(() => _controller.Register(new MemberRegistrationDto(), null, null, null, CancellationToken.None));
         }
 
         [Category("FR-02")]

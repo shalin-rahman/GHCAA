@@ -1,6 +1,6 @@
 # Spec 023 plan: election officials, personas and standards gaps
 
-Status: approved 2026-09-28. All four decisions in §6 are answered. It is now a design reference; the open items run in the stream E order of `docs/MASTER_EXECUTION_PLAN.md`.
+Status: approved 2026-09-28. All four decisions in §6 are answered. It is now a design reference; the open items run in the session cards (phases A, C and E) of `docs/MASTER_EXECUTION_PLAN.md`.
 As of 2026-11-03, 37.1w, 37.12a to 37.12j and 37.13a to 37.13e are done. 37.13f is partial
 and 37.13g is still open. The later review and rules items, 37.13h to 37.13y, were added after this plan and are
 built. `docs/TODO.md` records

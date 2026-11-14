@@ -10,6 +10,8 @@ paths:
 The dissertation in `docs/book/` is held to a stricter standard than the rest of the docs, and the
 standard is enforced by its build rather than by attention.
 
+- The book changes only in track H of `docs/MASTER_EXECUTION_PLAN.md`, when the owner asks (2026-11-13).
+  A feature session that changes a fact the book quotes adds a line to card H00 and leaves the book alone.
 - Before editing a chapter, read `docs/book/README.md`. It carries the house style, the IEEE
   conventions, the A4 figure rules and the fix order for a diagram that will not print.
 - After editing, run `python docs/book/build/build.py --pdf --strict`. It must end with

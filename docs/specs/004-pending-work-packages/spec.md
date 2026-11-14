@@ -8,7 +8,7 @@ for item status, priority, dependencies, owner actions, and acceptance criteria.
 This specification groups requirements and shared constraints; `tasks.md` maps
 tracker items to their implementation breakdowns. Existing code, generated
 contracts, and tests remain authoritative. Election-specific work stays in the
-election stream (E) of `docs/MASTER_EXECUTION_PLAN.md`.
+election phases (A, C and E) of `docs/MASTER_EXECUTION_PLAN.md`.
 
 ## Scope
 
@@ -200,6 +200,10 @@ required. Public totals MUST not expose private donor data. Web, Mobile,
 admin, API, ledger, payment-config, and failure-path tests are required.
 
 ### 37.9 Alumni impact metrics
+
+2026-11-13: tracker 37.9 is geographic chapters and tracker 37.10 is the annual impact report from
+the ledger. The text under this heading and the next describes impact metrics and reporting in
+general; build 37.9 and 37.10 from their tracker entries and spec 003, not from here.
 
 Authorized administrators MUST be able to derive impact metrics from persisted
 memberships, events, scholarships, fundraising, mentoring, jobs, reunions,

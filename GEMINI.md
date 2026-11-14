@@ -5,10 +5,13 @@ backend/Angular/Flutter conventions, API contract logging and the shared change 
 before cross-layer work. `CLAUDE.md` and `AGENTS.md` carry the same shared rules; keep all four files
 aligned. This file adds Gemini-specific notes and repeats only what is needed every session.
 
-Open work follows `docs/MASTER_EXECUTION_PLAN.md`, the only open plan (owner, 2026-11-03). Its
-first section is the handover: the current wave, the next items and the owner gates. Check it against
-the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`. Other
-plan files are design references: they say how to build an item, never when. Do not create a new
+Open work follows `docs/MASTER_EXECUTION_PLAN.md`, the only open plan (owner, 2026-11-03), written as
+session cards since 2026-11-13. Section 1 names the next session and section 2 holds the rules for
+every session. Run the cards in section 3 order and read only your own card and its tracker entries.
+Owner-gated items wait on gate cards (section 5), and `docs/book/` changes only in track H. Check the
+plan against the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+Other plan files are design references: they say how to build an item, never when, and a card wins
+where they differ. Do not create a new
 `PLAN.md`.
 
 Stack: ASP.NET Core on .NET 9 with `GHCAA.Domain` → `GHCAA.Application` (DTOs, interfaces) →
@@ -46,6 +49,10 @@ PostgreSQL in prod, SQLite locally. No MediatR, no generic repository.
   plan; a linked plan only says how to build the item.
 - Treat API and business-rule changes as cross-layer work. Check both web and mobile clients, update
   relevant tests, and record route or DTO changes in `docs/API_CONTRACT_REGISTRY.md`.
+- A change to a workflow with a local walkthrough adds or updates its step there and the "What the run
+  covers" table in its README, in the same piece of work: elections in
+  `GHCAA.Web/tests/e2e/election-walkthrough/`, registration and approval in `membership-walkthrough/`,
+  events and participation in `event-walkthrough/`.
 - Keep implemented mechanisms, executable test evidence, and empirical research claims distinct. A
   passing test does not by itself establish real-world effectiveness or performance.
 - The user owns Git and deployment operations. Do not commit, push, merge, or deploy.

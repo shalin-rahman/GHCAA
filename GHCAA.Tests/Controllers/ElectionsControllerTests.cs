@@ -379,6 +379,16 @@ namespace GHCAA.Tests.Controllers
             Assert.That(await _controller.Document(1, "nope", null, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
         }
 
+        // A print is recorded under the printer, so a caller with no user id gets no print.
+        [Test]
+        public async Task Document_NoUserId_Returns401()
+        {
+            SetUserContext(_controller, memberId: null, role: "ElectionOfficial");
+
+            Assert.That(await _controller.Document(1, "ER-10", ElectionPrintMode.Filled, CancellationToken.None), Is.InstanceOf<UnauthorizedResult>());
+            _documentServiceMock.Verify(x => x.GeneratePdfAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
         // 37.14s. The mode in the query reaches the service unchanged.
         [Test]
         public async Task Document_PassesThePrintMode()

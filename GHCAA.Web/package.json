@@ -16,6 +16,9 @@
     "test:e2e:walkthrough": "playwright test -c playwright.walkthrough.config.ts",
     "test:e2e:walkthrough:restore": "node tests/e2e/election-walkthrough/tasks.mjs restore",
     "test:e2e:walkthrough:clean": "node tests/e2e/election-walkthrough/tasks.mjs clean",
+    "test:e2e:membership": "playwright test -c playwright.membership.config.ts",
+    "test:e2e:event": "playwright test -c playwright.event.config.ts",
+    "test:e2e:workflow:restore": "node tests/e2e/election-walkthrough/tasks.mjs restore-workflows",
     "gen:org-config": "node scripts/generate-org-config-fallback.mjs",
     "gen:site-content": "node scripts/generate-site-content.mjs",
     "apply-brand": "node scripts/apply-brand.mjs"

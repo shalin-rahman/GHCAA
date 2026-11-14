@@ -468,7 +468,9 @@ public sealed class ElectionsController(
         if (mode is { } m && !Enum.IsDefined(m))
             return Problem(detail: "Mode must be Blank or Filled.", statusCode: StatusCodes.Status400BadRequest);
         // Officials with ViewDashboard may print a rehearsal's forms, so there is no test check here.
-        int? userId = int.TryParse(this.CurrentUserIdRaw(), out var parsed) ? parsed : null;
+        // A filled print is recorded under the printer, so an unknown caller is refused, as in RevokePrint.
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
         var result = await documentService.GeneratePdfAsync(id, formCode, new ElectionPrinter(userId, CallerRoles()), mode, ct);
         return result switch
         {

@@ -316,8 +316,8 @@ export class Register implements OnDestroy {
           this.notify.success('Registry filing submitted successfully. Please verify your email.');
         }
       },
-      error: (err) => {
-        this.notify.error(err.error?.message || 'Registration failed. Please check your data.');
+      // The interceptor already shows the server's reason, such as a duplicate application (84.102).
+      error: () => {
         this.loading.set(false);
       }
     });

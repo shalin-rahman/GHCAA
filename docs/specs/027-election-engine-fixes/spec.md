@@ -1,5 +1,9 @@
 # Election engine — implementation and post-ship defect fixes
 
+Status, 2026-11-13: a closed record of the engine as it stood on 2026-09-24. The ballot model here
+(`SerialNumber`, `IssuedAt`, `CastAt`) and the "not met" secrecy note were replaced by spec 023
+(ballot secrecy and standards), which is the current description.
+
 ## Scope
 
 This specification covers the persisted online election engine built under `docs/TODO.md`

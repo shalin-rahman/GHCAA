@@ -24,6 +24,8 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 
 ## A. Membership & Identity Lifecycle
 
+Since 2026-11-13 the repeatable end-to-end check for this section is the membership walkthrough (`scripts\run-membership-walkthrough.bat`, `GHCAA.Web/tests/e2e/membership-walkthrough/README.md`). The ticks below are the dated Phase 2 to 4 record.
+
 ### A1 — Registration wizard validation (configured institution record required)
 
 - [x] **A1.1–A1.4, A1.7** API unit tests pass (Phase 1)
@@ -92,6 +94,8 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 ---
 
 ## B. Events & Participation
+
+Since 2026-11-13 the repeatable end-to-end check for this section is the event walkthrough (`scripts\run-event-walkthrough.bat`, `GHCAA.Web/tests/e2e/event-walkthrough/README.md`).
 
 - [x] **B1–B3, B5** API tests pass (`EventServiceTests`, `EventsControllerTests`, workflow)
 - [ ] **B4** QR attendance scan (no isolated test; manual/Web)

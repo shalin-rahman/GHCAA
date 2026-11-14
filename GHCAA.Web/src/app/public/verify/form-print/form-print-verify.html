@@ -14,7 +14,7 @@
       <p>Printed {{ utcToLocal(print.printedAt) | appDate }} {{ utcToLocal(print.printedAt) | date:'shortTime' }} by the {{ print.printedByRole }}</p>
       <p>Phase at print: {{ phaseLabels[print.phaseAtPrint] }}</p>
       <p>Content hash (SHA-256): <code class="print-hash">{{ print.contentHash }}</code></p>
-      <p>The same hash appears for every print of the same content. Ask the election committee to compare it with their copy.</p>
+      <p>The same hash appears for every print of the same content. This page confirms only that the committee issued this print. It cannot show whether the paper was changed after printing, so ask the election committee to compare the paper with their records.</p>
     </article>
   </section>
 </main>

@@ -5,6 +5,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using static GHCAA.Domain.Enums;
@@ -805,6 +806,11 @@ public sealed class ElectionDocumentServiceTests : TestBase
 
     [TestCase("ER-01", ElectionPhase.Announced)]
     [TestCase("ER-10", ElectionPhase.Nomination)]
+    [TestCase("ER-11", ElectionPhase.Nomination)]
+    [TestCase("ER-17", ElectionPhase.Scrutiny)]
+    [TestCase("ER-17A", ElectionPhase.Scrutiny)]
+    [TestCase("ER-18", ElectionPhase.Withdrawal)]
+    [TestCase("ER-19", ElectionPhase.CandidateList)]
     [TestCase("ER-21", ElectionPhase.CandidateList)]
     [TestCase("ER-25", ElectionPhase.Polling)]
     [TestCase("ER-27", ElectionPhase.Counting)]
@@ -869,6 +875,43 @@ public sealed class ElectionDocumentServiceTests : TestBase
         row.RevokedByUserId.Should().Be(actor);
         (await _service.VerifyPrintAsync(id))!.Revoked.Should().BeTrue();
         _context.ElectionAuditEntries.Where(x => x.Action == Constants.Elections.AuditActions.FormPrintRevoked).Should().ContainSingle();
+    }
+
+    // Two officials revoke the same print at once. The one who saves second gets 409, and the
+    // first reason and audit entry stand.
+    [Test]
+    public async Task RevokePrint_RevokedBetweenReadAndSave_ReturnsAlreadyRecorded()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var id = (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).PrintId!.Value;
+        var first = await AddUserAsync();
+        var second = await AddUserAsync();
+        await using var other = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(_context.Database.GetDbConnection()).Options);
+        var interceptor = new RevokeBeforeSave(async () =>
+            (await new ElectionDocumentService(other, _config.Object).RevokePrintAsync(_election.Id, id, first, "First")).Should().BeNull());
+        _context.SavingChanges += interceptor.Handler;
+
+        var reply = await _service.RevokePrintAsync(_election.Id, id, second, "Second");
+
+        _context.SavingChanges -= interceptor.Handler;
+        reply.Should().Be(Constants.Elections.Replies.AlreadyRecorded);
+        var row = await _context.ElectionFormPrints.AsNoTracking().SingleAsync();
+        row.RevokeReason.Should().Be("First");
+        row.RevokedByUserId.Should().Be(first);
+        _context.ElectionAuditEntries.Where(x => x.Action == Constants.Elections.AuditActions.FormPrintRevoked).Should().ContainSingle();
+    }
+
+    // Runs the other official's revoke once, just before this context saves.
+    private sealed class RevokeBeforeSave(Func<Task> revoke)
+    {
+        private bool _done;
+        public void Handler(object? sender, SavingChangesEventArgs e)
+        {
+            if (_done) return;
+            _done = true;
+            revoke().GetAwaiter().GetResult();
+        }
     }
 
     [Test]

@@ -23,6 +23,7 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 import { LoadMoreComponent } from '../load-more/load-more';
+import { serverErrorMessage } from '../../core/utils/http.util';
 
 @Component({
   selector: 'app-events',
@@ -322,7 +323,8 @@ export class Events implements OnInit {
       },
       error: (err: any) => {
         console.error(err);
-        this.formError.set(err.error?.message || 'Registration failed. Please check your inputs.');
+        // ProblemDetails carries the reason in detail, such as "already registered" (84.102).
+        this.formError.set(serverErrorMessage(err, 'Registration failed. Please check your inputs.'));
         this.isSubmitting.set(false);
       }
     });

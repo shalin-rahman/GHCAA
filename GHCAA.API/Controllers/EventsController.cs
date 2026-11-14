@@ -108,8 +108,21 @@ namespace GHCAA.API.Controllers
                 };
             }
 
-            var result = await _eventService.RegisterForEventAsync(dto, memberId, receiptDto, cancellationToken);
-            return Ok(result);
+            try
+            {
+                var result = await _eventService.RegisterForEventAsync(dto, memberId, receiptDto, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Problem(detail: "Event not found.", statusCode: StatusCodes.Status404NotFound);
+            }
+            catch (RequestConflictException ex)
+            {
+                // 84.102: already registered, members only, closed, ended or full. These used to
+                // reach ExceptionMiddleware as a bare 500, so the clients showed a generic message.
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpGet("my-registrations")]
