@@ -117,7 +117,7 @@ the ledger row in section 7. Run top to bottom.
 | S06 | 37.14n, 37.14t | S | local stack run | | S05 |
 | S07 | 99.3 | S | full ci-local | | S01, S02 |
 | **B** | **P1 items with no owner gate** | | | | |
-| S08 | 84.25, 28.25, 84.102 | M | backend, e2e | | |
+| S08 | 84.25, 28.25 | M | backend, e2e | | |
 | S09 | 84.51, 84.49 (API part) | S | local API | | |
 | S10 | 84.92 (backend) | M | API | | |
 | S11 | 84.92 (clients) | M | web, mobile | | S10 |
@@ -332,20 +332,14 @@ Each card: what to read, the steps, the test command, and "Done when". Rules in 
 
 ### Phase B. P1 items with no owner gate
 
-**S08 · 84.25, 28.25, 84.102 · M**
+**S08 · 84.25, 28.25 · M**
 - 84.25: both parts exist. `MentorshipControllerTests.cs` covers the controller; `CreateJobDto` has
   DataAnnotations (FluentValidation never runs, so the text asking for a validator is wrong). Run
   `dotnet test --filter "FullyQualifiedName~MentorshipControllerTests|FullyQualifiedName~JobDtoValidationTests"`
   and check the 401, 400, 409 and AdminOnly cases exist; add any missing one.
 - 28.25: run `npx playwright test tests/e2e/config-regression.spec.ts` against the local stack; record
   the result and close 28.25 as covered by it. Do not run `--update-snapshots` on the whole suite.
-- 84.102: built 2026-11-13 (`RequestConflictException` mapped to 409, unknown event 404, web and
-  mobile show the reason, tests and registry written). Left: run
-  `dotnet test --filter "FullyQualifiedName~RegistrationControllerTests|FullyQualifiedName~EventsControllerTests|FullyQualifiedName~MemberServiceTests|FullyQualifiedName~EventServiceTests"`,
-  `npm run test:unit -- src/app/public/register/register.spec.ts src/app/common/events/events.spec.ts`,
-  `flutter test test/events_register_error_test.dart`, then `scripts\run-membership-walkthrough.bat`
-  and `scripts\run-event-walkthrough.bat`; the duplicate probes must pass.
-- Done when: all three DONE with the counts.
+- Done when: both DONE with the counts.
 
 **S09 · 84.51, 84.49 (API part) · S**
 - Steps: local stack up. 84.51: five wrong passwords on `setup-with-password` give 423 on the sixth
@@ -662,8 +656,8 @@ mobile, response difference. Script it in `scripts/` if it takes more than one p
 
 **S53 · 93.3 · S** Find why `registerNewMemberViaUi` gets "Registration failed" on the local API (read
 `api_error.log` tail and the registration response body; the membership walkthrough records the
-API's answer, and 84.102 in S08 may already have fixed it). Fix the cause (seed, OrgConfig or test
-data), run `portal-mobile-nav.spec.ts` and `gallery.spec.ts`.
+API's answer). Fix the cause (seed, OrgConfig or test data), run `portal-mobile-nav.spec.ts` and
+`gallery.spec.ts`.
 
 **S54 · 84.27 (API tests) · S** `ArchiveControllerTests` for each route: 200, 401, 403, 404.
 
@@ -1164,6 +1158,7 @@ brief asks for it.
 | 2026-11-13 | Membership and event walkthroughs (owner) | Built in the election walkthrough's shape, sharing its helpers: `tests/e2e/membership-walkthrough/` (two applications, email codes, fee marked received, approve and reject, first login) and `tests/e2e/event-walkthrough/` (paid event with a seat limit and waitlist, member and guest registrations, approve and reject, pass, check-in). Runners `scripts/run-membership-walkthrough.bat`, `run-event-walkthrough.bat`, `run-workflow-walkthrough.bat`. The old single-browser spec kept, with two selector fixes. Found while writing them: duplicates answer 500 (84.102, added to S08). Type-checked with `tsc --noEmit`; not run, since the local stack is needed | Walkthrough folders, `playwright.*.config.ts`, `package.json`, `.gitignore`, `scripts/local-election.py` (`sender`, `code-email`, `mail-error-email`), runners, `docs/TODO.md`, this file |
 | 2026-11-13 | 84.102 (built, partial) | Duplicate application and refused event registrations answer 409 with the reason, unknown event 404; web shows one message, mobile shows the server reason. Tests written in all three layers; web app type-check clean; backend, Vitest and Flutter runs left for the Windows machine. Walkthroughs now make sure a cash payment method is enabled, creating or switching it on as the SuperAdmin | `RequestConflictException.cs`, `MemberService.cs`, `EventService.cs`, `RegistrationController.cs`, `EventsController.cs`, their tests, `register.ts`, `events.ts`, their specs, `events_service.dart`, two event screens, `events_register_error_test.dart`, `fake_services.dart`, specs 012 and 014, registry, walkthroughs |
 | 2026-11-13 | Docs sync after the walkthroughs and 84.102 | `PROJECT_MAP.md` test table lists the three walkthroughs, their helpers, runners and `local-election.py`; README testing section names them; `BUSINESS_TEST_CHECKLIST.md` points sections A and B at them; tracker items 84.80, 84.92, 84.95, 84.97 and 97.1 and cards S11, S13, S58, S64 and S90 now say which walkthrough step each adds | `docs/PROJECT_MAP.md`, `README.md`, `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/TODO.md`, this file |
+| 2026-11-14 | 84.102 (closed) | Ran the three test layers and both walkthroughs on Windows: backend 105/105, web `register.spec.ts` + `events.spec.ts` 21/21, `events_register_error_test.dart` 3/3, `run-membership-walkthrough.bat` and `run-event-walkthrough.bat` both passed. `events.spec.ts`'s "shows the server reason when a registration is refused" had a `paymentReference` of 'REF' (3 chars), short of the form's own `minLength(4)` validator, so the form's own validation message pre-empted the assertion; fixed to 'REF123'. 93.3's note no longer needs to rule out the old duplicate-500 toast, since 84.102 replaced it with a 409 and the server's reason | `events.spec.ts`, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 

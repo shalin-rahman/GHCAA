@@ -150,7 +150,7 @@ describe('Events Component', () => {
         const mockEvent = { id: 1, title: 'Test', requiresPayment: true, registrationFee: 500 };
         component.selectedEvent.set(mockEvent as any);
         component.selectedPaymentMethod.set({ id: 2, method: 'ManualReceipt', gateway: 'None', isOnline: false, requiresReference: false } as any);
-        component.regForm.patchValue({ guestName: 'Guest User', guestEmail: 'guest@test.com', guestMobile: '01700000000', paymentReference: 'REF' });
+        component.regForm.patchValue({ guestName: 'Guest User', guestEmail: 'guest@test.com', guestMobile: '01700000000', paymentReference: 'REF123' });
         eventsServiceMock.registerForEvent.mockReturnValueOnce(throwError(() => ({ status: 409, error: { detail: 'You are already registered for this event.' } })));
 
         component.submitRegistration();
