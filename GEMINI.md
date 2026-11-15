@@ -10,6 +10,9 @@ session cards since 2026-11-13. Section 1 names the next session and section 2 h
 every session. Run the cards in section 3 order and read only your own card and its tracker entries.
 Owner-gated items wait on gate cards (section 5), and `docs/book/` changes only in track H. Check the
 plan against the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+The check also covers the cards. Section 1 of the plan says which phases have cards in the eleven-part
+form; rewrite a short-form phase before running it (`--card <id>` prints a card skeleton and the
+tracker entry).
 Other plan files are design references: they say how to build an item, never when, and a card wins
 where they differ. Do not create a new
 `PLAN.md`.

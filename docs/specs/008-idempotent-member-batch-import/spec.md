@@ -94,7 +94,9 @@ validation as a real import — including the FR-2/FR-3 idempotency checks — b
 shall return one row per input row, each with its mapped field values and a list of validation errors,
 each error naming the specific row index and column key it belongs to (not a flat message), covering
 at minimum: required-field-missing, malformed value for its target type (date, number, email), and a
-`MembershipNumber`/NID collision (FR-2).
+`MembershipNumber`/NID collision (FR-2). The route is `POST api/admin/members/import/preview`, under
+the same policy and form field as the import route (plan card S17 in
+`docs/MASTER_EXECUTION_PLAN.md`).
 
 The Angular import flow shall show this preview in an editable grid before the admin can commit:
 each cell that has a validation error is marked at that exact cell, not in a separate error list, and

@@ -2,6 +2,9 @@
 
 > **Status 2026-11-03:** design reference. The order of the open WP37 items is now the session
 > cards (phases A, C and E, rewritten 2026-11-13) in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan. The session order below is history.
+> The phase C cards (S20 to S33) were checked against the code on 2026-11-15. A card wins where a
+> name here differs; these names are not in the code: `MembershipRules`, `CheckConflictAsync`,
+> `ElectionApprovalKind`, `SetKey`, `DestroyKey`, `ER29_PrintsTheAuditChainHead`.
 
 Written 2026-10-09 on Opus. It covers every open WP37 item that code can close, split into six
 sessions (S1 to S6). Each session runs on Sonnet from a cleared context and should need no

@@ -37,7 +37,8 @@ Run commands from the repository root unless a working directory is shown.
 | Start the local stack | `.\GHCAA.Tools\run-app.ps1` |
 | Stop the local stack | `.\GHCAA.Tools\stop-app.ps1` |
 | Local CI gate before handing work back | `python scripts/ci-local.py` (`--quick`, `--only backend\|web\|mobile\|contract`, `--e2e`) |
-| Check the master plan against the tracker | `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md` |
+| Check the master plan and its cards against the tracker | `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md` |
+| Print a card skeleton and the tracker entry for a session or item | `python scripts/backlog_inventory.py --card <id>` |
 
 The standard GitHub Actions pipeline is
 `.github/workflows/ghcaa-ci-standard.yml`; it runs backend formatting and
@@ -187,7 +188,9 @@ tracker figures quoted in the outline's Chapter 11 block.
    `docs/MASTER_EXECUTION_PLAN.md` is the only open plan and gives the order of
    all open work as session cards (2026-11-13): take the next card in its
    section 3, read only that card and its tracker entries, and follow the
-   session rules in its section 2. Book edits wait for its track H.
+   session rules in its section 2. Its section 1 says which phases have cards
+   in the eleven-part form; rewrite a short-form phase before running it. Book
+   edits wait for its track H.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,

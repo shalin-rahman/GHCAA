@@ -20,8 +20,12 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-13. **Open:** 125 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-15. **Open:** 125 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
+- **Cards (99.10):** phases A, B, C and D (S01 to S44) are in the eleven-part form and were checked against
+  the code. Phases E to G and track H are still in the short form; rewrite a phase before running
+  it. `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
+  the tracker entry.
 - **Next session:** S01 (84.100). Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **In the working tree, not committed (owner owns Git):** the 37.14t print-record work, its
@@ -240,380 +244,2056 @@ Owner-gated items and where they re-enter: section 5.
 
 ## 4. Session cards
 
-Each card: what to read, the steps, the test command, and "Done when". Rules in section 2 apply.
+Rules in section 2 apply to every card. A card in a rewritten phase has the eleven parts below, in
+this order, and the plan check fails when one is missing or when a named file does not exist. A file
+the card creates is marked "(new)". Phases still in the short form are listed by the check as owed.
+
+<!-- card-template: A B C D -->
+
+| Part | What it holds |
+|---|---|
+| Goal | One or two sentences: what is true after the session that is not true now. |
+| Before you start | Cards that must be closed, and one command that shows the starting state. |
+| Read (only these) | The files and symbols to open. Nothing else is read. |
+| Change (only these files) | Every file the session may edit or create. Another file needs the owner's yes. |
+| Do not touch | Nearby code that looks related and must stay as it is. |
+| Steps | Numbered. Each step ends with "-> check:" and how to see it worked. |
+| Contract | Route, policy, request and response fields, status codes. "None" when no route or DTO changes. |
+| Tests | File, test name, and what the test proves. |
+| Run | The focused command first, then the layer gate. |
+| Done when | The facts that close the item, and the status each ID gets. |
+| Stop and ask if | The cases where the session stops and asks the owner, with the default answer. |
+
+Names on a card were checked against the code on 2026-11-14. A line number is a hint; find the symbol
+by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
 
+<a id="s01"></a>
 **S01 · 84.100 · M**
-- Read: `GHCAA.Web/vitest.config.ts`, its `setupFiles`, the web step in `scripts/ci-local.py`.
-- Steps: (1) `npm run test:unit 2>&1 > %TEMP%\vt.log`; list the 36 files with "reading 'config'".
-  (2) Run them alone in one call; they pass in groups of 20, so bisect the full file list by halves
-  until one spec makes the next files fail. Look for `vi.stubGlobal`, `vi.mock` of a module that
-  holds `config`, or a spec that replaces `window`/`environment` without restoring it. (3) Fix the
-  cause in that spec, or set `unstubGlobals: true` / `restoreMocks: true` in `vitest.config.ts` if
-  several specs leak. (4) In `ci-local.py`, fail the web step when vitest's "Test Files" line reports
-  any failed file, not only failed tests.
-- Tests: `npm run test:unit` twice; `python scripts/ci-local.py --only web`. Prove step 4 with a
-  temporary spec that throws in `describe`, then delete it.
-- Done when: 129 of 129 files pass twice in a row and ci-local fails on a file-level error.
+- Goal: `npm run test:unit` loads all 129 spec files, and `ci-local.py` fails the web layer when any
+  spec file fails to load, even with every test passing.
+- Before you start: no card needed. In `GHCAA.Web` run `npm run test:unit > vt.log 2>&1`; the log
+  shows 36 failed files with "reading 'config'" and no failed test. Delete `vt.log` at the end.
+- Read (only these): `GHCAA.Web/vitest.config.ts`, `GHCAA.Web/src/test-setup.ts`, and in
+  `scripts/ci-local.py` the `STEPS` list, `run(step)` and `main()`.
+- Change (only these files): the one spec that leaks, or `GHCAA.Web/vitest.config.ts`;
+  `scripts/ci-local.py`; `scripts/test_ci_local.py` (new).
+- Do not touch: application code under `GHCAA.Web/src/app` outside spec files; the `test:unit`
+  script in `package.json`; the other web steps (`type-check`, `build`, `audit`).
+- Steps:
+  1. List the 36 failing files from the log. -> check: the count is 36.
+  2. Run the full file list in halves (`npx vitest run <files>`), then halve the failing half, until
+     one spec makes the files after it fail. Look in it for `vi.stubGlobal`, a `vi.mock` of a module
+     that holds `config`, or `window` or `environment` replaced and not restored. -> check: the full
+     run passes with that one spec left out.
+  3. Fix the cause in that spec (restore in `afterEach`). Only if three or more specs leak, set
+     `unstubGlobals: true` and `restoreMocks: true` in `vitest.config.ts` instead. -> check:
+     `npm run test:unit` shows 129 passed files, twice in a row.
+  4. In `ci-local.py` add `vitest_failed_files(output)`: it reads the "Test Files" line and returns
+     the failed count, or -1 when the line is missing. The `unit-tests` web step captures its output
+     and fails when the result is not 0, whatever the exit code. -> check: step 5.
+  5. Add a temporary spec that throws inside `describe`, run `python scripts/ci-local.py --only web`,
+     see it fail, delete the spec. -> check: `git status --short` shows no leftover spec.
+- Contract: none.
+- Tests: `scripts/test_ci_local.py` :: `test_failed_files_counted` (a "Test Files  2 failed | 127
+  passed" line gives 2); `test_all_passed_gives_zero`; `test_missing_line_gives_minus_one`. Load
+  `ci-local.py` with `importlib.util.spec_from_file_location`, since the name has a hyphen.
+- Run: `python -m unittest scripts/test_ci_local.py </dev/null`; then
+  `python scripts/ci-local.py --only web`.
+- Done when: 129 of 129 files pass twice in a row; the temporary spec made the web layer fail;
+  84.100 DONE with both counts.
+- Stop and ask if: the leak is in `src/test-setup.ts` or in application code, not in a spec. Default:
+  fix it in the setup file and say so in the tracker.
 
+<a id="s02"></a>
 **S02 · 84.101, 84.99 · S**
-- Read: the contract step in `scripts/ci-local.py`; the five migrations named in 84.99.
-- Steps 84.101: before `dotnet tool restore`, walk from the repo root up to the drive root and list
-  every `dotnet-tools.json` and `.config/dotnet-tools.json`; when restore succeeds but the swagger
-  tool is missing, print which manifest was used. Owner step: rename `C:\Users\dotnet-tools.json`.
-- Steps 84.99: in each of `20260927121346_ElectionBallotSecrecy`, `20260930020138_ElectionAppointments`,
-  `20261021100000_AddEcPositions`, `20261105120000_SeedJobCategoryLookups`,
-  `20261105200808_AddPollDiscussion`, change each bare `SELECT setval(...)` to
-  `DO $sv$ BEGIN PERFORM setval(...); END $sv$;`. `PERFORM` alone is wrong: it is PL/pgSQL only and
-  fails in the plain `Migrate()` run. Applied databases never rerun these, so live data is unaffected.
-- Tests: put the manifest walk in a function `find_tool_manifests(start)` in `ci-local.py` and test it
-  in a new `scripts/test_ci_local.py` with a temp folder holding a stray manifest
-  (`python -m unittest scripts/test_ci_local.py`); on an empty local PostgreSQL: `dotnet ef migrations script --idempotent -o x.sql`, apply
-  `x.sql` twice with `psql`, then start the API once against another empty database (`Migrate()`).
-- Done when: contract passes on this machine; a stray manifest gives a message naming it; the
-  idempotent script applies twice and `Migrate()` still builds an empty database.
+- Goal: the contract step names the tool manifest it used, and five old migrations no longer hold a
+  bare `SELECT setval`, so the idempotent script applies twice.
+- Before you start: S01 closed (it creates `scripts/test_ci_local.py`). Run
+  `grep -c "SELECT setval" GHCAA.Infrastructure/Data/Migrations/PgSql/20261021100000_AddEcPositions.cs`;
+  a count above 0 means 84.99 is still open.
+- Read (only these): in `scripts/ci-local.py` the contract steps `api-build-release`,
+  `swagger-generate`, `swagger-diff`; the five migration files in step 3.
+- Change (only these files): `scripts/ci-local.py`; `scripts/test_ci_local.py` (new if S01 did not
+  make it); `20260927121346_ElectionBallotSecrecy.cs`, `20260930020138_ElectionAppointments.cs`,
+  `20261021100000_AddEcPositions.cs`, `20261105120000_SeedJobCategoryLookups.cs`,
+  `20261105200808_AddPollDiscussion.cs`.
+- Do not touch: the `.Designer.cs` files, `PgSqlApplicationDbContextModelSnapshot.cs`, any other
+  migration, and the file `C:\Users\dotnet-tools.json` (the owner renames it).
+- Steps:
+  1. 84.101: add `find_tool_manifests(start)` to `ci-local.py`. It walks from `start` up to the
+     drive root and returns every `dotnet-tools.json` and `.config/dotnet-tools.json` it finds,
+     nearest first. -> check: the unit tests below.
+  2. Before `dotnet tool restore`, print the list. When restore succeeds and the swagger tool is
+     still missing, print which manifest was used and that a stray one higher up hides the repo's.
+     -> check: `python scripts/ci-local.py --only contract` prints the list.
+  3. 84.99: in each of the five migrations, change every bare `SELECT setval(...)` inside
+     `migrationBuilder.Sql` to `DO $sv$ BEGIN PERFORM setval(...); END $sv$;`. Keep the arguments
+     as they are. `PERFORM` alone is wrong: it is PL/pgSQL only and fails in the plain `Migrate()`
+     run. -> check: `grep -n "SELECT setval" <file>` gives nothing for each file.
+  4. On an empty local PostgreSQL database: `dotnet ef migrations script --idempotent -o <scratch file>`,
+     with the scratch file outside the repo. Apply it twice with `psql`, then start the API once
+     against a second empty database. Delete the scratch file. -> check: both applies end without error and the API starts.
+- Contract: none.
+- Tests: `scripts/test_ci_local.py` :: `test_finds_stray_manifest_above_repo` (a temp tree with a
+  manifest two levels up is listed); `test_nearest_first`; `test_none_found_gives_empty_list`.
+- Run: `python -m unittest scripts/test_ci_local.py </dev/null`; then
+  `python scripts/ci-local.py --only contract`.
+- Done when: the contract layer passes on this machine or names the stray manifest; the idempotent
+  script applies twice; `Migrate()` builds an empty database; 84.101 and 84.99 DONE. The tracker
+  notes the owner step (rename `C:\Users\dotnet-tools.json`).
+- Stop and ask if: a `setval` call sits outside `migrationBuilder.Sql`, or a sixth migration holds
+  one. Default: fix it the same way and name the file in the tracker.
 
+<a id="s03"></a>
 **S03 · 37.16j · S**
-- Read: `RevokePrintAsync` in `ElectionDocumentService.cs`; the test
-  `RevokePrint_RevokedBetweenReadAndSave_ReturnsAlreadyRecorded`.
-- Steps: run the same race on local PostgreSQL. Add a test fixture switch or a one-off console
-  check that opens two contexts on a PG test database, revokes from both, and counts `RevokedAt`
-  rows and `FormPrintRevoked` audit entries. Record what happens when the audit write fails after the
-  claim: the claim and the audit entry are in one `SaveChanges`, so both roll back; write that as the
-  decision in the tracker.
-- Tests: `dotnet test --filter "FullyQualifiedName~ElectionDocumentServiceTests"`.
-- Done when: one `RevokedAt` and one audit entry on PostgreSQL; 37.16j DONE.
+- Goal: proof on PostgreSQL that two revokes of one print at the same moment leave one `RevokedAt`
+  and one audit entry, and a written decision on what happens when the audit write fails.
+- Before you start: no card needed. Local PostgreSQL is up with a database that tests may create and
+  drop. `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~RevokePrint"` passes.
+- Read (only these): `RevokePrintAsync` in `GHCAA.Infrastructure/Services/ElectionDocumentService.cs`
+  (line 228); `RevokePrint_RevokedBetweenReadAndSave_ReturnsAlreadyRecorded` in
+  `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs` (line 883); `GHCAA.Tests/LiveSyncTest.cs`
+  for how a test reaches a real database.
+- Change (only these files): `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`; `docs/TODO.md`.
+- Do not touch: `RevokePrintAsync` itself, unless the PostgreSQL run shows two rows; the concurrency
+  token on `ElectionFormPrint`.
+- Steps:
+  1. Add the test below. It reads its connection string from the environment variable
+     `GHCAA_TEST_PG` and calls `Assert.Ignore` when the variable is not set, so CI skips it.
+     -> check: without the variable the test shows as skipped.
+  2. The test builds the schema on that database, adds one election and one print, opens two
+     contexts, calls `RevokePrintAsync` from both at once, then counts. -> check: with the variable
+     set, one call returns done and the other returns already recorded.
+  3. Write the decision in the 37.16j tracker entry: the claim and the audit entry are in one
+     `SaveChanges`, so a failed audit write rolls the claim back and the caller can try again.
+     -> check: the entry names the test and the counts.
+- Contract: none.
+- Tests: `ElectionDocumentServiceTests.cs` :: `RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry`
+  (`[Category("NFR-R5")]`): one row with `RevokedAt`, one `FormPrintRevoked` audit entry.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionDocumentServiceTests"`
+  once without and once with `GHCAA_TEST_PG`; then `python scripts/ci-local.py --only backend`.
+- Done when: the PostgreSQL run shows one `RevokedAt` and one audit entry; 37.16j DONE with the
+  decision written.
+- Stop and ask if: PostgreSQL shows two revokes or two audit entries. Default: stop, set 37.16j
+  PARTIAL with the counts, and do not change the service without the owner's answer.
 
+<a id="s04"></a>
 **S04 · 37.16k · M**
-- Read: `RateLimitingExtensions.cs`, the `CredentialVerification` policy, the election settings in
-  `OrgConfigDto.cs`, the filled-print path in `ElectionDocumentService.cs`, memory
+- Goal: print verification has its own rate limit read from OrgConfig, and a second identical filled
+  download returns the first print id and adds no row.
+- Before you start: S03 closed. `grep -n "CredentialVerification" GHCAA.API/Controllers/ElectionsController.cs`
+  shows the policy on the print verification route (line 486).
+- Read (only these): `GHCAA.API/Extensions/RateLimitingExtensions.cs`; `RateLimitPolicies` in
+  `GHCAA.Domain/Constants.cs` (line 41); `ElectionSettingsDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs`
+  (line 27); `GeneratePdfAsync` in `ElectionDocumentService.cs` (line 98, the `new ElectionFormPrint`
+  at 128); `ElectionFormPrint` in `GHCAA.Domain/Models/Election.cs`; memory
   `gotcha_ratelimit_api_policy_overrides_named_policies`.
-- Steps: (1) a named policy `PrintVerification` in `Constants`; its permit count and window read from
-  the OrgConfig election settings (add `PrintVerifyLimit` default 60 and `PrintVerifyWindowMinutes`
-  default 15, golden snapshot and `CONFIG_DRIVEN_FRAMEWORK.md` updated). (2) Put it on
-  `GET api/elections/print-records/{printId}/verification`; check the global limiter does not replace
-  it. (3) On a filled print, look up a row with the same election, form, printer user and content
-  hash that is not revoked; return its id instead of inserting.
-- Tests: controller test for the policy attribute; service test for reuse and for a revoked row not
-  reused; a rate-limit test showing card verification still answers after the print limit is hit.
-- Done when: own policy; second identical download returns the same id; registry and authz catalog
-  updated.
+- Change (only these files): `GHCAA.Domain/Constants.cs`, `RateLimitingExtensions.cs`,
+  `GHCAA.API/Controllers/ElectionsController.cs`, `OrgConfigDto.cs`, `ElectionDocumentService.cs`,
+  `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json`, `docs/CONFIG_DRIVEN_FRAMEWORK.md`,
+  `docs/API_CONTRACT_REGISTRY.md`, `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`,
+  `GHCAA.Tests/Controllers/ElectionsControllerTests.cs`, the authz catalog output.
+- Do not touch: the `CredentialVerification` policy and its numbers; the route
+  `GET api/elections/{id:int}/documents/{formCode}/verification` (it keeps the old policy);
+  `appsettings*.json`; the global limiter.
+- Steps:
+  1. Add `RateLimitPolicies.PrintVerification = "PrintVerification"`. -> check: build.
+  2. Add `PrintVerifyLimit` (int, default 60, `[Range(1, 1000)]`) and `PrintVerifyWindowMinutes`
+     (int, default 15, `[Range(1, 1440)]`) to `ElectionSettingsDto`. Both are non-nullable, since
+     stored JSON drops nulls. Update the golden as the failure message of
+     `OrgConfigGoldenSnapshotTests.cs` says, and add both keys to `CONFIG_DRIVEN_FRAMEWORK.md`.
+     -> check: `--filter "FullyQualifiedName~OrgConfigGoldenSnapshotTests"` passes.
+  3. Register the policy in `RateLimitingExtensions.cs`: fixed window, per IP, numbers read from the
+     OrgConfig election settings. -> check: the rate-limit test below.
+  4. Put `[EnableRateLimiting(RateLimitPolicies.PrintVerification)]` on the print verification
+     action only. -> check: the controller test below.
+  5. In `GeneratePdfAsync`, before the insert, look for a print with the same `ElectionId`,
+     `FormCode`, `PrintedByUserId` and `ContentHash` and `RevokedAt == null`. When found, use its
+     `Id` and insert nothing. -> check: the two service tests below.
+- Contract: no new route. `GET api/elections/print-records/{printId:guid}/verification` stays
+  anonymous with the same response; only its rate-limit policy changes (429 past the limit).
+  `ElectionSettingsDto` gains the two fields. Record both in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `ElectionsControllerTests.cs` :: `PrintVerification_UsesItsOwnRateLimitPolicy` (attribute
+  names `PrintVerification`); `ElectionDocumentServiceTests.cs` ::
+  `GeneratePdf_SameOfficialSameContent_ReusesPrintId` and `GeneratePdf_RevokedPrint_IsNotReused`;
+  `ElectionsControllerTests.cs` :: `CardVerification_StillAnswers_AfterPrintLimitIsHit`. Tag
+  `[Category("FR-39")]`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionDocumentServiceTests|FullyQualifiedName~ElectionsControllerTests"`;
+  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: the four tests pass; the registry and the catalog are updated; 37.16k DONE.
+- Stop and ask if: the limiter cannot read OrgConfig per request without blocking on async code.
+  Default: read both values once at startup and note in the tracker that a change needs a restart.
+  Also stop if the global limiter replaces the named policy; report what the test shows.
 
+<a id="s05"></a>
 **S05 · 37.16i · M**
-- Read: `ElectionsController.cs` revoke action; the officials area under
-  `GHCAA.Web/src/app/admin/elections/`; `common/confirm-dialog`, `step-up-dialog`.
-- Steps: (1) `GET api/elections/{id}/print-records` (officials with Count and ManageSetup) returning
-  form code, printed at, role, phase, revoked at, reason. (2) Web: a "Print records" tab in the
-  election's officials view with the list and a Revoke action (reason, at least 3 visible
-  characters, step-up). Hide the action without both permissions. (3) Mobile: none. Mobile has no
-  official form screens, since admin steps live on the web; write that into the tracker entry.
-- Tests: controller tests (200, 403); Vitest for the dialog validation and the hidden action.
-  Browser check light and dark with the API mocked (memory `reference_browser_check_mocked_api`).
-- Done when: revoke from the web shows "Print revoked" on `/verify/form/:id`; 403 without permission;
-  registry updated.
+- Goal: an official with Count and ManageSetup lists an election's print records on the web and
+  revokes one with a reason; mobile shows the same list read only.
+- Before you start: S04 closed. `grep -n "print-records" GHCAA.API/Controllers/ElectionsController.cs`
+  shows two routes (verification, revoke) and no list route.
+- Read (only these): the revoke action in `ElectionsController.cs` (line 494) and
+  `ElectionFormPrintRevokeDto`; `GHCAA.Web/src/app/admin/elections/admin-elections.ts`;
+  `GHCAA.Web/src/app/admin/elections/election-form-records/` (the pattern to copy);
+  `GHCAA.Web/src/app/common/confirm-dialog/`, `GHCAA.Web/src/app/common/step-up-dialog/`;
+  `GHCAA.Web/src/app/core/services/elections.service.ts`;
+  `GHCAA.Mobile/lib/screens/admin/election_form_records_sheet.dart` (the pattern to copy).
+- Change (only these files): `ElectionsController.cs`, `IElectionDocumentService` and
+  `ElectionDocumentService.cs`, `GHCAA.Application/DTOs/ElectionDtos.cs`; web
+  `admin/elections/election-print-records/` (new, component plus spec), `admin-elections.ts` and its
+  template, `elections.service.ts`, `GHCAA.Web/src/app/core/models/election.models.ts`; mobile
+  `GHCAA.Mobile/lib/screens/admin/election_print_records_sheet.dart` (new),
+  `election_management_screen.dart`, `GHCAA.Mobile/lib/features/elections/election_service.dart`,
+  `GHCAA.Mobile/test/election_print_records_sheet_test.dart` (new); `scripts/verify-election.py`;
+  `docs/API_CONTRACT_REGISTRY.md`; backend tests.
+- Do not touch: the revoke route and its rules; `election-form-records/` (form details, a different
+  thing); the public verify page.
+- Steps:
+  1. Service method `ListPrintsAsync(int electionId, CancellationToken)` returning rows newest
+     first. -> check: the service test.
+  2. Controller action `GET {id:int}/print-records` with the same attributes as the revoke action,
+     without step-up. -> check: the controller tests.
+  3. Web service method `getPrintRecords(electionId)` and `revokePrint(electionId, printId, reason)`
+     (the second only if it is missing). -> check: `npm run type-check`.
+  4. Web component: a table (form code, printed at, role, phase, revoked at, reason) in
+     `.table-wrap`, and a Revoke action that opens the confirm dialog with a reason field (at least
+     3 visible characters after trim), then step-up. Hide the action without both permissions and
+     on a revoked row. Add it as a "Print records" tab in the election's officials view.
+     -> check: the Vitest specs.
+  5. Mobile: a read-only sheet with the same columns, opened from `election_management_screen.dart`.
+     No revoke on mobile. -> check: the widget test.
+  6. Add the new spec to `WEB_SPECS` and the new test to `MOBILE_TESTS` in
+     `scripts/verify-election.py`. -> check: `python scripts/verify-election.py </dev/null`.
+  7. Browser check in light and dark with the API mocked (memory
+     `reference_browser_check_mocked_api`). -> check: both themes show the table and the dialog.
+- Contract: `GET api/elections/{id:int}/print-records`. Policy `Policies.ElectionStaff` plus
+  `RequireElectionPermission(Count | ManageSetup)`. Response: array of `{ id, formCode, printedAt,
+  printedByRole, phaseAtPrint, revokedAt, revokeReason }`. 200; 403 without the permissions; 404 for
+  an unknown election. The revoke route is unchanged (204, 409, 404; 400 on a blank reason).
+- Tests: `ElectionsControllerTests.cs` :: `ListPrints_WithPermissions_Returns200`,
+  `ListPrints_WithoutPermissions_Returns403`; `ElectionDocumentServiceTests.cs` ::
+  `ListPrints_ReturnsNewestFirst_WithRevokeFields`; web spec :: "reason under 3 characters keeps
+  Revoke disabled", "hides Revoke without both permissions", "hides Revoke on a revoked row"; mobile
+  test :: "shows the list and no revoke action".
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionsControllerTests|FullyQualifiedName~ElectionDocumentServiceTests"`;
+  in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/elections/election-print-records`;
+  in `GHCAA.Mobile`: `flutter analyze; flutter test test/election_print_records_sheet_test.dart`;
+  then `python docs/api/authz_catalog.py --write </dev/null` and ci-local for backend, web, mobile
+  and contract.
+- Done when: a revoke from the web makes `/verify/form/:id` show "Print revoked" with the date; 403
+  without permission; registry updated; 37.16i DONE.
+- Stop and ask if: the officials view has no tab strip to extend. Default: add the list as a section
+  under the form records section.
 
+<a id="s06"></a>
 **S06 · 37.14n, 37.14t · S**
-- Read: `scripts/run-election-walkthrough.bat`, memory `gotcha_election_walkthrough_local_run`.
-- The run now also checks: roll unfreeze and refreeze, filled prints refused before their phase,
-  the receipt PDF on API ballots, a handover tick, and an unknown form code (added 2026-11-13,
-  type-checked, not yet run).
-- Steps: (1) restart the local API (applies the print migration; `.env` already has
-  `GeneralSettings__PortalBaseUrl`). (2) `npx ng serve --host 0.0.0.0`, port 4200 open in the
-  firewall. (3) Run the walkthrough; the Print records section must pass. (4) Owner scans one printed
-  QR code with a phone; record phone, browser and result.
-- Done when: walkthrough Print records green; phone scan opens the verify page; 37.14n and 37.14t
-  DONE (the preprod release is G-REL, not part of these items' acceptance).
+- Goal: the election walkthrough passes with its "Print records" section, and one printed QR code
+  opens the verify page on a phone.
+- Before you start: S05 closed. Read memory `gotcha_election_walkthrough_local_run`. The local
+  `.env` already has `GeneralSettings__PortalBaseUrl`; do not edit it.
+- Read (only these): `scripts/run-election-walkthrough.bat`;
+  `GHCAA.Web/tests/e2e/election-walkthrough/README.md`.
+- Change (only these files): `docs/TODO.md`;
+  `GHCAA.Web/tests/e2e/election-walkthrough/README.md` and `election.walkthrough.ts`, only when a
+  step fails because the test is wrong.
+- Do not touch: `.env`, `appsettings*.json`, application code. A failure caused by the application
+  goes to the tracker as a new item; it is not fixed in this session.
+- Steps:
+  1. Restart the local API so the print migration applies. -> check: the API log shows
+     `20261112120000_AddElectionFormPrints` applied or already present.
+  2. In `GHCAA.Web`: `npx ng serve --host 0.0.0.0`; port 4200 open in the firewall. -> check: the
+     site opens from the phone's browser on the same network.
+  3. Run `scripts\run-election-walkthrough.bat`. The run also covers roll unfreeze and refreeze,
+     filled prints refused before their phase, the receipt PDF on API ballots, a handover tick and
+     an unknown form code. -> check: the report shows every section green, "Print records" included.
+  4. Owner step: scan one printed QR code with a phone. -> check: the verify page opens; record
+     phone, browser and result in the tracker.
+- Contract: none.
+- Tests: none added. The walkthrough is the evidence.
+- Run: `scripts\run-election-walkthrough.bat`.
+- Done when: the walkthrough is green; the phone scan opens the verify page; 37.14n and 37.14t DONE.
+  The preprod release is gate G-REL and is not part of these items.
+- Stop and ask if: the owner is not at hand for the scan. Default: close step 3, set both items
+  PARTIAL with "phone scan left", and leave the card open for step 4 only.
 
+<a id="s07"></a>
 **S07 · 99.3 · S**
-- Steps: `python scripts/ci-local.py` (full), after S01 and S02. Name each failure with its cause
-  (98.34's `npm audit` stays red, on hold). Ask the owner to accept wave 1 with the result.
-- Done when: owner accepts; 99.3 DONE.
+- Goal: one full `ci-local.py` run with every failure named, and the owner's acceptance of wave 1.
+- Before you start: S01 and S02 closed. At least 10 GB free on C: (section 2, rule 14).
+- Read (only these): the 99.3 and 98.34 tracker entries.
+- Change (only these files): `docs/TODO.md`, this plan.
+- Do not touch: any code. A failure found here becomes a tracker item, not a fix.
+- Steps:
+  1. `python scripts/ci-local.py`. If disk space is short, run `--only backend`, then `web`, then
+     `mobile`, then `contract`, one at a time. -> check: a pass or fail line for each step.
+  2. For each failure write one line: step, cause, tracker ID. The `audit` step stays red under
+     98.34, which is on hold. -> check: no failure without an ID.
+  3. Ask the owner (question dialog) to accept wave 1, with the result table in the question.
+     -> check: the answer is recorded in the 99.3 entry with its date.
+- Contract: none.
+- Tests: none added.
+- Run: `python scripts/ci-local.py`.
+- Done when: the owner accepts; 99.3 DONE with the run date and counts.
+- Stop and ask if: a step other than `audit` fails. Default: open an item for it, give it a card, and
+  ask the owner whether acceptance waits on that card.
 
 ### Phase B. P1 items with no owner gate
 
+<a id="s08"></a>
 **S08 · 84.25, 28.25 · M**
-- 84.25: both parts exist. `MentorshipControllerTests.cs` covers the controller; `CreateJobDto` has
-  DataAnnotations (FluentValidation never runs, so the text asking for a validator is wrong). Run
-  `dotnet test --filter "FullyQualifiedName~MentorshipControllerTests|FullyQualifiedName~JobDtoValidationTests"`
-  and check the 401, 400, 409 and AdminOnly cases exist; add any missing one.
-- 28.25: run `npx playwright test tests/e2e/config-regression.spec.ts` against the local stack; record
-  the result and close 28.25 as covered by it. Do not run `--update-snapshots` on the whole suite.
-- Done when: both DONE with the counts.
+- Goal: the mentorship controller and the job DTO have tests for each refusal case, and the config
+  regression run is recorded as the cover for 28.25.
+- Before you start: no card needed. Local stack up (`.\GHCAA.Tools\run-app.ps1`) for step 3.
+- Read (only these): `GHCAA.Tests/Controllers/MentorshipControllerTests.cs`,
+  `GHCAA.Tests/Validators/JobDtoValidationTests.cs`, `GHCAA.Web/tests/e2e/config-regression.spec.ts`.
+- Change (only these files): the two test files above; `docs/TODO.md`.
+- Do not touch: the controller and the DTO. No FluentValidation validator is added (they never run;
+  `CreateJobDto` already uses DataAnnotations). No `--update-snapshots`.
+- Steps:
+  1. Run the focused command below. -> check: it passes; note the count.
+  2. In the two test files look for a test of each case: 401 without a login, 400 on an invalid
+     body, 409 on a duplicate request, 403 on an AdminOnly action as a member. Add a test for each
+     missing case, in the file's style. -> check: one test per case, all passing.
+  3. In `GHCAA.Web`: `npx playwright test tests/e2e/config-regression.spec.ts`. -> check: all pass;
+     note the count.
+- Contract: none.
+- Tests: `MentorshipControllerTests.cs` and `JobDtoValidationTests.cs` :: one test per case in
+  step 2, named `<Action>_<Case>_Returns<Code>`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MentorshipControllerTests|FullyQualifiedName~JobDtoValidationTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: 84.25 DONE with the test count; 28.25 DONE as covered by the config regression run,
+  with its count and date.
+- Stop and ask if: the config regression run fails. Default: 28.25 stays open with the failing test
+  named; no snapshot is updated.
 
+<a id="s09"></a>
 **S09 · 84.51, 84.49 (API part) · S**
-- Steps: local stack up. 84.51: five wrong passwords on `setup-with-password` give 423 on the sixth
-  and on login; `POST api/roles/users/{id}/unlock` clears it; record the HTTP log. 84.49: import one
-  member through `MemberImportController` (placeholder NID), then `PUT api/profile` with a valid
-  10-digit NID succeeds and an invalid one gives 400 with the reason.
-- Done when: 84.51 DONE; 84.49 notes the API check passed and stays PARTIAL for B4-B5 (S33) and the
-  device check (gate G-DEV).
+- Goal: a recorded local run shows the lockout and unlock work, and an imported member can replace a
+  placeholder NID.
+- Before you start: no card needed. Local stack up. A SuperAdmin login and one member invite at hand.
+- Read (only these): the 84.51 and 84.49 tracker entries; `Constants.Login` and `Constants.Nid` in
+  `GHCAA.Domain/Constants.cs`.
+- Change (only these files): `docs/TODO.md`.
+- Do not touch: any code. A wrong result becomes a tracker note, not a fix.
+- Steps:
+  1. 84.51: send five wrong passwords to `setup-with-password` for one user. -> check: the sixth
+     try gives 423, and login for that user gives 423.
+  2. `POST api/roles/users/{id}/unlock` as SuperAdmin. -> check: login then succeeds.
+  3. 84.49: import one member through `POST api/admin/members/import` with a placeholder NID.
+     -> check: the member exists.
+  4. As that member, `PUT api/profile` with a valid 10-digit NID, then with an invalid one.
+     -> check: 200, then 400 with the reason in the body.
+  5. Paste the method, route and status of each call into the two tracker entries. No tokens or
+     passwords in the tracker. -> check: each step has its status line.
+- Contract: none.
+- Tests: none added. The HTTP log is the evidence.
+- Run: the calls above with `curl` or the Swagger page.
+- Done when: 84.51 DONE; 84.49 says the API check passed and stays PARTIAL for B4 and B5 (S33) and
+  the device check (gate G-DEV).
+- Stop and ask if: a call gives another status. Default: record it, leave the item open, and do not
+  change code in this session.
 
+<a id="s10"></a>
 **S10 · 84.92 (backend) · M**
-- Read: `FinancialsController.cs` (`update-status`), `FinancialService.UpdatePaymentStatusAsync`,
-  `PaymentHistory.cs`, `INotificationService`.
-- Steps: (1) `GET api/financials/pending` (AdminOnly): Pending declarations with member name, due,
-  amount, reference, proof path, submitted at. (2) Replace the query-string `update-status` with
-  `POST api/financials/{id}/verify` and `POST api/financials/{id}/reject` (body `{ reason }`, at least
-  3 visible characters); keep `update-status` working for one release and mark it deprecated in the
-  registry. (3) Only Pending can change; a settled payment gives 409. (4) Verify marks the due paid
-  (`MembershipDue.IsPaid`, `PaymentDate`, `PaymentHistoryId`); reject stores the reason in `Notes`.
-  (5) Notify the member both ways; activity row with admin, old and new status.
-- Tests: `FinancialServiceTests` and `FinancialsControllerTests` for verify, reject without a reason,
-  second action on a settled payment, the due marked paid.
-- Done when: backend acceptance of 84.92 holds; registry updated.
+- Goal: an admin lists pending payment declarations and verifies or rejects one with a reason; the
+  due is marked paid on verify and the member is told either way.
+- Before you start: no card needed. `grep -n "update-status" GHCAA.API/Controllers/FinancialsController.cs`
+  shows one PATCH route.
+- Read (only these): `GHCAA.API/Controllers/FinancialsController.cs` (`update-status`);
+  `UpdatePaymentStatusAsync` in `GHCAA.Infrastructure/Services/FinancialService.cs`;
+  `GHCAA.Domain/Models/PaymentHistory.cs`, `GHCAA.Domain/Models/MembershipDue.cs`;
+  `GHCAA.Application/DTOs/FinancialDtos.cs`; `GHCAA.Application/Interfaces/INotificationService.cs`.
+- Change (only these files): `FinancialsController.cs`, `GHCAA.Application/Interfaces/IFinancialService.cs`,
+  `FinancialService.cs`, `FinancialDtos.cs`, `GHCAA.Tests/Services/FinancialServiceTests.cs`,
+  `GHCAA.Tests/Controllers/FinancialsControllerTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, the authz
+  catalog output, `docs/TODO.md`.
+- Do not touch: `PaymentStatus` in `GHCAA.Domain/Enums.cs` (no new value; reject uses `Failed`);
+  `PaymentCallbackOrchestrator.cs` and the gateway path; the old `PATCH update-status` route keeps
+  working for one release.
+- Steps:
+  1. DTOs: `PendingPaymentDto` and `RejectPaymentDto` with `[Required, MinLength(3)]` on `Reason`;
+     the service also trims and refuses fewer than 3 visible characters. -> check: build.
+  2. Service `GetPendingPaymentsAsync`: rows with `Status == Pending`, oldest first. -> check: test.
+  3. Service `VerifyPaymentAsync(int paymentId, int adminUserId)` and
+     `RejectPaymentAsync(int paymentId, int adminUserId, string reason)`. Only a Pending payment
+     changes; anything else returns a "settled" result. Verify sets `Completed` and, on the linked
+     due, `IsPaid`, `PaymentDate`, `PaymentHistoryId`. Reject sets `Failed` and writes the reason to
+     `Notes`. One `SaveChanges` for each. -> check: tests.
+  4. Both write an activity row (admin, old status, new status) and notify the member through
+     `INotificationService`, in the way `UpdatePaymentStatusAsync` does today. -> check: tests.
+  5. Controller actions per the contract; mark `update-status` deprecated in the registry.
+     -> check: controller tests and the reflection test.
+- Contract: all `AdminOnly`.
+  `GET api/financials/pending` -> 200, array of `{ id, memberId, memberName, dueId, amount,
+  transactionReference, proofPath, submittedAt }`.
+  `POST api/financials/{id:int}/verify` -> 204; 404 unknown; 409 not Pending.
+  `POST api/financials/{id:int}/reject`, body `{ reason }` -> 204; 400 reason under 3 visible
+  characters; 404; 409.
+- Tests: `FinancialServiceTests.cs` :: `Verify_PendingPayment_MarksDuePaid`,
+  `Reject_StoresReasonAndSetsFailed`, `Verify_SettledPayment_ReturnsSettled`,
+  `Reject_SettledPayment_ReturnsSettled`, `GetPending_ReturnsOnlyPending_OldestFirst`,
+  `Verify_NotifiesMember`; `FinancialsControllerTests.cs` :: `Reject_BlankReason_Returns400`,
+  `Verify_Settled_Returns409`, `Pending_AsMember_IsAdminOnly`. Tag with the FR of 84.92 in spec 015.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FinancialServiceTests|FullyQualifiedName~FinancialsControllerTests"`;
+  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: the nine tests pass; registry lists the three routes and the deprecation; 84.92 notes
+  "backend done, clients in S11" and stays PARTIAL.
+- Stop and ask if: `PaymentHistory` has no field that links it to a due, so verify cannot find the
+  due. Default: match on member and amount only when exactly one unpaid due fits; otherwise leave
+  the due alone and say so in the response. Also stop if a field in the pending response does not
+  exist on the model; name the missing field.
 
+<a id="s11"></a>
 **S11 · 84.92 (clients) · M**
-- Steps: web `admin/ledger` (or a new `admin/payments-pending` under the finance nav section): list,
-  open proof through `SecureFilesController`, verify, reject with reason. Member payments page on web
-  and mobile shows status and the rejection reason.
-- Tests: Vitest for the page and service; Flutter widget test for the reason on the member screen.
-- Walkthrough: membership walkthrough verifies the fee on the new screen and rejects one declaration
-  with a reason; drop its 84.92 gap and README line.
-- Done when: 84.92 DONE; 78.9 notes Treasurer Tasks 1 and 2 unblocked.
+- Goal: the web admin has a pending payments page with verify and reject; the member payment screens
+  on web and mobile show the status and the rejection reason.
+- Before you start: S10 closed. The three routes answer on the local API.
+- Read (only these): `GHCAA.Web/src/app/admin/ledger/ledger.ts` (page pattern);
+  `GHCAA.Web/src/app/core/services/financial.service.ts`; `GHCAA.Web/src/app/member/payments/payments.ts`;
+  `GHCAA.Web/src/app/app.routes.ts` (admin block); `ADMIN_NAV_SECTIONS` in
+  `GHCAA.Web/src/app/core/services/nav.service.ts`; `GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart`;
+  `GHCAA.Mobile/lib/core/models/financial_models.dart`;
+  `GHCAA.Web/tests/e2e/membership-walkthrough/README.md`.
+- Change (only these files): web `src/app/admin/payments-pending/` (new: component, template, spec),
+  `app.routes.ts`, `nav.service.ts`, `financial.service.ts` and its spec, `member/payments/payments.ts`
+  with its template and spec; mobile `financial_portal_screen.dart`, `financial_models.dart`,
+  `GHCAA.Mobile/test/financial_portal_rejection_test.dart` (new);
+  `GHCAA.Web/tests/e2e/membership-walkthrough/membership.walkthrough.ts` and `README.md`;
+  `docs/PROJECT_MAP.md`; `docs/TODO.md`.
+- Do not touch: the admin routes `payments` and `ledger` and their pages; mobile gets no admin
+  verify screen (not asked for); theme files (use the existing tokens and shared components).
+- Steps:
+  1. Web service: `getPendingPayments()`, `verifyPayment(id)`, `rejectPayment(id, reason)`.
+     -> check: service spec.
+  2. Page at route `admin/payments-pending` with the same guard as `admin/ledger`: a table in
+     `.table-wrap` (member, amount, reference, submitted, proof link, actions). Proof opens through
+     the secure files route the ledger page uses. Verify asks through the confirm dialog. Reject
+     opens a dialog with a reason field, disabled under 3 visible characters. A 409 shows the server
+     message and reloads the list. -> check: component spec.
+  3. Add the page to the finance section of `ADMIN_NAV_SECTIONS`. -> check: the link shows for an
+     admin.
+  4. Member payments page (web) and `financial_portal_screen.dart` (mobile): show the status and,
+     on a failed declaration, the reason from `notes`. -> check: spec and widget test.
+  5. Membership walkthrough: verify one fee on the new page and reject one declaration with a
+     reason; remove the 84.92 gap line and update "What the run covers" in the README. -> check:
+     `scripts\run-membership-walkthrough.bat` is green.
+  6. Browser check in light and dark. -> check: table, both dialogs and the member reason show.
+- Contract: none new (uses S10's routes).
+- Tests: `payments-pending` spec :: "lists pending payments", "reject stays disabled under 3
+  characters", "verify calls the service and reloads", "409 shows the message and reloads";
+  `payments.spec.ts` :: "shows the rejection reason"; `financial_portal_rejection_test.dart` ::
+  "shows the rejection reason on a failed payment".
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/payments-pending src/app/member/payments`;
+  in `GHCAA.Mobile`: `flutter analyze; flutter test test/financial_portal_rejection_test.dart`; then
+  `python scripts/ci-local.py --only web` and `--only mobile`.
+- Done when: the walkthrough is green with the two new steps; 84.92 DONE; the 78.9 entry notes
+  Treasurer Tasks 1 and 2 are unblocked.
+- Stop and ask if: the nav has no finance section, or the member payment DTO does not carry `notes`.
+  Default for the first: put the link beside "Ledger". For the second: stop, since it needs a DTO
+  change that belongs in S10.
 
+<a id="s12"></a>
 **S12 · 84.80 (backend) · M**
-- Read: `EventService.cs` registration path, `EventRegistrationStatus` in `Enums.cs`, the
-  registration configuration (check whether the status is stored as int or string).
-- Steps: (1) add `Cancelled` at the end of `EventRegistrationStatus` (no schema change either way).
-  (2) `POST api/events/registrations/{id}/cancel` for the owner of the registration. (3) In one
-  transaction: cancel, then promote the oldest Waitlisted registration of that event to Approved (or
-  Pending when the event needs payment) and notify it. (4) A paid registration: cancel is allowed,
-  refund is out of scope; write `Notes` "refund handled by the treasurer" and notify the treasurer
-  role. Record that decision in the tracker.
-- Tests: full event promotes one; empty waitlist; paid registration; cancel by someone else 403.
-- Done when: backend acceptance holds; registry updated.
+- Goal: a member cancels their own event registration, and the oldest waitlisted registration of
+  that event moves up in the same transaction.
+- Before you start: no card needed.
+  `grep -n "Waitlisted" GHCAA.Domain/Enums.cs` shows `EventRegistrationStatus { Pending, Approved,
+  Rejected, Waitlisted }` with no `Cancelled`.
+- Read (only these): `RegisterForEventAsync` (line 229) and `ApproveRegistrationAsync` (line 499)
+  in `GHCAA.Infrastructure/Services/EventService.cs`; `GHCAA.Domain/Models/EventRegistration.cs`;
+  `GHCAA.Infrastructure/Data/Configurations/EventRegistrationConfiguration.cs`;
+  `GHCAA.API/Controllers/EventsController.cs`.
+- Change (only these files): `GHCAA.Domain/Enums.cs`, `GHCAA.Application/Interfaces/IEventService.cs`,
+  `EventService.cs`, `EventsController.cs`, `GHCAA.Application/DTOs/EventDto.cs` (only if a result
+  type is needed), `GHCAA.Tests/Services/EventServiceTests.cs`,
+  `GHCAA.Tests/Controllers/EventsControllerTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, the authz
+  catalog output, `docs/TODO.md`.
+- Do not touch: no migration and no new column (`EventRegistration` has no `Notes`; none is added);
+  refunds; the capacity rule in `RegisterForEventAsync`.
+- Steps:
+  1. Add `Cancelled` as the last value of `EventRegistrationStatus`. The status is stored as an
+     int, so the order of the old values must not change. -> check: build; existing tests pass.
+  2. Every count of taken places must leave out `Cancelled`. Grep `EventRegistrationStatus` in
+     `EventService.cs` and fix each count that would include it. -> check: test
+     `Cancel_FreesThePlace`.
+  3. `CancelRegistrationAsync(int registrationId, int memberId)` inside the execution strategy and
+     one transaction: load the registration; not the owner returns Forbidden; already `Cancelled` or
+     `Rejected` returns Conflict; set `Cancelled`; if it held a place (`Approved`, or `Pending` on a
+     paid event), take the oldest `Waitlisted` registration of that event and set it to `Pending`
+     when the event has a fee, else `Approved`. -> check: tests.
+  4. After commit: notify the promoted member. For a registration that had a completed payment,
+     notify users in the treasurer role "refund to be handled" and write an activity row; the
+     refund itself is out of scope. Record that decision in the 84.80 entry. -> check: tests.
+  5. Controller action per the contract. -> check: controller tests.
+- Contract: `POST api/events/registrations/{id:int}/cancel`, any signed-in member, no body.
+  204; 403 not the owner; 404 unknown; 409 already cancelled or rejected.
+- Tests: `EventServiceTests.cs` :: `Cancel_FullEvent_PromotesOldestWaitlisted`,
+  `Cancel_EmptyWaitlist_OnlyCancels`, `Cancel_PaidEvent_PromotesToPending`,
+  `Cancel_PaidRegistration_NotifiesTreasurer`, `Cancel_ByAnotherMember_IsForbidden`,
+  `Cancel_Twice_IsConflict`, `Cancel_FreesThePlace`; `EventsControllerTests.cs` ::
+  `Cancel_NotOwner_Returns403`, `Cancel_Twice_Returns409`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~EventServiceTests|FullyQualifiedName~EventsControllerTests"`;
+  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: the nine tests pass; registry updated; 84.80 notes "backend done, clients in S13".
+- Stop and ask if: a client `switch` or map over the status breaks on the new value (grep
+  `Waitlisted` in `GHCAA.Web/src` and `GHCAA.Mobile/lib`). Default: add the `Cancelled` label there
+  in S13 and list the files in the tracker. Also stop if no treasurer role constant exists in
+  `Constants.Roles`; default is to notify `Admin`.
 
+<a id="s13"></a>
 **S13 · 84.80 (clients) · M**
-- Steps: cancel action on "My registrations" on web and mobile with a confirm; refresh counts.
-- Tests: Vitest and a Flutter widget test for the action and the confirm.
-- Walkthrough: event walkthrough cancels from My Participations and checks the first waitlisted
-  registration moves up; drop its waitlist gap and README line.
-- Done when: 84.80 DONE.
+- Goal: a member cancels a registration from the web and from mobile, after a confirm, and the list
+  and counts refresh.
+- Before you start: S12 closed. The cancel route answers on the local API.
+- Read (only these): `GHCAA.Web/src/app/common/events/events.ts` (it calls `getMyRegistrations`);
+  `GHCAA.Web/src/app/core/services/events.service.ts`; `GHCAA.Web/src/app/common/confirm-dialog/`;
+  `GHCAA.Mobile/lib/features/events/events_service.dart`;
+  `GHCAA.Mobile/lib/screens/member/events_screen.dart`, `event_details_screen.dart`;
+  `GHCAA.Web/tests/e2e/event-walkthrough/README.md`.
+- Change (only these files): web `events.service.ts` and its spec, `common/events/events.ts` with
+  its template and spec; mobile `events_service.dart`, `events_screen.dart`,
+  `event_details_screen.dart`, `GHCAA.Mobile/test/events_cancel_registration_test.dart` (new);
+  `GHCAA.Web/tests/e2e/event-walkthrough/event.walkthrough.ts` and `README.md`; `docs/TODO.md`.
+- Do not touch: admin event pages; the register flow; golden images (run mobile tests with
+  `--exclude-tags golden`).
+- Steps:
+  1. Web service `cancelRegistration(id)`; mobile service `cancelRegistration(id)`. -> check:
+     service spec and analyzer.
+  2. Web: a Cancel action on the member's own registrations with status Pending, Approved or
+     Waitlisted. It opens the confirm dialog; on yes it calls the service, shows a toast and reloads
+     the registrations and the event counts. Show a "Cancelled" label for the new status.
+     -> check: component spec.
+  3. Mobile: the same action on the event the member is registered for, with a confirm dialog;
+     errors go through the shared `serverMessage` helper. -> check: widget test.
+  4. Event walkthrough: fill an event, add one waitlisted member, cancel from the first member's
+     registrations, check the waitlisted one moved up; remove the waitlist gap line and update "What
+     the run covers". -> check: `scripts\run-event-walkthrough.bat` is green.
+  5. Browser check in light and dark. -> check: action, dialog and label show.
+- Contract: none new (uses S12's route).
+- Tests: `events.spec.ts` :: "cancel asks for a confirm", "cancel reloads registrations", "no cancel
+  action on a rejected or cancelled registration"; `events_cancel_registration_test.dart` :: "confirm
+  then cancel calls the service", "dismiss does not call the service".
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/common/events`; in
+  `GHCAA.Mobile`: `flutter analyze; flutter test test/events_cancel_registration_test.dart --exclude-tags golden`;
+  then `python scripts/ci-local.py --only web` and `--only mobile`.
+- Done when: the walkthrough is green with the cancel step; 84.80 DONE.
+- Stop and ask if: mobile has no place that shows the member's own registrations. Default: put the
+  action on `event_details_screen.dart` when the event's own status says the member is registered.
 
+<a id="s14"></a>
 **S14 · 84.81 · L · migration 3**
-- Read: `ExpiredRevokeSweep.cs` (pattern), `MembershipDue.cs`, `EventRegistration`, email templates
-  (`FEE_REMINDER`), OrgConfig workflow settings.
-- Steps: (1) migration `AddReminderSentMarks`: `MembershipDue.ReminderSentAt`,
-  `EventRegistration.ReminderSentAt` (nullable). (2) OrgConfig `Workflow.DueReminderLeadDays`
-  (default 14) and `Workflow.EventReminderLeadDays` (default 2); 0 turns a reminder off; golden and
-  `CONFIG_DRIVEN_FRAMEWORK.md`. (3) `ReminderSweep` hosted service, daily, like `ExpiredRevokeSweep`:
-  unpaid dues with `DueDate` inside the window and no mark, approved registrations for events
-  starting inside the window and no mark; send one email (and push when 84.61 lands), set the mark in
-  the same save.
-- Tests: window edges (day before, first day, last day), a paid due, a second run sends nothing,
-  lead 0 sends nothing.
-- Done when: 84.81 DONE; dry run of the migration per rule 5.
+- Goal: a daily job sends one reminder for each unpaid due and each approved event registration
+  inside a lead window set in OrgConfig, and never sends the same reminder twice.
+- Before you start: S13 closed (it adds `Cancelled`, which this job must skip). Migration 2 of the
+  ledger (section 7) is applied locally.
+- Read (only these): `GHCAA.API/Services/ExpiredRevokeSweep.cs` (the pattern to copy, and where it
+  is registered in `Program.cs`); `GHCAA.Domain/Models/MembershipDue.cs`, `EventRegistration.cs`;
+  `WorkflowDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs` (line 144); `TemplateCodes` in
+  `GHCAA.Domain/Constants.cs` (line 80); the newest migration `20261112120000_AddElectionFormPrints`
+  with its `.Designer.cs` as the shape to copy; memory `gotcha_orgconfig_feature_flag_default_drift`.
+- Change (only these files): `MembershipDue.cs`, `EventRegistration.cs`;
+  `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddReminderSentMarks.cs` (new) with its
+  `.Designer.cs` (new) and `PgSqlApplicationDbContextModelSnapshot.cs`; `OrgConfigDto.cs`;
+  `GHCAA.API/Services/ReminderSweep.cs` (new); `GHCAA.API/Program.cs` (one registration line);
+  `GHCAA.Domain/Constants.cs` (template code, only if missing);
+  `GHCAA.Tests/Services/ReminderSweepTests.cs` (new);
+  `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json`; `docs/CONFIG_DRIVEN_FRAMEWORK.md`;
+  `docs/TODO.md`; the ledger row in section 7.
+- Do not touch: `Seed/*.json`; `appsettings*.json`; `ExpiredRevokeSweep.cs`; push notifications
+  (84.61 adds them later).
+- Steps:
+  1. Add `DateTime? ReminderSentAt` to both models. -> check: build.
+  2. Write the migration by hand: two nullable `timestamp with time zone` columns, `Down` drops
+     them. Copy the `.Designer.cs` from the model and update the snapshot. Never run
+     `ef migrations add` then `remove`. -> check: a fresh local PostgreSQL database migrates, and
+     the migration reruns clean (rule 5).
+  3. `WorkflowDto`: `DueReminderLeadDays` (int, default 14, `[Range(0, 365)]`) and
+     `EventReminderLeadDays` (int, default 2, `[Range(0, 60)]`); 0 turns that reminder off. Update
+     the golden as its test says, and `CONFIG_DRIVEN_FRAMEWORK.md`. -> check: the golden test passes.
+  4. `ReminderSweep`: a hosted service that runs once a day like `ExpiredRevokeSweep`, with the
+     work in a public method `RunOnceAsync(DateTime utcNow, CancellationToken)` so tests call it.
+     Dues: `IsPaid == false`, `ReminderSentAt == null`, `DueDate` from today to today plus the lead
+     days. Registrations: `Approved`, `ReminderSentAt == null`, event start in the same kind of
+     window. Send the email, then set `ReminderSentAt`; save after each item so a crash does not
+     resend the ones already sent. A failed send leaves the mark empty. -> check: tests.
+  5. Register it in `Program.cs` beside `ExpiredRevokeSweep`. -> check: the API starts.
+- Contract: no route. `WorkflowDto` gains two fields; record them in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `ReminderSweepTests.cs` :: `Due_DayBeforeWindow_NoMail`, `Due_FirstDayOfWindow_OneMail`,
+  `Due_LastDayOfWindow_OneMail`, `Due_Paid_NoMail`, `SecondRun_SendsNothing`, `LeadZero_SendsNothing`,
+  `Event_ApprovedInsideWindow_OneMail`, `Event_PendingOrCancelled_NoMail`,
+  `FailedSend_LeavesMarkEmpty`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ReminderSweepTests|FullyQualifiedName~OrgConfigGoldenSnapshotTests"`;
+  `python scripts/ci-local.py --only backend`; `python scripts/ci-local.py --only contract`; then
+  the code-reviewer pass on the migration.
+- Done when: the nine tests pass; the migration dry run is recorded; 84.81 DONE; ledger row 3 marked.
+- Stop and ask if: no email template for a due or an event reminder exists in the database seed.
+  Default: reuse `FEE_REMINDER` for dues, and for events send through the existing generic
+  notification email; do not edit `Seed/*.json`. Also stop if the golden has no regeneration path.
 
+<a id="s15"></a>
 **S15 · 88.1 · L · migration 4**
-- Read: spec 008 `spec.md` FR-1 to FR-3 and `plan.md`; `MemberImportService.cs`,
-  `MemberImportController.cs`.
-- Steps: (1) before the index, a query that lists duplicate `MembershipNumber` values; the migration
-  `AddMembershipNumberUniqueIndex` aborts with that list when any exist (raise in a DO block), and the
-  tracker records the local result. (2) Accept `.csv` beside `.xlsx` (same column map). (3) For each
-  member: insert AcademicRecord, ProfessionalRecord, PaymentHistory, User and UserRoles only when a
-  matching row (natural key per table, listed in spec 008) is missing.
-- Tests: `MemberImportServiceTests`: csv path; each related table not duplicated on rerun.
-- Done when: FR-1 to FR-3 tests pass; migration dry run per rule 5.
+- Goal: `MembershipNumber` is unique in the database, the import takes `.csv` beside `.xlsx`, and a
+  rerun adds no second academic, professional, payment, user or role row.
+- Before you start: S14 closed (migration order). Run on local PostgreSQL:
+  `SELECT "MembershipNumber", count(*) FROM "Members" WHERE "MembershipNumber" IS NOT NULL GROUP BY 1 HAVING count(*) > 1;`
+  and record the result in the 88.1 entry.
+- Read (only these): `docs/specs/008-idempotent-member-batch-import/spec.md` FR-1 to FR-3 and
+  `plan.md`; `GHCAA.Infrastructure/Services/MemberImportService.cs`;
+  `GHCAA.API/Controllers/MemberImportController.cs`; `GHCAA.Application/DTOs/MemberImportDtos.cs`;
+  `GHCAA.Infrastructure/Data/Configurations/MemberConfiguration.cs`.
+- Change (only these files): `MemberConfiguration.cs`;
+  `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddMembershipNumberUniqueIndex.cs` (new)
+  with its `.Designer.cs` (new) and `PgSqlApplicationDbContextModelSnapshot.cs`;
+  `MemberImportService.cs`, `MemberImportController.cs`;
+  `GHCAA.Tests/Services/MemberImportServiceTests.cs`;
+  `docs/specs/008-idempotent-member-batch-import/tasks.md` (tick boxes); `docs/TODO.md`; ledger row 4.
+- Do not touch: the response DTO (S16 changes it); the transaction scope (S16); the column map of
+  the `.xlsx` path; `Seed/*.json`.
+- Steps:
+  1. `MemberConfiguration.cs`: unique index on `MembershipNumber`, filtered to non-null values.
+     -> check: build.
+  2. Migration by hand. `Up` starts with a `DO` block that raises an exception listing the
+     duplicate numbers when any exist, then creates the filtered unique index. `Down` drops the
+     index. -> check: on a database with a planted duplicate the migration stops with the list; on a
+     clean one it applies and reruns clean (rule 5).
+  3. Accept `.csv`: same headers and column map as `.xlsx`, UTF-8 with or without BOM, quoted
+     fields. An unknown extension gives 400. -> check: tests.
+  4. For each member, insert each related row only when no row with the natural key from spec 008
+     exists. AcademicRecord, ProfessionalRecord, PaymentHistory, User and UserRoles are each
+     checked. -> check: tests.
+- Contract: `POST api/admin/members/import` now accepts `.csv` as well; same response. Record it in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `MemberImportServiceTests.cs` :: `Import_Csv_SameResultAsXlsx`,
+  `Import_CsvWithBomAndQuotedCommas_Parses`, `Rerun_DoesNotDuplicateAcademicRecords`,
+  `Rerun_DoesNotDuplicateProfessionalRecords`, `Rerun_DoesNotDuplicatePaymentHistory`,
+  `Rerun_DoesNotDuplicateUsersOrRoles`; `MemberImportControllerTests.cs` ::
+  `Import_UnknownExtension_Returns400`. Tag `[Category("FR-1")]` to `FR-3` of spec 008 as fits.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MemberImport"`;
+  `python scripts/ci-local.py --only backend`; then the code-reviewer pass on the migration.
+- Done when: the seven tests pass; both migration runs are recorded; 88.1 DONE; ledger row 4 marked.
+- Stop and ask if: the local or preprod data has duplicate membership numbers, or spec 008 names no
+  natural key for one of the five tables. Default for the first: stop; the owner decides which row
+  keeps the number. For the second: stop and ask; do not invent a key.
 
+<a id="s16"></a>
 **S16 · 88.2, 88.3 · M**
-- Steps: one transaction through the execution strategy around the whole run; response gains
-  per-table insert, update and skip counts. Integration tests: a full member imported twice gives zero
-  inserts the second time with equal row counts; a forced failure mid-batch leaves nothing.
-- Done when: both DONE; registry entry for the response shape.
+- Goal: one import run is one transaction, and the response reports insert, update and skip counts
+  for each table.
+- Before you start: S15 closed.
+- Read (only these): `MemberImportService.cs`; `MemberImportResultDto` in `MemberImportDtos.cs`;
+  the use of `CreateExecutionStrategy` in `GHCAA.Infrastructure/Services/EventService.cs` as the
+  pattern; spec 008 `spec.md` FR-4 and FR-5.
+- Change (only these files): `MemberImportService.cs`, `MemberImportDtos.cs`,
+  `GHCAA.Tests/Services/MemberImportServiceTests.cs`;
+  `GHCAA.Web/src/app/admin/members/member-import-modal/member-import-modal.component.ts` and its
+  template (show the counts); `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/specs/008-idempotent-member-batch-import/tasks.md`; `docs/TODO.md`.
+- Do not touch: the natural keys from S15; the controller route; mobile (it has no import screen).
+- Steps:
+  1. Wrap the whole run in `CreateExecutionStrategy().ExecuteAsync` with one transaction; any
+     exception rolls everything back. No retry inside the transaction (memory
+     `gotcha_election_audit_writer_transactions`). -> check: the failure test.
+  2. Add `Tables` to `MemberImportResultDto`: a list of `{ table, inserted, updated, skipped }`,
+     one entry for each of the six tables. Keep the existing fields. -> check: tests.
+  3. The web modal shows the counts in a small table. -> check: `npm run type-check`; browser check.
+- Contract: `POST api/admin/members/import` response gains `tables: [{ table, inserted, updated,
+  skipped }]`. Existing fields stay.
+- Tests: `MemberImportServiceTests.cs` :: `ImportTwice_SecondRunInsertsNothing_AndRowCountsMatch`
+  (counts all six tables before and after), `FailureMidBatch_LeavesNoRows`,
+  `Result_ReportsCountsPerTable`. Tag FR-4 and FR-5.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MemberImport"`; in
+  `GHCAA.Web`: `npm run type-check`; then `python scripts/ci-local.py --only backend`, `--only web`,
+  `--only contract`.
+- Done when: the three tests pass; registry updated; 88.2 and 88.3 DONE.
+- Stop and ask if: the service calls another service that opens its own transaction. Default: move
+  that work behind a method that takes no transaction, and name it in the tracker.
 
+<a id="s17"></a>
 **S17 · 88.5 (backend) · M**
-- Steps: `POST api/admin/member-import/preview` runs mapping, validation and idempotency and writes
-  nothing; returns rows with `{ rowIndex, columnKey, message }` errors. Commit refuses a file whose
-  preview has errors.
-- Tests: preview writes nothing; cell errors carry row and column; commit refused while invalid.
+- Goal: a preview call runs the whole import check and writes nothing, and commit refuses a file
+  that still has errors.
+- Before you start: S16 closed.
+- Read (only these): `MemberImportController.cs`, `MemberImportService.cs`, `MemberImportDtos.cs`.
+- Change (only these files): `MemberImportController.cs`,
+  `GHCAA.Application/Interfaces/IMemberImportService.cs`, `MemberImportService.cs`,
+  `MemberImportDtos.cs`, `GHCAA.Tests/Services/MemberImportServiceTests.cs`,
+  `GHCAA.Tests/Controllers/MemberImportControllerTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, the
+  authz catalog output, `docs/TODO.md`.
+- Do not touch: web (S18); the import transaction from S16.
+- Steps:
+  1. `MemberImportPreviewDto`: `{ columns: [{ key, header }], rows: [{ rowIndex, cells }],
+     errors: [{ rowIndex, columnKey, message }], canCommit }`. `rowIndex` counts from 1 on the data
+     rows; `columnKey` is the column map key. -> check: build.
+  2. `PreviewAsync`: the same mapping, validation and natural-key checks as the import, sharing the
+     code and not copying it, with no `SaveChanges`. -> check: the no-write test.
+  3. Controller action per the contract. -> check: controller tests.
+  4. The commit path runs the same checks first and returns 400 with the same `errors` list when
+     any exist. -> check: test.
+- Contract: `POST api/admin/members/import/preview`, same policy and form field as the import route.
+  200 with `MemberImportPreviewDto`; 400 for an unknown extension or an empty file. The import route
+  now gives 400 with `{ errors }` for an invalid file.
+- Tests: `MemberImportServiceTests.cs` :: `Preview_WritesNothing` (row counts equal before and
+  after), `Preview_CellError_CarriesRowAndColumn`, `Preview_ValidFile_CanCommit`,
+  `Import_FileWithErrors_IsRefused`; `MemberImportControllerTests.cs` :: `Preview_UsesImportPolicy`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MemberImport"`;
+  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: the five tests pass; registry updated; 88.5 notes "backend done, grid in S18".
+- Stop and ask if: validation today happens only while rows are saved, so it cannot run without a
+  write. Default: run the import inside a transaction that is always rolled back, and say so in the
+  tracker.
 
+<a id="s18"></a>
 **S18 · 88.5 (grid) · M**
-- Steps: `src/app/common/data-grid/` generic component: inputs rows, columns, cell errors, editable
-  flag; outputs cellEdit and commit. Theme tokens only. Import page uses it; commit disabled while any
-  error remains. 90.4 reuses the same grid read-only.
-- Tests: Vitest for the grid (error marking, edit event, commit blocked) and the import page.
-- Done when: 88.5 DONE.
+- Goal: a shared grid component shows the preview with cell errors, lets the admin fix cells, and
+  the import page blocks commit while an error remains.
+- Before you start: S17 closed. `ls GHCAA.Web/src/app/common` shows no `data-grid` folder.
+- Read (only these): `GHCAA.Web/src/app/admin/members/member-import-modal/member-import-modal.component.ts`
+  and its template; one shared component such as `GHCAA.Web/src/app/common/pagination/` for the
+  file layout and style; memories `gotcha_table_styles_wrapper_scoped`, `gotcha_vitest_jit_signal_inputs`.
+- Change (only these files): `GHCAA.Web/src/app/common/data-grid/` (new: component, template, styles,
+  spec); the import modal component, template and a spec for it (new if missing); the web service
+  the modal calls for import; `docs/PROJECT_MAP.md`; `docs/TODO.md`.
+- Do not touch: other tables in the app (no page is moved to the grid here); theme files; no new
+  npm package.
+- Steps:
+  1. `DataGridComponent` (standalone). Inputs: `rows`, `columns` (`{ key, header }`), `cellErrors`
+     (`{ rowIndex, columnKey, message }`), `editable` (default false). Outputs: `cellEdit`
+     (`{ rowIndex, columnKey, value }`) and `commit`. A cell with an error gets an error class, the
+     message as its title and `aria-invalid`. Theme tokens only. -> check: grid spec.
+  2. Import modal: after file choice call preview, show the grid with `editable` true; a cell edit
+     updates the local row and re-runs preview; Commit is disabled while `errors` is not empty or
+     a preview is running. -> check: modal spec.
+  3. Commit sends the edited rows as a `.csv` file built in the browser to the import route, so the
+     server checks the same data again. -> check: modal spec.
+  4. Browser check in light and dark, with a file that has two bad cells. -> check: both cells are
+     marked, fixing them enables Commit.
+- Contract: none new (uses S17's routes).
+- Tests: `data-grid` spec :: "marks a cell that has an error", "emits cellEdit with row and column",
+  "read-only grid has no inputs", "emits commit"; modal spec :: "commit disabled while errors
+  remain", "commit enabled after the last error is fixed". Use `componentRef.setInput` in specs.
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/common/data-grid src/app/admin/members/member-import-modal`;
+  then `python scripts/ci-local.py --only web`.
+- Done when: the six specs pass; the browser check is recorded; 88.5 DONE. The 90.4 entry notes it
+  reuses this grid read only.
+- Stop and ask if: the file is too large to edit in the browser (over 2,000 rows). Default: show the
+  first 200 rows with errors first, and say how many rows are hidden.
 
+<a id="s19"></a>
 **S19 · 88.4 · S**
-- Steps: local PostgreSQL copy seeded from `profiles/ghc/demo-data/`; count rows of Members,
-  AcademicRecords, ProfessionalRecords, PaymentHistory, Users, UserRoles before, after run 1, after
-  run 2 (SQL in the tracker). This runs locally; no preprod.
+- Goal: row counts on a local PostgreSQL copy prove a second import of the same file adds nothing.
+- Before you start: S16 closed. A local PostgreSQL database seeded from `profiles/ghc/demo-data/`.
+  This runs locally; the tracker entry is changed to say so, and no preprod database is used.
+- Read (only these): the 88.4 tracker entry; `GHCAA.Tools/delete_imported_members.sql` (cleanup).
+- Change (only these files): `docs/TODO.md`.
+- Do not touch: any code; the demo-data JSON files; preprod.
+- Steps:
+  1. Count rows in Members, AcademicRecords, ProfessionalRecords, PaymentHistories, Users and
+     UserRoles (use the table names the database has). -> check: six numbers.
+  2. Import one real-shaped file through the import route. Count again. -> check: counts grow by
+     what the response reports.
+  3. Import the same file again. Count again. -> check: every count equals the count after step 2,
+     and the response shows zero inserts.
+  4. Write the SQL and the three sets of counts in the 88.4 entry. -> check: the entry holds them.
+- Contract: none.
+- Tests: none added (S16 has the automated version).
+- Run: the SQL above with `psql`.
 - Done when: counts after run 2 equal counts after run 1; 88.4 DONE.
+- Stop and ask if: a count grows on the second run. Default: 88.4 stays open, the table is named,
+  and a fix goes back to S15's natural keys with the owner's yes.
 
 ### Phase C. Election sessions 3 to 6
 
 Design reference for every card here: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`
 sections F2 to F6. Where it disagrees with a card, the card wins (section 8 lists why).
 
+Names in these cards were checked against the code on 2026-11-15. Names the older cards used that are
+not in the code: `MembershipRules`, `CheckConflictAsync`, `ElectionApprovalKind`, `SetKey`,
+`DestroyKey`, `ER29_PrintsTheAuditChainHead`, a "security" test category. Each card gives the real
+name or marks the new one.
+
+Every backend card in this phase ends its run with `python scripts/verify-election.py --only backend`.
+Tests carry the FR or NFR category of the tracker item (for example `[Category("FR-39")]`).
+
+<a id="s20"></a>
 **S20 · 37.16f · S**
-- Read: `ElectionService.FreezeVoterRollAsync`, `GovernanceService.cs` near the voting-member check.
-- Steps: `Constants.Membership.VotingTypes` (Founding, Executive, General) and one static
-  `MembershipRules.IsVotingMember(MembershipType)` in `GHCAA.Domain`; both services call it.
-- Tests: one `[TestCase]` per membership type in each service's tests giving the same answer.
+- Goal: one rule says which membership types may vote. The voter roll freeze and the constitution
+  vote both call it, so they cannot drift apart.
+- Before you start: no card needed. `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FreezeVoterRoll"`
+  passes.
+- Read (only these): `MembershipType` in `GHCAA.Domain/Enums.cs`; `ElectionService.FreezeVoterRollAsync`
+  (the type check a few lines into the method); `GovernanceService.VoteOnConstitutionAsync` (the type
+  check after the member is loaded); the `Constants.Governance` group in `GHCAA.Domain/Constants.cs`.
+- Change (only these files): `GHCAA.Domain/Constants.cs`, `GHCAA.Domain/MembershipRules.cs` (new),
+  `ElectionService.cs`, `GovernanceService.cs`, `GHCAA.Tests/Services/MembershipRulesTests.cs` (new),
+  `ElectionServiceTests.cs`, `GovernanceServiceTests.cs`, `docs/TODO.md`.
+- Do not touch: who may stand as a candidate, the roll snapshot rows, any client.
+- Steps:
+  1. Write down the set of types each of the two checks accepts today. -> check: the two sets are
+     the same (Founding, Executive, General). If not, stop (see the last part).
+  2. Add `Constants.Membership.VotingTypes` (a new group, read-only list) and the static method
+     `MembershipRules.IsVotingMember(MembershipType type)` that reads it. -> check: the new unit tests.
+  3. Replace both inline checks with the method. Keep each refusal message as it is. -> check: the
+     existing tests of both services pass unchanged.
+- Contract: none.
+- Tests: `MembershipRulesTests.cs` :: `IsVotingMember_EachType` (one `[TestCase]` per enum value);
+  `ElectionServiceTests.cs` :: `FreezeVoterRoll_TakesOnlyVotingTypes` (one member of each type, the
+  roll holds the voting ones); `GovernanceServiceTests.cs` :: `VoteOnConstitution_RefusesNonVotingType`
+  (one `[TestCase]` per non-voting type).
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MembershipRulesTests|FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~GovernanceServiceTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: no other place in `GHCAA.Infrastructure` compares `MembershipType` values to decide a
+  vote (`grep -rn "MembershipType\." GHCAA.Infrastructure/Services` shows none for voting); 37.16f DONE.
+- Stop and ask if: the two checks accept different types today. Default: Founding, Executive and
+  General for both, and the tracker names the service whose answer changed.
 
+<a id="s21"></a>
 **S21 · 37.16g · M**
-- Read: `ElectionService.DeclareAsync` (ECMember insert), the governance assignment method in
-  `GovernanceService` used by `AdminGovernanceController` assign.
-- Steps: declare calls the governance assignment path for each winner (seat count, term dates from
-  the period, audit row). A test election still writes no ECMember rows.
-- Tests: declared winner gets the same ECMember fields and audit row as a manual assignment; existing
-  declare tests pass.
+- Goal: a declared winner becomes an Executive Committee member through the same code a manual
+  assignment uses, with the same checks, fields and audit row.
+- Before you start: S20 closed. `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Declare"`
+  passes.
+- Read (only these): `ElectionService.DeclareAsync` (the loop that adds `ECMember` rows with
+  `StartDate = periodStart`, inside the declare transaction); `GovernanceService.AssignMemberToRoleAsync`
+  (it opens its own Serializable transaction and uses the current time); `IGovernanceService.cs`;
+  the declare tests in `ElectionServiceTests.cs`.
+- Change (only these files): `GHCAA.Infrastructure/Services/EcMemberAssigner.cs` (new),
+  `GovernanceService.cs`, `ElectionService.cs`, `ElectionServiceTests.cs`, `GovernanceServiceTests.cs`,
+  `docs/TODO.md`.
+- Do not touch: `IGovernanceService.cs` and `IElectionService.cs` (no signature changes), the
+  constructor of `ElectionService` (tests build it with the context only), `AdminGovernanceController`,
+  the notification a manual assignment sends.
+- Steps:
+  1. Move the checks and writes of `AssignMemberToRoleAsync` (seat count, duplicate seat, the
+     `ECMember` row, the audit row) into `EcMemberAssigner.AssignAsync(db, periodId, memberId,
+     position, startDate, reason, actorUserId, ct)`. It opens no transaction and sends no
+     notification. `AssignMemberToRoleAsync` keeps its transaction and its notification and calls
+     it with the current time. -> check: `GovernanceServiceTests` pass unchanged.
+  2. In `DeclareAsync`, call `EcMemberAssigner.AssignAsync` for each winner with the period start,
+     inside the declare transaction. Remove the direct `ECMember` insert. -> check: the new declare
+     test.
+  3. A refusal from the assigner (seat full, member already seated) rolls back the whole declare and
+     returns the assigner's message. -> check: the refusal test.
+  4. A test election still writes no `ECMember` row. -> check: the existing test for it passes.
+- Contract: none. Declare keeps its route and replies; one new refusal text, added under
+  `Constants.Elections.Replies`.
+- Tests: `ElectionServiceTests.cs` :: `Declare_WinnerGetsSameRowAsManualAssignment` (compare every
+  `ECMember` field and the audit row with one made through `AssignMemberToRoleAsync`),
+  `Declare_SeatAlreadyFull_RollsBackAndSaysWhy`, `Declare_TestElection_WritesNoEcMember` (existing or
+  new); `GovernanceServiceTests.cs` unchanged and green.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~GovernanceServiceTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: `DeclareAsync` holds no `new ECMember`; the tests above pass; 37.16g DONE.
+- Stop and ask if: (a) the manual path does something a declared winner must not get (for example it
+  ends the member's current seat in the same period). Default: the assigner takes a flag for that step
+  and declare leaves it off. (b) `DeclareAsync` runs on PostgreSQL with a transaction level below
+  Serializable and the seat count check can race. Default: keep the declare transaction as it is and
+  record the gap in the tracker.
 
+<a id="s22"></a>
 **S22 · 37.16h (backend) · L · migration 5**
-- Read: `SubmitNominationAsync`, `IFileValidationService`, `IFileStorageService`, ballot read path.
-- Steps: (1) migration `AddNominationPhotoApproval`: `Nomination.PhotoStatus` (int, default 0 None),
-  `PhotoApprovedByUserId`, `PhotoApprovedAt`. (2) `POST api/elections/{id}/nominations/{nid}/photo`
-  (the nominee) through file validation and storage under `uploads/members`; the free `PhotoPath` in
-  the request is ignored. (3) `POST .../photo/approve` and `/reject` for officials with Scrutiny
-  rights, audited. (4) Ballot and public lists show the photo only when Approved.
-- Tests: unknown path refused, upload validated, ballot hides pending and rejected photos, audit row.
+- Goal: a nominee uploads a candidate photo through the checked upload path, an official approves or
+  rejects it, and voters see a nomination photo only after approval.
+- Before you start: S21 closed. Migration 4 of the ledger (section 7, the migration ledger) is applied
+  locally. `grep -n "PhotoPath" GHCAA.Infrastructure/Services/ElectionService.cs` shows the copy in
+  `SubmitNominationAsync` and the fallback `n.PhotoPath ?? m.PhotoPath` in `GetBallotAsync` and
+  `GetPublicCandidateListAsync`.
+- Read (only these): `Nomination` in `GHCAA.Domain/Models/Election.cs`; `NominationDto` and
+  `NominationViewDto` in `ElectionDtos.cs`; `SubmitNominationAsync`, `GetBallotAsync`,
+  `GetPublicCandidateListAsync` in `ElectionService.cs`; `ProfileController.UploadPhoto` and the member
+  service method it calls (the upload pattern to copy); `FileValidationExtensions.cs`;
+  `ElectionsController.Scrutinise` (policy, step-up and permission to copy); `NominationConfiguration`
+  in `ElectionConfigurations.cs`; `Constants.Elections.AuditActions`; `IElectionAuditWriter.cs`.
+- Change (only these files): `GHCAA.Domain/Enums.cs`, `Election.cs`, `Constants.cs`, `ElectionDtos.cs`,
+  `IElectionService.cs`, `ElectionService.cs`, `ElectionConfigurations.cs`, `ElectionsController.cs`;
+  a new migration `AddNominationPhotoApproval` with its `.Designer.cs`, and
+  `PgSqlApplicationDbContextModelSnapshot.cs`; `ElectionServiceTests.cs`, `ElectionsControllerTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, the ledger row in this plan.
+- Do not touch: the member profile photo and `ProfileController`; the scrutiny decision itself
+  (`DecideNominationAsync`); `Seed/*.json`; any client (S23).
+- Steps:
+  1. Model: enum `NominationPhotoStatus { None, Pending, Approved, Rejected }`; on `Nomination` add
+     `PhotoStatus` (default `None`), `PhotoApprovedByUserId` (nullable), `PhotoApprovedAt` (nullable).
+     -> check: the project builds.
+  2. Migration per rule 5 of section 2 (the migration rule). It adds the three columns and sets
+     `PhotoStatus` to Pending for every row that already has a `PhotoPath`. -> check: the dry run in
+     rule 5 on a fresh database and on a copy with nominations.
+  3. `SubmitNominationAsync` stops copying `PhotoPath` from the request. -> check: test "free path
+     ignored".
+  4. `SetNominationPhotoAsync(electionId, nominationId, memberId, file, ct)`: only the nominee, only
+     in the Nomination phase, only while the nomination is not rejected or withdrawn. It stores the
+     file the way the member photo is stored, sets `PhotoPath` and `PhotoStatus = Pending`, and clears
+     the approver fields. -> check: service tests.
+  5. `DecideNominationPhotoAsync(nominationId, approve, reason, actorUserId, ct)`: refuses when there
+     is no pending photo; reject needs a reason; sets the status and approver fields; writes one audit
+     entry (`NominationPhotoApproved` or `NominationPhotoRejected`, new in `AuditActions`) with the
+     nomination id and the reason. -> check: service tests.
+  6. `GetBallotAsync` and `GetPublicCandidateListAsync` show the nomination photo only when it is
+     Approved, and the member's profile photo otherwise. `NominationViewDto` gains `PhotoPath` and
+     `PhotoStatus` so the nominee and the officials see the state. -> check: read tests.
+  7. Routes (next part) with the same file check `UploadPhoto` uses (image, 5 MB). -> check:
+     controller tests.
+- Contract: `POST api/elections/{id}/nominations/{nominationId}/photo` (signed-in member, multipart
+  field `photo`): 200 `{ photoPath, photoStatus }`, 400 bad file or wrong phase, 403 not the nominee,
+  404 unknown. `POST api/elections/nominations/{nominationId}/photo/approve` and `.../photo/reject`
+  (body `{ reason }`, required on reject): `Policies.ElectionStaff`, `[RequireStepUp]`,
+  `ElectionPermission.DecideNominations`; 204, 400 no reason, 404 unknown, 409 no pending photo.
+  `NominationDto.PhotoPath` stays in the DTO and is ignored. Registry entry for all four changes.
+- Tests: `ElectionServiceTests.cs` :: `SubmitNomination_IgnoresPhotoPathInRequest`,
+  `SetNominationPhoto_NotTheNominee_Refused`, `SetNominationPhoto_OutsideNominationPhase_Refused`,
+  `SetNominationPhoto_NewUploadAfterApproval_GoesBackToPending`, `DecidePhoto_RejectWithoutReason_Refused`,
+  `DecidePhoto_WritesOneAuditEntry`, `Ballot_ShowsNominationPhotoOnlyWhenApproved` (pending and
+  rejected fall back to the profile photo), `PublicList_ShowsNominationPhotoOnlyWhenApproved`;
+  `ElectionsControllerTests.cs` :: `UploadNominationPhoto_BadFile_Returns400`,
+  `RejectNominationPhoto_WithoutReason_Returns400WithTheRule`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~ElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; the migration dry run is recorded in the tracker; one `code-reviewer`
+  pass on the migration (idempotent, rollback, provider); ledger row 5 filled; 37.16h PARTIAL
+  (clients in S23).
+- Stop and ask if: (a) the owner wants no photo at all until approval. Default: fall back to the
+  member's profile photo, as the code does today. (b) `ElectionService` cannot store a file without a
+  new constructor dependency. Default: add `IFileStorageService? fileStorage = null` as the last
+  optional constructor parameter, so existing tests still build it with the context only.
+  (c) Existing nominations with a photo belong to a declared election. Default: set those to Approved
+  in the migration so published history does not change, and Pending for the rest.
 
+<a id="s23"></a>
 **S23 · 37.16h (clients) · M**
-- Steps: web nominate form uploads the photo; officials scrutiny view approves or rejects; mobile
-  nominate uploads; both ballots show only approved photos.
-- Tests: Vitest and Flutter tests for upload and the hidden photo. Done when: 37.16h DONE.
+- Goal: the nominee uploads the photo on web and mobile, officials approve or reject it on web, and
+  both clients show the state.
+- Before you start: S22 closed. `grep -n "photo" GHCAA.Web/src/app/core/services/elections.service.ts`
+  shows no upload method yet.
+- Read (only these): web `election-nomination.ts` with its template and spec, `elections.service.ts`
+  (`scrutinise` and the endpoint constants it uses), `election.models.ts` (`NominationViewDto`),
+  `nomination-records.ts`, `officials-dashboard.ts` (where `scrutinise` is called), `profile.service.ts`
+  (the upload call to copy); mobile `election_nomination_panel.dart`, `election_service.dart`,
+  `officials_election_detail_screen.dart`, `election_nomination_panel_test.dart`;
+  `GHCAA.Web/tests/e2e/election-walkthrough/README.md`.
+- Change (only these files): web `elections.service.ts`, `election.models.ts`, `app.constants.ts`,
+  `election-nomination.ts`, `officials-dashboard.ts`, each with its template and spec; mobile
+  `election_service.dart`, `election_nomination_panel.dart`, `election_nomination_panel_test.dart`,
+  `election_service_test.dart`; `GHCAA.Web/tests/e2e/election-walkthrough/election.walkthrough.ts` and
+  `README.md`; `docs/TODO.md`.
+- Do not touch: the ballot components (the server already sends the right photo), the profile photo
+  screens, golden images, `scenario.json`.
+- Steps:
+  1. Web service: `uploadNominationPhoto(electionId, nominationId, file)`,
+     `approveNominationPhoto(nominationId)`, `rejectNominationPhoto(nominationId, reason)`; models gain
+     `photoPath` and `photoStatus`. -> check: service spec.
+  2. Web nominate form: a file input (image, 5 MB, checked before the call), upload after the
+     nomination is saved, a status label (Pending, Approved, Rejected). The free photo path field goes
+     away if the form has one. -> check: component spec.
+  3. Web officials dashboard: in the scrutiny list show the pending photo with Approve and Reject
+     (reject asks for a reason; both go through the step-up dialog). Shown only with the
+     DecideNominations permission. -> check: component spec.
+  4. Mobile: the nomination panel picks an image and uploads it, and shows the status label. Errors
+     go through `serverMessage`. Officials on mobile stay read-only. -> check: widget test.
+  5. Walkthrough: the nominee uploads a photo, an official approves it, the ballot shows it; add the
+     row to "What the run covers". -> check: `scripts\run-election-walkthrough.bat` is green.
+  6. Browser check in light and dark. -> check: input, label and buttons show.
+- Contract: none new (uses S22's routes).
+- Tests: `election-nomination.spec.ts` :: "uploads the photo after save", "refuses a file over 5 MB
+  before the call", "shows the photo status"; `officials-dashboard.spec.ts` :: "approve calls the
+  service after step-up", "reject needs a reason", "no photo actions without the permission";
+  `election_nomination_panel_test.dart` :: "upload calls the service", "status label shows".
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/member/election src/app/officials`;
+  in `GHCAA.Mobile`: `flutter analyze; flutter test test/election_nomination_panel_test.dart --exclude-tags golden`;
+  then `python scripts/ci-local.py --only web` and `--only mobile`.
+- Done when: the walkthrough is green with the photo steps; 37.16h DONE.
+- Stop and ask if: the mobile app has no image picker package in `pubspec.yaml`. Default: reuse the
+  picker the profile photo screen uses; add no new package.
 
+<a id="s24"></a>
 **S24 · 37.14d and the F2 schema · L · migration 6**
-- Already in the model from earlier work, do not add again: `Election.RecountWindowEndsOn`,
-  `Nomination.ConsentAt`, `ElectionRecountRequest` (one row per filing with decision fields),
-  `ElectionRecountFigure`.
-- Migration `ElectionF2` adds: `ElectionConflictDeclaration` (appointment, nomination, relation enum
-  Spouse, Parent, Child, Sibling, Proposer, Seconder; declared by, declared at); `ElectionKeyCopy`
-  (election, holder appointment, recorded at, confirmed at, destroyed at); `ElectionPaperCount`
-  (election, issued, unused, spoiled, entered by, entered at, approved by, approved at);
-  `ElectionSeat.NominationsReopenedUntil`; `Election.PollingExtensionCount` (default 0),
-  `Election.MaxPollingExtensions`, `Election.MaxExtensionHours`, `Election.NominationReopenDays`
-  (nullable, null means the OrgConfig default); `ElectionPurgeRecord` (election id, title, declared
-  on, requested by, approved by, purged at, summary json; FK to Elections Restrict); audit FK
-  Cascade to Restrict (`ElectionConfigurations.cs`). OrgConfig election defaults: key copies 2,
-  extension hours 24, extensions 2, reopen days 3. The election create and edit DTOs take the three
-  per-election limits (null means the default) and refuse a value above the default; registry entry.
-- Tests: deleting an election with audit entries fails on SQLite and PostgreSQL; a chain with its last
-  entry removed no longer matches the printed head; `ER29_PrintsTheAuditChainHead` passes; creation
-  refuses per-election limits above the OrgConfig defaults (37.12y acceptance part).
-- Done when: 37.14d DONE; full chain dry run per rule 5 on a non-empty copy; code-reviewer on the
-  migration (idempotency, rollback, provider).
+- Goal: the tables and columns that S25 to S30 need exist, an election with audit entries cannot be
+  deleted, and each election can carry its own limits below the OrgConfig defaults.
+- Before you start: S23 closed. Migration 5 is applied locally. `grep -n "OnDelete" GHCAA.Infrastructure/Data/Configurations/ElectionConfigurations.cs`
+  shows Cascade on the `ElectionAuditEntry` foreign key.
+- Read (only these): `Election.cs` (all of it); `ElectionConfigurations.cs` (`ElectionAuditEntryConfiguration`
+  and one configuration to copy); the election DbSets in `ApplicationDbContext.cs`; `ElectionSettingsDto`
+  in `OrgConfigDto.cs`; `CreateElectionDto`, `CreateAdminElectionRequest` and
+  `UpdateElectionFormDetailsRequest` in `ElectionDtos.cs`; `ElectionService.CreateAsync`;
+  `ElectionFormService.UpdateFormDetailsAsync`; `ER27C_PrintsTheAuditChainHead` in
+  `ElectionDocumentServiceTests.cs`; `OrgConfigGoldenSnapshotTests.cs`.
+- Change (only these files): `Election.cs`, `Enums.cs`, `ElectionConfigurations.cs`,
+  `ApplicationDbContext.cs`, `OrgConfigDto.cs`, `ElectionDtos.cs`, `ElectionService.cs`,
+  `ElectionFormService.cs`, `Constants.cs`; a new migration `ElectionF2` with its `.Designer.cs`, and
+  `PgSqlApplicationDbContextModelSnapshot.cs`; `ElectionServiceTests.cs`, `ElectionFormServiceTests.cs`,
+  `ElectionAuditWriterTests.cs`, `ElectionDtoValidationTests.cs`; `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/TODO.md`, the ledger row in this plan.
+- Do not touch: already in the model, do not add again: `Election.RecountWindowEndsOn`,
+  `Nomination.ConsentAt`, `ElectionRecountRequest`, `ElectionRecountFigure`. Also leave
+  `org-config-ghc.golden.json` and `Seed/*.json` alone (see the last part), and add no service logic
+  for the new tables here.
+- Steps:
+  1. Entities: `ElectionConflictDeclaration` (appointment id, nomination id, relation enum
+     `ElectionConflictRelation { Spouse, Parent, Child, Sibling, Proposer, Seconder }`, declared by,
+     declared at); `ElectionKeyCopy` (election id, holder appointment id, recorded at, confirmed at,
+     destroyed at); `ElectionPaperCount` (election id, issued, unused, spoiled, entered by, entered at,
+     approved by, approved at); `ElectionPurgeRecord` (election id, title, declared on, requested by,
+     approved by, purged at, summary json; foreign key to `Elections` Restrict). -> check: build.
+  2. Columns: `ElectionSeat.NominationsReopenedUntil` (nullable); `Election.PollingExtensionCount`
+     (default 0); `Election.MaxPollingExtensions`, `Election.MaxExtensionHours`,
+     `Election.NominationReopenDays` (nullable, null means the OrgConfig default). -> check: build.
+  3. Configurations and DbSets for the four entities; indexes on the election id; one key copy per
+     holder per election (unique). Change the `ElectionAuditEntry` foreign key from Cascade to
+     Restrict. -> check: the delete test below.
+  4. `ElectionSettingsDto` gains `KeyCopyCount = 2`, `MaxExtensionHours = 24`,
+     `MaxPollingExtensions = 2`, `NominationReopenDays = 3`. -> check: an old `ConfigJson` row reads
+     the defaults (existing pattern in the DTO).
+  5. `CreateElectionDto`, `CreateAdminElectionRequest` and `UpdateElectionFormDetailsRequest` take the
+     three per-election limits (nullable, DataAnnotations `[Range]` with a floor of 0 or 1).
+     `CreateAsync` and `UpdateFormDetailsAsync` refuse a value above the OrgConfig default with a
+     named reply in `Constants.Elections.Replies`, and store null as null. -> check: service tests.
+  6. Migration per rule 5 of section 2 (the migration rule): four tables, five columns, the foreign
+     key change. -> check: the dry run in rule 5, on a copy that has elections with audit entries.
+- Contract: create and edit election requests gain `maxPollingExtensions`, `maxExtensionHours`,
+  `nominationReopenDays` (all optional); 400 with the named reply when above the default. The
+  OrgConfig election section gains four fields. Registry entries for both.
+- Tests: `ElectionAuditWriterTests.cs` :: `DeleteElection_WithAuditEntries_Fails` (SQLite; the
+  PostgreSQL proof is the dry run), `Chain_LastEntryRemoved_NoLongerMatchesPrintedHead`;
+  `ElectionDocumentServiceTests.cs` :: `ER27C_PrintsTheAuditChainHead` still passes;
+  `ElectionServiceTests.cs` :: `Create_LimitAboveOrgDefault_Refused` (one `[TestCase]` per limit),
+  `Create_NullLimits_StoredAsNull`; `ElectionFormServiceTests.cs` :: `UpdateFormDetails_LimitAboveOrgDefault_Refused`;
+  `ElectionDtoValidationTests.cs` :: `Limits_NegativeValue_Invalid`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Election|FullyQualifiedName~OrgConfigGoldenSnapshotTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; the dry run is recorded; one `code-reviewer` pass on the migration; ledger
+  row 6 filled; 37.14d DONE.
+- Stop and ask if: (a) `OrgConfigGoldenSnapshotTests` fails because the golden file lacks the four new
+  fields. The golden file is JSON data and is not edited without the owner's yes. Default: the owner
+  approves a refresh through the test's own refresh path. (b) Existing data has an election that was
+  deleted while its audit entries stayed, so the Restrict key cannot be added. Default: stop, list the
+  rows, change nothing.
 
+<a id="s25"></a>
 **S25 · 37.16e · M**
-- Steps: `ElectionAccessService.CheckConflictAsync` called from `SubmitNominationAsync`,
-  `AddCandidateAsync`, `DecideNominationAsync`, `ElectionAppointmentService.AppointAsync` and
-  `AcceptAsync`; named refusal codes in `Constants.Elections`; declarations on accept and later by
-  the official or the Chief Commissioner, audited. Drop "not built yet" in
-  `docs/Elections/00-Election-Master-Overview.md` (section 2 item 6, step 13, section 6, VVSG table).
-- Tests: each path refused with its code; an untied official still decides; a later declaration
-  takes effect at once. Done when: backend acceptance holds (client screens in S32, S33).
+- Goal: an official with a declared tie to a candidate cannot act on that candidate, a candidate
+  cannot hold an appointment in the same election, and each refusal carries a named code.
+- Before you start: S24 closed (it adds `ElectionConflictDeclaration`). `grep -n "ConflictDeclaration" GHCAA.Infrastructure/Services/*.cs`
+  gives nothing.
+- Read (only these): `ElectionAccessService.cs` and `IElectionAccessService.cs`;
+  `SubmitNominationAsync`, `AddCandidateAsync`, `DecideNominationAsync` in `ElectionService.cs`;
+  `AppointAsync` and `AcceptAsync` in `ElectionAppointmentService.cs`; `Constants.Elections.Replies`;
+  tracker entry 37.16e; `docs/Elections/00-Election-Master-Overview.md` section 2 item 6, step 13,
+  section 6 and the VVSG table.
+- Change (only these files): `IElectionAccessService.cs`, `ElectionAccessService.cs`,
+  `ElectionService.cs`, `ElectionAppointmentService.cs`, `IElectionAppointmentService.cs`,
+  `ElectionDtos.cs`, `Constants.cs`, `ElectionsController.cs`; `ElectionAccessServiceTests.cs`,
+  `ElectionServiceTests.cs`, `ElectionAppointmentServiceTests.cs`, `ElectionsControllerTests.cs`;
+  `docs/Elections/00-Election-Master-Overview.md`, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: the permission flags in `ElectionPermission`, the persona seeder, the approval
+  service, any client (S32 and S33).
+- Steps:
+  1. `ElectionAccessService.CheckConflictAsync(electionId, actorUserId, nominationId, ct)` (new)
+     returns null or a refusal code: the actor is the candidate, the proposer or the seconder of that
+     nomination, or has a declaration against it. -> check: service tests.
+  2. Call it from `DecideNominationAsync` (the deciding official) and from `AddCandidateAsync`.
+     `SubmitNominationAsync` refuses a nominee who holds a live appointment in the election.
+     `AppointAsync` and `AcceptAsync` refuse a person who is a candidate, proposer or seconder in the
+     election. Codes live in a new group `Constants.Elections.ConflictErrors`. -> check: one test per
+     path.
+  3. Declarations: `DeclareConflictAsync(appointmentId, nominationId, relation, actorUserId, ct)`.
+     The official declares at acceptance and later; the Chief Commissioner (permission
+     `AppointOfficials`) declares for any official. Each writes one audit entry
+     (`ConflictDeclared`, new in `AuditActions`) and takes effect on the next call. -> check: tests.
+  4. Remove "not built yet" for this rule in the Master Overview at the four places named above.
+     -> check: `grep -n "not built" docs/Elections/00-Election-Master-Overview.md` shows none of them.
+- Contract: `POST api/elections/{id}/conflicts` (body `{ appointmentId, nominationId, relation }`,
+  `Policies.ElectionStaff`): 204, 400 unknown relation, 403 another official's appointment without
+  `AppointOfficials`, 404 unknown. `GET api/elections/{id}/conflicts` lists them for staff. Existing
+  routes gain 409 with the conflict code in the problem detail. Registry entry.
+- Tests: `ElectionAccessServiceTests.cs` :: `CheckConflict_Candidate`, `_Proposer`, `_Seconder`,
+  `_Declared`, `_Untied_ReturnsNull`; `ElectionServiceTests.cs` :: `DecideNomination_ConflictedOfficial_Refused`,
+  `DecideNomination_UntiedOfficial_Decides`, `AddCandidate_ConflictedOfficial_Refused`,
+  `SubmitNomination_AppointedOfficial_Refused`; `ElectionAppointmentServiceTests.cs` ::
+  `Appoint_Candidate_Refused`, `Accept_Proposer_Refused`, `DeclareConflict_TakesEffectAtOnce`,
+  `DeclareConflict_WritesAuditEntry`; `ElectionsControllerTests.cs` :: `Scrutinise_Conflict_Returns409WithTheCode`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionAccessServiceTests|FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~ElectionAppointmentServiceTests|FullyQualifiedName~ElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; 37.16e PARTIAL (client screens in S32 and S33).
+- Stop and ask if: an election already running has an official who is also a proposer or seconder.
+  Default: the check applies from now on, existing appointments stay, and the dashboard query in S32
+  lists them.
 
+<a id="s26"></a>
 **S26 · 37.1p (recount, consent, reopen) · M**
-- Steps: (1) recount decision on `ElectionRecountRequest` becomes a two-person step through
-  `ElectionApprovalService`; at most one undecided request per seat (one row per filing stays, as
-  37.14m built it). (2) A nomination without `ConsentAt` cannot move to the candidate list. (3) Chief
-  Commissioner reopens nominations for a seat with no valid candidate: sets
-  `NominationsReopenedUntil` from the election's reopen days, refused if it would pass the roll
-  freeze; a seat still empty at polling stays vacant.
-- Tests: second approver needed and audited; no consent blocks the list; reopen one seat; reopen past
-  the freeze refused; empty seat at polling vacant.
+- Goal: a recount decision needs two people, a nomination without recorded consent cannot be accepted,
+  and the Chief Commissioner can reopen nominations for a seat with no valid candidate.
+- Before you start: S25 closed. `grep -n "ConsentAt" GHCAA.Infrastructure/Services/ElectionService.cs`
+  shows no check in `DecideNominationAsync`.
+- Read (only these): `RecordRecountAsync`, `DecideRecountAsync`, `RecordRecountFiguresAsync` and
+  `RecordConsentAsync` in `ElectionFormService.cs`; `RunOrRequestAsync` and `NeedsSecondAsync` in
+  `ElectionApprovalService.cs`; `ElectionApprovalAction` in `Enums.cs`; `DecideNominationAsync`,
+  `SubmitNominationAsync` and `FreezeVoterRollAsync` in `ElectionService.cs`; the recount routes in
+  `AdminElectionsController.cs`; tracker entry 37.1p.
+- Change (only these files): `Enums.cs`, `Constants.cs`, `ElectionFormService.cs`,
+  `ElectionApprovalService.cs`, `ElectionService.cs`, `IElectionService.cs`, `ElectionDtos.cs`,
+  `AdminElectionsController.cs`; `ElectionFormServiceTests.cs`, `ElectionApprovalServiceTests.cs`,
+  `ElectionServiceTests.cs`, `AdminElectionsControllerTests.cs`; `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/TODO.md`.
+- Do not touch: one row per recount filing (37.14m built it that way); `RecordRecountFiguresAsync`;
+  the phase order in `SetPhaseAsync`; `org-config-ghc.golden.json`.
+- Steps:
+  1. Add `DecideRecount` to `ElectionApprovalAction` (at the end, so stored numbers do not move). The
+     decide route runs through `RunOrRequestAsync` like `ReplaceBallotKey` does. -> check: approval
+     tests.
+  2. `RecordRecountAsync` refuses a second undecided request for the same seat (409). -> check: test.
+  3. `DecideNominationAsync` refuses to accept a nomination with no `ConsentAt`, with a named reply.
+     Reject still works without consent. -> check: tests.
+  4. `ReopenNominationsAsync(electionId, seatId, actorUserId, ct)`: permission `ManageSetup`, only
+     when the seat has no accepted nomination and the phase is Scrutiny, Withdrawal or CandidateList.
+     It sets `ElectionSeat.NominationsReopenedUntil` to now plus the election's reopen days (the
+     OrgConfig default when null), refuses when that passes the roll freeze or the polling start, and
+     writes an audit entry (`NominationsReopened`, new). `SubmitNominationAsync` accepts a nomination
+     for that seat until then. -> check: tests.
+  5. A seat still without a valid candidate at Polling stays vacant: it is left off the ballot and
+     gets no result row. -> check: test.
+- Contract: `POST api/admin/elections/{id}/seats/{seatId}/reopen-nominations` (step-up, `ManageSetup`):
+  200 `{ nominationsReopenedUntil }`, 409 with the reason. The recount decide route returns 202 with
+  the approval when a second person is needed, as the other two-person routes do. Seat DTOs gain
+  `nominationsReopenedUntil`. Registry entry.
+- Tests: `ElectionFormServiceTests.cs` :: `RecordRecount_SecondUndecidedForSeat_Refused`,
+  `DecideRecount_NeedsSecondApprover`, `DecideRecount_AuditsBothSteps`; `ElectionServiceTests.cs` ::
+  `DecideNomination_AcceptWithoutConsent_Refused`, `DecideNomination_RejectWithoutConsent_Allowed`,
+  `ReopenNominations_SeatWithNoValidCandidate_Opens`, `ReopenNominations_SeatWithCandidate_Refused`,
+  `ReopenNominations_PastRollFreeze_Refused`, `SubmitNomination_ReopenedSeat_Accepted`,
+  `Ballot_EmptySeatAtPolling_IsVacant`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionFormServiceTests|FullyQualifiedName~ElectionApprovalServiceTests|FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~AdminElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; 37.1p stays PARTIAL with this part ticked (the rest is in S29).
+- Stop and ask if: (a) `TwoPersonActions` in a saved OrgConfig row does not list `DecideRecount`, so
+  the step runs with one person on old data. Default: `NeedsSecondAsync` treats `DecideRecount` as
+  always two-person, like `EmergencyRevoke`. (b) The election walkthrough accepts a nomination before
+  consent. Default: add the consent step to the walkthrough in S32 and keep the rule.
 
+<a id="s27"></a>
 **S27 · 37.14a · M · security**
-- Steps: holders named at key set (appointed, not candidate, distinct), copies recorded up to the
-  configured count, each holder confirms only their own copy; readiness (`GetReadinessAsync`) lists
-  missing copies and confirmations and blocks Polling; key destroy records copies destroyed.
-- Tests: each refusal; readiness lists what is missing; Polling opens only when complete.
+- Goal: the ballot key has named holders and recorded copies, each holder confirms their own copy,
+  and polling cannot open until every copy is confirmed.
+- Before you start: S26 closed. `grep -rn "ElectionKeyCopy" GHCAA.Infrastructure/Services` gives
+  nothing.
+- Read (only these): `SetBallotKeyAsync`, `RecordKeyDestroyedAsync`, `GetReadinessAsync`,
+  `ReadinessOfAsync` and `SetPhaseAsync` in `ElectionService.cs`; `ElectionReadinessDto` and
+  `ElectionReadinessItemDto` in `ElectionDtos.cs`; `Constants.Elections.Readiness`; the ballot key
+  route in `AdminElectionsController.cs` and the key-destroyed route in `ElectionsController.cs`;
+  `ElectionAppointment` in `Election.cs`; `docs/Elections/11-Election-Key-Procedure.md`; tracker
+  entry 37.14a.
+- Change (only these files): `ElectionService.cs`, `IElectionService.cs`, `ElectionDtos.cs`,
+  `Constants.cs`, `AdminElectionsController.cs`, `ElectionsController.cs`; `ElectionServiceTests.cs`,
+  `AdminElectionsControllerTests.cs`, `ElectionsControllerTests.cs`; `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/Elections/11-Election-Key-Procedure.md`, `docs/TODO.md`.
+- Do not touch: how the key is made or encrypted; the `ReplaceBallotKey` approval; the unique index
+  `IX_ElectionAuditEntries_KeyDestroyed_Once`; the private key never reaches the server and no step
+  here changes that.
+- Steps:
+  1. `SetBallotKeyAsync` takes the holder appointment ids. It refuses unless the count equals the
+     OrgConfig `KeyCopyCount`, each holder has a live accepted appointment in this election, none is
+     a candidate, proposer or seconder, and all are distinct. It writes one `ElectionKeyCopy` row per
+     holder with `RecordedAt`. Replacing the key removes the old rows. -> check: tests.
+  2. `ConfirmKeyCopyAsync(electionId, actorUserId, ct)`: only the holder, only their own copy, once.
+     Sets `ConfirmedAt` and writes an audit entry (`KeyCopyConfirmed`, new). -> check: tests.
+  3. Readiness gains the item `KeyCopies`, met when every copy is confirmed. `ReadinessOfAsync`
+     counts it, so `SetPhaseAsync` and `IsReadyForPollingAsync` refuse Polling without it.
+     -> check: tests.
+  4. `RecordKeyDestroyedAsync` sets `DestroyedAt` on every copy of the election in the same save.
+     -> check: test.
+  5. Update the key procedure document: holders, confirmation, what blocks polling. -> check: the
+     steps there match the routes.
+- Contract: `POST api/admin/elections/{id}/ballot-key` body gains `holderAppointmentIds`; 400 with a
+  named reply for each refusal. `POST api/elections/{id}/key-copy/confirm` (`Policies.ElectionStaff`,
+  step-up): 204, 403 not a holder, 409 already confirmed. `GET api/elections/{id}/key-copies` (staff)
+  returns holder name, recorded, confirmed and destroyed times. The readiness reply gains one item.
+  Registry entry.
+- Tests: `ElectionServiceTests.cs` :: `SetBallotKey_WrongHolderCount_Refused`,
+  `SetBallotKey_HolderIsCandidate_Refused`, `SetBallotKey_SameHolderTwice_Refused`,
+  `SetBallotKey_HolderWithoutLiveAppointment_Refused`, `SetBallotKey_Replace_ClearsOldCopies`,
+  `ConfirmKeyCopy_NotAHolder_Refused`, `ConfirmKeyCopy_Twice_Refused`,
+  `Readiness_ListsKeyCopiesUntilAllConfirmed`, `SetPhase_Polling_RefusedUntilCopiesConfirmed`,
+  `KeyDestroyed_MarksEveryCopyDestroyed`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~AdminElectionsControllerTests|FullyQualifiedName~ElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; one `security-reviewer` pass on the diff; 37.14a PARTIAL (screens in S31
+  and S33).
+- Stop and ask if: (a) the web and mobile key screens send no holders yet, so setting a key fails
+  between this card and S31. Default: accept that on the working branch and run S31 and S33 before
+  any release; the election walkthrough is updated in S31. (b) An election in Polling or later has a
+  key and no copy rows. Default: readiness counts `KeyCopies` only for elections that have not
+  reached Polling.
 
+<a id="s28"></a>
 **S28 · 37.12y · M · security**
-- Steps: extension request (hours, reason) by the Chief Commissioner, second approval with step-up,
-  within the election's limits, only in Polling; on approval move `PollingClosesOn`, increment the
-  count, notify voters once through `INotificationService`, audit both steps. A request past the
-  count names the L3 void-and-rerun procedure.
-- Tests: each refusal case on the tracker; one notice per approved extension; audit rows.
+- Goal: polling can be extended only by a request from the Chief Commissioner plus a second approval,
+  within the election's limits, with one notice to voters and an audit entry for each step.
+- Before you start: S27 closed. `grep -n "PollingExtension" GHCAA.Infrastructure/Services/*.cs` gives
+  nothing.
+- Read (only these): `ElectionApprovalService.cs` (`RunOrRequestAsync`, `RequestAsync`, `ApproveAsync`,
+  `NeedsSecondAsync`); `ElectionApprovalAction`; the readers of `PollingClosesOn` in
+  `ElectionService.cs`, `ElectionDocumentService.cs` and `ElectionFormService.cs`;
+  `INotificationService.cs` and `NotificationType`; tracker entry 37.12y (its refusal cases);
+  `docs/Elections/12-Election-Officials-Handbook.md` near "L1 to L3".
+- Change (only these files): `Enums.cs`, `Constants.cs`, `ElectionService.cs`, `IElectionService.cs`,
+  `ElectionApprovalService.cs`, `ElectionDtos.cs`, `AdminElectionsController.cs`;
+  `ElectionServiceTests.cs`, `ElectionApprovalServiceTests.cs`, `AdminElectionsControllerTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/Elections/12-Election-Officials-Handbook.md`, `docs/TODO.md`.
+- Do not touch: `PollingOpensOn`; ballots already cast; the count; the `ClosePolling` approval.
+- Steps:
+  1. Add `ExtendPolling` to `ElectionApprovalAction` (at the end). It always needs a second person,
+     like `EmergencyRevoke`. -> check: approval test.
+  2. `RequestPollingExtensionAsync(electionId, hours, reason, actorUserId, ct)`: only in Polling, only
+     before `PollingClosesOn`, hours from 1 to the election's `MaxExtensionHours` (OrgConfig default
+     when null), `PollingExtensionCount` below `MaxPollingExtensions`, reason required, permission
+     `ChangePhase`. Each refusal has a named reply. -> check: one test per refusal on the tracker.
+  3. On approval, in one transaction: move `PollingClosesOn` by the hours, add one to
+     `PollingExtensionCount`, write audit entries for the request and the approval
+     (`PollingExtensionRequested`, `PollingExtensionApproved`, new). After the save, send one
+     broadcast to the voters on the frozen roll. A failed notice does not undo the extension and is
+     logged. -> check: tests.
+  4. A request when the count is used up is refused and the reply names the handbook's void-and-rerun
+     procedure. Add that procedure as a short named section in the handbook next to "L1 to L3" (the
+     handbook has no such section today). -> check: the reply text and the heading match.
+  5. Every reader of `PollingClosesOn` uses the stored value, so forms and the voting window follow
+     the new time. -> check: test `Vote_AfterOldCloseWithinExtension_Accepted`.
+- Contract: `POST api/admin/elections/{id}/polling-extension` (body `{ hours, reason }`, step-up,
+  `ChangePhase`): 202 with the approval; 400 or 409 with the named reply. Approval goes through the
+  existing approve route, with step-up. Election DTOs gain `pollingExtensionCount` and the three
+  limits. Registry entry.
+- Tests: `ElectionServiceTests.cs` :: `ExtendPolling_NotInPolling_Refused`, `_AfterClose_Refused`,
+  `_HoursAboveLimit_Refused`, `_CountUsedUp_RefusedAndNamesTheProcedure`, `_NoReason_Refused`,
+  `_Approved_MovesCloseAndCounts`, `_Approved_SendsOneNotice`, `_Approved_AuditsBothSteps`,
+  `Vote_AfterOldCloseWithinExtension_Accepted`; `ElectionApprovalServiceTests.cs` ::
+  `ExtendPolling_AlwaysNeedsSecond`, `ExtendPolling_SamePersonCannotApprove`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~ElectionApprovalServiceTests|FullyQualifiedName~AdminElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; one `security-reviewer` pass; 37.12y PARTIAL (screens in S31).
+- Stop and ask if: (a) `NotificationType` has no value that fits and a new one would change both
+  clients. Default: use `GeneralSystem`. (b) The approval arrives after the old close time has passed.
+  Default: refuse it, since polling has closed, and say so in the reply.
 
+<a id="s29"></a>
 **S29 · 37.1p (unopposed, paper counts) · M · security**
-- Steps: a seat with one valid candidate is left off the ballot and declared at declare marked
-  unopposed (result and certificate); all seats unopposed or vacant: CandidateList to Declared as a
-  two-person step with step-up. Paper counts entered by a polling officer, approved by the Chief
-  Commissioner before the count; refused unless issued equals used plus unused plus spoiled; printed
-  on the poll-closing certificate.
-- Tests: unopposed seat absent from the ballot and declared; all-uncontested path only through the
-  two-person step; counts in the count only after approval. Done when: 37.1p backend complete.
+- Goal: a seat with one valid candidate is declared unopposed without a vote, an election with no
+  contested seat is declared through a two-person step, and paper ballot counts are entered, approved
+  and printed.
+- Before you start: S28 closed. `grep -rn "Unopposed\|ElectionPaperCount" GHCAA.Infrastructure/Services`
+  gives nothing.
+- Read (only these): `GetBallotAsync`, `GetSeatsAsync`, `CountAsync`, `StoredResultsAsync`,
+  `DeclareAsync`, `GetPublicResultsAsync` and `SetPhaseAsync` in `ElectionService.cs`; `ElectionResult`
+  and `ElectionSeat` in `Election.cs`; `PollOpenCloseTableAsync` and `PollRecordTableAsync` in
+  `ElectionDocumentService.cs`; `ElectionApprovalService.RunOrRequestAsync`; tracker entry 37.1p.
+- Change (only these files): `Enums.cs`, `Constants.cs`, `ElectionService.cs`, `IElectionService.cs`,
+  `ElectionDocumentService.cs`, `ElectionApprovalService.cs`, `ElectionDtos.cs`,
+  `AdminElectionsController.cs`, `ElectionsController.cs`; `ElectionServiceTests.cs`,
+  `ElectionDocumentServiceTests.cs`, `ElectionApprovalServiceTests.cs`; `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/TODO.md`.
+- Do not touch: the tally of online ballots; the tie rule; the `ElectionResult` table shape (unopposed
+  is worked out, not stored: a seat is unopposed when it has one accepted nomination at CandidateList).
+- Steps:
+  1. `GetBallotAsync` leaves out a seat with exactly one accepted nomination. `CountAsync` writes a
+     result row for that candidate with `VoteCount = 0` and `IsElected = true`. Result DTOs and
+     `GetPublicResultsAsync` gain `IsUnopposed`. -> check: tests.
+  2. All seats unopposed or vacant: add `DeclareUncontested` to `ElectionApprovalAction` (at the end,
+     always two-person). On approval the election goes from CandidateList to Declared, writes the
+     result rows and runs the same winner assignment as `DeclareAsync` (S21). The route refuses when
+     any seat is contested. -> check: tests.
+  3. Paper counts: `RecordPaperCountAsync(electionId, issued, unused, spoiled, actorUserId, ct)`
+     (permission `Count`, phase Polling or Counting) refuses negative numbers and unused plus spoiled
+     above issued. `ApprovePaperCountAsync` (permission `Declare`, a different person) sets the
+     approver fields. A new entry replaces an unapproved one and is refused after approval. Each
+     writes an audit entry. -> check: tests.
+  4. `CountAsync` refuses to run when a paper count is entered and not approved. With none entered it
+     runs as today. -> check: tests.
+  5. `PollOpenCloseTableAsync` prints issued, used (issued minus unused minus spoiled), unused and
+     spoiled on the closing form (ER-24) when an approved count exists. -> check: document test.
+- Contract: `POST api/elections/{id}/paper-count` (body `{ issued, unused, spoiled }`, step-up) 204;
+  `POST api/elections/{id}/paper-count/approve` 204, 409 same person or nothing to approve;
+  `GET api/elections/{id}/paper-count`; `POST api/admin/elections/{id}/declare-uncontested` 202 with
+  the approval, 409 when a seat is contested. Result DTOs gain `isUnopposed`. Registry entry.
+- Tests: `ElectionServiceTests.cs` :: `Ballot_LeavesOutUnopposedSeat`, `Count_UnopposedSeat_ElectedWithZeroVotes`,
+  `PublicResults_MarkUnopposed`, `DeclareUncontested_ContestedSeat_Refused`,
+  `DeclareUncontested_NeedsSecondApprover`, `DeclareUncontested_AssignsWinnersLikeDeclare`,
+  `PaperCount_PartsAboveIssued_Refused`, `PaperCount_ApprovedBySamePerson_Refused`,
+  `PaperCount_ChangeAfterApproval_Refused`, `Count_UnapprovedPaperCount_Refused`;
+  `ElectionDocumentServiceTests.cs` :: `ER24_PrintsApprovedPaperCounts`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~ElectionDocumentServiceTests|FullyQualifiedName~ElectionApprovalServiceTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; one `security-reviewer` pass; 37.1p backend complete, PARTIAL until S32
+  and S33.
+- Stop and ask if: (a) the regulations ask for a confirming vote on an unopposed seat
+  (`docs/Elections/01-Election-Regulations.md`). Default: no vote, declared unopposed, as the tracker
+  says. (b) Paper votes must be added to the online tally. Default: no, the paper count is a
+  reconciliation record only and the tally stays online ballots.
 
+<a id="s30"></a>
 **S30 · 37.14f · M · security**
-- Steps: pin test first (no job deletes election rows). Dashboard query: elections declared more than
-  ten years ago. Purge request plus second approver (SuperAdmin when no Commission sits); in one
-  transaction delete Ballot, BallotVote, SeatVote, PendingBallot, BallotReceipt, ElectionApproval and
-  ElectionAuditEntry rows of that election; keep Election, seats, nominations and ElectionResult;
-  write `ElectionPurgeRecord`.
-- Tests: pin; under ten years refused; second approver needed; rows gone and result plus record kept.
+- Goal: no job ever deletes election rows, and ballot data of an election declared more than ten
+  years ago can be purged only by a request and a second approver, leaving the result and a record.
+- Before you start: S29 closed (S24 added `ElectionPurgeRecord`). `grep -n "Election" GHCAA.Infrastructure/Services/DataRetentionService.cs`
+  shows no election table in `PurgedTables`.
+- Read (only these): `DataRetentionService.cs` (`PurgedTables`, `PurgeAsync`); `DataRetentionSweep.cs`
+  and `ExpiredRevokeSweep.cs`; the election DbSets in `ApplicationDbContext.cs`;
+  `ElectionApprovalService.RunOrRequestAsync` and `LiveApproverCountAsync` in `ElectionAccessService.cs`;
+  `Constants.Retention`; tracker entry 37.14f.
+- Change (only these files): `Enums.cs`, `Constants.cs`, `ElectionService.cs`, `IElectionService.cs`,
+  `ElectionApprovalService.cs`, `ElectionDtos.cs`, `AdminElectionsController.cs`;
+  `DataRetentionServiceTests.cs`, `ElectionServiceTests.cs`, `ElectionApprovalServiceTests.cs`,
+  `AdminElectionsControllerTests.cs`; `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/Elections/09-Election-Security-and-Compliance.md`, `docs/TODO.md`.
+- Do not touch: `DataRetentionService.PurgedTables` (no election table goes in); `Election`, seats,
+  nominations and `ElectionResult` rows; the audit foreign key (Restrict since S24).
+- Steps:
+  1. Pin test first: `PurgedTables` names no election table, and a retention run leaves every
+     election row in place. -> check: the test passes before any other change.
+  2. `GetPurgeCandidatesAsync`: elections with `DeclaredOn` more than ten years ago and no
+     `ElectionPurgeRecord`. The ten years is `Constants.Retention.ElectionBallotYears` (new).
+     -> check: test.
+  3. Add `PurgeBallotData` to `ElectionApprovalAction` (at the end, always two-person). The request
+     is refused under ten years. The second approver is a live election approver, or a SuperAdmin when
+     `LiveApproverCountAsync` is zero. -> check: tests.
+  4. On approval, in one transaction: write the `ElectionPurgeRecord` (title, declared on, both
+     people, row counts per table and the audit chain head as the summary), then delete the
+     election's `BallotVotes`, `SeatVotes`, `Ballots`, `PendingBallots`, `BallotReceipts`,
+     `ElectionApprovals` and `ElectionAuditEntries`, children first. -> check: tests.
+  5. Describe the rule in the security and compliance document. -> check: the years and the tables
+     match the code.
+- Contract: `GET api/admin/elections/purge-candidates`; `POST api/admin/elections/{id}/purge`
+  (step-up; 202 with the approval, 409 under ten years or already purged);
+  `GET api/admin/elections/{id}/purge-record`. Registry entry.
+- Tests: `DataRetentionServiceTests.cs` :: `Purge_NeverTouchesElectionTables`; `ElectionServiceTests.cs`
+  :: `PurgeCandidates_OnlyOlderThanTenYears`, `Purge_UnderTenYears_Refused`,
+  `Purge_RemovesBallotDataKeepsResultAndRecord`, `Purge_Twice_Refused`;
+  `ElectionApprovalServiceTests.cs` :: `PurgeBallotData_AlwaysNeedsSecond`,
+  `PurgeBallotData_NoCommission_SuperAdminApproves`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~DataRetentionServiceTests|FullyQualifiedName~ElectionServiceTests|FullyQualifiedName~ElectionApprovalServiceTests|FullyQualifiedName~AdminElectionsControllerTests"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: the tests pass; one `security-reviewer` pass; 37.14f PARTIAL (screen in S32).
+- Stop and ask if: (a) the approval that authorises the purge is itself an `ElectionApprovals` row of
+  that election and would be deleted with the rest. Default: delete it too; the purge record holds
+  both names and times. (b) The delete must pass a table not listed here (a new election table since
+  2026-11-15). Default: stop and ask whether it is ballot data or record.
 
+<a id="s31"></a>
 **S31 · F5 web part 1 · M**
-- Screens in the web officials area: readiness list with attestation buttons, key holders and copy
-  confirmation, polling extension request and approval, paper counts entry and approval, and the
-  three per-election limits on the create and edit form.
-- Tests: Vitest per component (refusal codes shown through the interceptor message, hidden actions
-  by permission); add specs to `WEB_SPECS`. Browser check light and dark.
+- Goal: officials and admins can do on the web what S24, S27, S28 and S29 added: set per-election
+  limits, name key holders and confirm copies, see what blocks polling, extend polling, and enter and
+  approve paper counts.
+- Before you start: S30 closed. `python scripts/verify-election.py --only web` is green.
+- Read (only these): `admin-elections.ts` and `admin-elections.html` (the create form),
+  `election.models.ts` (`CreateElectionRequest`, `ELECTION_PERMISSION_FLAGS`), `elections.service.ts`,
+  `officials-dashboard.ts` and `officials-dashboard.html` (readiness list and key card),
+  `confirm-dialog.ts`, `step-up-dialog.ts`, `WEB_SPECS` in `scripts/verify-election.py`;
+  `GHCAA.Web/tests/e2e/election-walkthrough/README.md`; the Contract parts of S24, S27, S28 and S29.
+- Change (only these files): `election.models.ts`, `elections.service.ts`, `app.constants.ts`,
+  `admin-elections.ts`, `officials-dashboard.ts`, each with its template, styles and spec;
+  `scripts/verify-election.py`; `GHCAA.Web/tests/e2e/election-walkthrough/election.walkthrough.ts`,
+  `web.ts`, `api.ts` and `README.md`; `docs/TODO.md`.
+- Do not touch: the ballot and voting pages; the key generation code in the browser; `scenario.json`;
+  the global interceptor (refusals already show through it); theme tokens (use the ones there).
+- Steps:
+  1. Models and service methods for every route in the four contracts. -> check: service spec.
+  2. Create and edit form: three optional number fields for the limits, with the OrgConfig default
+     as the hint and the server's refusal shown. -> check: component spec.
+  3. Officials dashboard, key card: choose holders from the accepted appointments when setting the
+     key; list copies with recorded and confirmed times; a holder sees "Confirm my copy" (step-up).
+     -> check: component spec.
+  4. Readiness list: show the `KeyCopies` item with what is missing. -> check: spec.
+  5. Polling extension: a request form (hours, reason) shown in Polling with the `ChangePhase`
+     permission, the count used and left, and the pending approval. -> check: spec.
+  6. Paper counts: entry form with the `Count` permission, approve button with `Declare`, the sum
+     rule checked before the call. -> check: spec.
+  7. Every action is hidden without its permission (`can(permission)`) and asks the confirm dialog
+     before a step that cannot be undone. -> check: one "hidden without the permission" test each.
+  8. Add each new or changed spec file to `WEB_SPECS`. Walkthrough: name holders at key set, confirm
+     each copy before polling opens, enter and approve a paper count; update "What the run covers".
+     -> check: `python scripts/verify-election.py --only web` and `scripts\run-election-walkthrough.bat`.
+  9. Browser check in light and dark. -> check: every new control shows and reads well.
+- Contract: none new (uses the routes of S24, S27, S28 and S29).
+- Tests: `admin-elections.spec.ts` :: "sends null for an empty limit", "shows the refusal for a limit
+  above the default"; `officials-dashboard.spec.ts` :: "key set sends the chosen holders", "only a
+  holder sees confirm", "readiness shows missing copies", "extension form hidden outside polling",
+  "extension request sends hours and reason", "paper count refuses parts above issued", "approve
+  hidden without the permission"; `elections.service.spec.ts` :: one test per new method.
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/elections src/app/officials src/app/core/services/elections.service.spec.ts`;
+  then `python scripts/verify-election.py --only web` and `python scripts/ci-local.py --only web`.
+- Done when: the walkthrough is green with the new steps; 37.14d stays DONE; 37.14a, 37.12y and
+  37.1p wait for S32 and S33.
+- Stop and ask if: `officials-dashboard.ts` would pass about 400 lines of new code. Default: put the
+  key copies, the extension and the paper count each in a small child component under
+  `GHCAA.Web/src/app/officials/dashboard/`, each with its spec in `WEB_SPECS`.
 
+<a id="s32"></a>
 **S32 · F5 web part 2 · M**
-- Screens: recount decision, reopen nominations, conflict declaration at acceptance and later,
-  consent entry, ten-year list and purge request, the all-uncontested declare, refusal messages on
-  nominate, add candidate, appoint and accept.
-- Done when: 37.16e, 37.14a, 37.12y and 37.14f DONE once S33 covers their mobile parts.
+- Goal: the web covers the rest of the new rules: recount decision by two people, reopening
+  nominations, conflict declarations, the ten-year list and purge, the all-uncontested declare, and
+  plain refusal messages on nominate, add candidate, appoint and accept.
+- Before you start: S31 closed. `python scripts/verify-election.py --only web` is green.
+- Read (only these): `election-form-records.ts` (recount and consent entry), `nomination-records.ts`,
+  `election-officials.ts`, `my-appointments.ts`, `election-nomination.ts`, `admin-elections.ts`,
+  `officials-dashboard.ts`, `election-results.ts`, `election.models.ts`, `elections.service.ts`,
+  `global-http.interceptor.ts`; the Contract parts of S25, S26, S29 and S30;
+  `GHCAA.Web/tests/e2e/election-walkthrough/README.md`.
+- Change (only these files): `election.models.ts`, `elections.service.ts`, `app.constants.ts`,
+  `election-form-records.ts`, `nomination-records.ts`, `election-officials.ts`, `my-appointments.ts`,
+  `election-nomination.ts`, `admin-elections.ts`, `officials-dashboard.ts`, `election-results.ts`,
+  each with its template and spec; `scripts/verify-election.py`;
+  `GHCAA.Web/tests/e2e/election-walkthrough/election.walkthrough.ts`, `web.ts`, `api.ts` and
+  `README.md`; `docs/TODO.md`.
+- Do not touch: the screens S31 built, other than adding to them; the interceptor's behaviour; the
+  public verify pages.
+- Steps:
+  1. Models and service methods for the routes of S25, S26, S29 and S30. -> check: service spec.
+  2. Recount: the decide action shows "waiting for a second approver" on 202 and the open approval.
+     -> check: spec.
+  3. Reopen nominations: an action on a seat with no valid candidate (`ManageSetup`), showing the
+     date it stays open until. -> check: spec.
+  4. Conflict declaration: on accepting an appointment (`my-appointments.ts`) the official picks none
+     or a nomination and a relation; later declarations from the same page; the Chief Commissioner
+     declares for any official from `election-officials.ts`. Both pages list the declarations.
+     -> check: specs.
+  5. Consent: `nomination-records.ts` shows consent recorded or missing next to Accept, and the
+     server's refusal when it is missing. -> check: spec.
+  6. Purge: in `admin-elections.ts` a list of elections past ten years, a request action behind the
+     confirm dialog and step-up, and the purge record once done. -> check: spec.
+  7. All-uncontested declare: shown at CandidateList only when no seat is contested; results show
+     "Unopposed". -> check: specs.
+  8. Refusals: the conflict codes and the consent, reopen and extension replies show the server's
+     message once, through the interceptor, with no second toast from the component. -> check: spec.
+  9. Add new spec files to `WEB_SPECS`. Walkthrough: record consent before accept, declare one
+     conflict and see the refusal, decide a recount with two people; update "What the run covers".
+     -> check: `python scripts/verify-election.py --only web` and `scripts\run-election-walkthrough.bat`.
+  10. Browser check in light and dark. -> check: every new control shows and reads well.
+- Contract: none new.
+- Tests: `election-form-records.spec.ts` :: "recount decision shows the pending approval";
+  `nomination-records.spec.ts` :: "shows missing consent", "reopen action only on a seat with no
+  valid candidate"; `my-appointments.spec.ts` :: "accept sends the declaration", "accept with none
+  sends no declaration"; `election-officials.spec.ts` :: "declares a conflict for an official";
+  `admin-elections.spec.ts` :: "lists purge candidates", "purge asks for confirm and step-up",
+  "uncontested declare hidden when a seat is contested"; `election-results.spec.ts` :: "marks an
+  unopposed seat".
+- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/elections src/app/officials src/app/member/election src/app/public/elections`;
+  then `python scripts/verify-election.py --only web` and `python scripts/ci-local.py --only web`.
+- Done when: the walkthrough is green with the new steps; 37.14f DONE; 37.16e, 37.14a, 37.12y and
+  37.1p DONE once S33 covers their mobile parts.
+- Stop and ask if: the card passes its size. Default: land steps 1 to 5 and 8, set the items PARTIAL
+  with steps 6 and 7 named, and stop.
 
+<a id="s33"></a>
 **S33 · F6 mobile, 84.49 (B4-B5) · M**
-- Steps: candidate recount request, consent shown, readiness and phase read-only, conflict
-  declaration at acceptance, confirm own key copy, refusal messages. 84.49 B4: the key progress
-  dialog closes through its own dialog context; B5: a 60 s timeout on the server save only, retry
-  sends the same key so no second key is stored (`docs/AUTH_AND_DEVICE_FIX_PLAN.md` B4, B5).
-- Tests: widget tests (dispose mid-key leaves no dialog; slow save shows the timeout and retry);
-  add to `MOBILE_TESTS`; `python scripts/verify-election.py` seven of seven.
-- Done when: 37.1p, 37.16e, 37.14a, 37.12y, 37.14f DONE; 84.49 PARTIAL only for the device check.
+- Goal: mobile shows the new election facts and lets a candidate and an official do their own small
+  steps, and the ballot key screen can no longer leave a dialog behind or store a second key.
+- Before you start: S32 closed. `python scripts/verify-election.py --only mobile` is green.
+- Read (only these): `election_management_screen.dart` (`_withProgress` and the dialog with key
+  `ballot-key-progress`), `election_management_screen_test.dart`, `election_service.dart`
+  (`setBallotKey`), `retry_interceptor.dart`, `officials_dashboard_screen.dart`,
+  `officials_election_detail_screen.dart`, `election_screen.dart`, `election_nomination_panel.dart`,
+  `MOBILE_TESTS` in `scripts/verify-election.py`; `docs/AUTH_AND_DEVICE_FIX_PLAN.md` items B4 and B5;
+  the Contract parts of S25, S26 and S27.
+- Change (only these files): `election_service.dart`, `election_management_screen.dart`,
+  `officials_dashboard_screen.dart`, `officials_election_detail_screen.dart`, `election_screen.dart`,
+  `election_nomination_panel.dart`; `election_management_screen_test.dart`, `election_service_test.dart`,
+  `election_screen_test.dart`, `officials_dashboard_screen_test.dart`,
+  `GHCAA.Mobile/test/officials_election_detail_screen_test.dart` (new); `scripts/verify-election.py`;
+  `docs/AUTH_AND_DEVICE_FIX_PLAN.md`, `docs/TODO.md`.
+- Do not touch: `retry_interceptor.dart` (the key save gets its own timeout, not a global one); the
+  key generation; golden images; admin-only tools that stay web only (limits, extension, paper
+  counts, purge).
+- Steps:
+  1. 84.49 B4: the progress dialog is closed through the context its own builder gives, kept in a
+     local variable, not through the screen's context. Leaving the screen while the key is being made
+     leaves no dialog and throws nothing. -> check: widget test "dispose mid-key leaves no dialog".
+  2. 84.49 B5: a 60 second timeout on the `setBallotKey` call only. On timeout show a message with
+     Retry. Retry sends the same public key, so the server holds one key. -> check: widget test and
+     service test.
+  3. Service methods and models: readiness with `KeyCopies`, key copies, confirm own copy, conflict
+     declarations, recount request, consent and photo status fields. -> check: service tests.
+  4. Candidate: a recount request on a declared seat inside the recount window, and consent shown on
+     the nomination panel. -> check: widget tests.
+  5. Official: readiness and phase read-only, "Confirm my copy" for a holder, conflict declaration
+     when accepting an appointment. -> check: widget tests.
+  6. Refusals from the server show through `serverMessage`. -> check: one test with a conflict code.
+  7. Add the new test file to `MOBILE_TESTS`. -> check: `python scripts/verify-election.py` passes
+     seven of seven steps.
+- Contract: none new.
+- Tests: `election_management_screen_test.dart` :: "dispose mid-key leaves no dialog", "slow save
+  shows the timeout and retry", "retry sends the same key"; `election_service_test.dart` :: one test
+  per new method; `election_screen_test.dart` :: "recount request only inside the window", "consent
+  state shows"; `officials_dashboard_screen_test.dart` :: "readiness lists missing copies";
+  `officials_election_detail_screen_test.dart` :: "only a holder sees confirm", "accept sends the
+  declaration".
+- Run: in `GHCAA.Mobile`: `flutter analyze; flutter test test/election_management_screen_test.dart test/election_service_test.dart test/election_screen_test.dart test/officials_dashboard_screen_test.dart test/officials_election_detail_screen_test.dart --exclude-tags golden`;
+  then `python scripts/verify-election.py` and `python scripts/ci-local.py --only mobile`.
+- Done when: seven of seven; 37.1p, 37.16e, 37.14a and 37.12y DONE; 84.49 PARTIAL only for the check
+  on a real device, which is the owner's.
+- Stop and ask if: (a) the candidate recount request has no member route on the server (today's
+  recount routes are under `api/admin/elections`). Default: leave the request out of mobile, keep it
+  recorded by an official as now, and say so in the tracker. (b) Accepting an appointment happens
+  only through the emailed link and not in the app. Default: put the declaration on the official's
+  election detail screen.
 
 ### Phase D. Meetings, then the model work after it
 
-Design reference: `docs/specs/026-meetings-and-action-items/` (spec, plan, tasks) and spec 028 for the
-discussion service. Tick the spec 026 task boxes as each card closes.
+Design reference for S34 to S41: `docs/specs/026-meetings-and-action-items/` (spec, plan, tasks), and
+spec 028 (comments on polls and meetings) for the discussion service. Tick the spec 026 task boxes as
+each card closes. Where the design reference disagrees with a card, the card wins.
 
-**S34 · 84.19 T002, T002a, T003 · L · migration 7** Entities, enums, `Poll.MeetingId`, constants,
-`MeetingType` lookup group (migration data step, not `Seed/*.json`), list filters, migration
-`AddMeetings` with dry run. Tests: model builds on SQLite; migration rule 5.
+Names in these cards were checked against the code on 2026-11-15. What the older cards and spec 026
+assumed that the code does not have:
 
-**S35 · 84.19 T004 to T006 · M** Services, DTOs, admin and member controllers, announcements
-(FR-25 to FR-27) reusing the poll announcement path. Tests T006.
+- No audit log service. Audit rows go through `IActivityService.LogActivityAsync`.
+- No `ContextType` enum. The discussion service takes a string; `Constants.Discussion.ContextMeeting`
+  is already there, and `DiscussionService.ResolveContextAsync` handles only `ContextPoll`.
+- No SQLite migrations folder. Migrations live in `GHCAA.Infrastructure/Data/Migrations/PgSql/` and
+  SQLite builds from the model.
+- `INotificationService` has no method for a list of members; it has one member or everyone.
+- The current EC period is the `ECPeriod` with `IsActive`, and a seat counts while `EndDate` is null
+  (`NetworkingService.GetExecutiveCommitteeAsync`).
+- The web has no admin page for lookups and no event detail page; events show in
+  `GHCAA.Web/src/app/common/events/events.ts`. `LookupsController` already has admin-only create,
+  update and delete routes.
+- Mobile has no admin poll screen and no role guard on admin routes.
+- `MemberSearchFilterDto` sits in `GHCAA.Application/Interfaces/INetworkingService.cs`.
+- The feature catalogue is `docs/FEATURES.md`.
 
-**S36 · 84.19 T007 to T009 · M** Agenda ordering and status, participants, RSVP until start,
-attendance, decisions, outcome, minutes publish to Closed. Tests T008 and the minutes part of T012.
+Meeting services are built by tests with the context and the services they call, as `PollService` is.
+Tests carry the FR or NFR category of spec 026 (for example `[Category("FR-8")]`).
 
-**S37 · 84.20 T010 to T012 · M** To-do lists per meeting (FR-18 to FR-19b), "My to-dos", create
-next meeting with carry-over. Tests T010a, T012.
+<a id="s34"></a>
+**S34 · 84.19 (T002, T002a, T003) · L · migration 7**
+- Goal: the meeting tables, enums, constants and the `MeetingType` lookup values are in the model and
+  in one migration, and a poll can point at a meeting. No route yet.
+- Before you start: the poll comments of spec 028 are in the code and migration 6 of the ledger (section 7,
+  the migration ledger) is applied locally. `grep -rn "class Meeting" GHCAA.Domain` shows nothing.
+- Read (only these): the data model part of `docs/specs/026-meetings-and-action-items/spec.md`;
+  `GHCAA.Domain/Models/Poll.cs`; `Constants.Discussion` in `GHCAA.Domain/Constants.cs`;
+  `GHCAA.Infrastructure/Data/Migrations/PgSql/20261105200808_AddPollDiscussion.cs` (the lookup rows
+  with fixed Ids, `ON CONFLICT DO NOTHING` and the identity sequence step);
+  `GHCAA.Infrastructure/Data/Configurations/LookupItemConfiguration.cs`; the `DbSet` block in
+  `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`; `GHCAA.Tests/Data/JobCategorySeedSyncTests.cs`.
+- Change (only these files): `GHCAA.Domain/Enums.cs`, `GHCAA.Domain/Models/Meeting.cs` (new, all
+  seven classes), `Poll.cs`, `Constants.cs`, `ApplicationDbContext.cs`,
+  `GHCAA.Infrastructure/Data/Configurations/MeetingConfigurations.cs` (new); a new migration
+  `AddMeetings` with its `.Designer.cs`, and `PgSqlApplicationDbContextModelSnapshot.cs`;
+  `GHCAA.Tests/Data/MeetingModelTests.cs` (new); `docs/TODO.md`, the ledger row in this plan.
+- Do not touch: `Seed/*.json` (see the last part), `PollService.cs`, `DiscussionService.cs`, any
+  controller, any client. The list filters of T002a are built in S35 (routes), S39 and S40 (lists).
+- Steps:
+  1. Enums: `MeetingMode { InPerson, Online, Hybrid }`, `MeetingAudience { AllMembers, EcMembers,
+     InviteesOnly }`, `MeetingStatus { Draft, Scheduled, Held, Closed, Cancelled }`, `MeetingRsvp
+     { None, Yes, No, Maybe }`, `AgendaItemStatus { Planned, Discussed, Deferred, Dropped }`,
+     `ActionItemStatus { Open, InProgress, Done, Dropped }`, `ActionItemPriority { Low, Normal, High }`.
+     -> check: the project builds.
+  2. Entities `MeetingSeries`, `Meeting`, `MeetingAgendaItem`, `MeetingParticipant`, `MeetingDecision`,
+     `MeetingTodoList`, `MeetingActionItem` with the fields of the spec's data model. Type and
+     category are strings holding the lookup value, as `Poll.Category` is. Add nullable
+     `Poll.MeetingId`. -> check: the project builds.
+  3. Configurations: lengths from new constants; `Meeting` indexed on `StartsAt` and on `SeriesId`;
+     one row per (`MeetingId`, `MemberId`) in `MeetingParticipant`; deleting a meeting sets
+     `Poll.MeetingId` to null and never deletes the poll. -> check: `MeetingModelTests`.
+  4. Constants: a new group `Constants.Meetings` with `TypeLookupGroup = "MeetingType"`, field
+     lengths, the audit type strings and the member page path. The category group stays
+     `Constants.Discussion.CategoryLookupGroup`. -> check: no meeting literal outside the group.
+  5. Migration per rule 5 of section 2 (the migration rule): seven tables, the `Polls.MeetingId`
+     column, and the six `MeetingType` rows (AGM, EGM, EC meeting, General meeting, Event planning,
+     Discussion session) with Ids 5201 to 5206, written the way `AddPollDiscussion` writes its rows,
+     with the sequence step. -> check: the dry run in rule 5 on a fresh database and on a copy that
+     has polls; a second run adds no row.
+- Contract: none.
+- Tests: `MeetingModelTests.cs` :: `Model_BuildsOnSqlite` (the context is created and one row of each
+  entity saves); `Participant_OnePerMember` (a second row for the same member is refused);
+  `DeletingMeeting_KeepsItsPolls`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MeetingModelTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the migration applies and reruns clean; ledger row 7 has its timestamp; T002 and T003
+  ticked in the spec 026 tasks; 84.19 gets an evidence note and stays IN PROGRESS.
+- Stop and ask if: a new SQLite database needs the `MeetingType` rows. They come only from
+  `GHCAA.Infrastructure/Data/Seed/lookups.json`, which agents do not edit. Default: the owner adds
+  the six rows there (same values and Ids), and the card closes without them. Also stop if
+  `JobCategorySeedSyncTests` fails because the JSON and the migration differ.
 
-**S38 · 84.19 T013 to T015 · M** Attach polls, audience rule for poll reads and votes, `Meeting`
-context in the spec 028 discussion service. Tests T015.
+<a id="s35"></a>
+**S35 · 84.19 (T004 to T006, T002a routes) · M**
+- Goal: an admin creates, edits, schedules and cancels series and meetings through the API, and a
+  member reads only the meetings of an audience they belong to.
+- Before you start: S34 closed. `grep -rn "IMeetingService" GHCAA.Application` shows nothing.
+- Read (only these): FR-1 to FR-9 and FR-24 to FR-27 of the spec 026 `spec.md`;
+  `GHCAA.Infrastructure/Services/PollService.cs` (`CreatePollAsync`, where it calls
+  `INewsService.CreateNewsAsync` for the announcement); `PollAnnouncementDto` in
+  `GHCAA.Application/DTOs/PollDtos.cs`; `GHCAA.API/Controllers/AdminPollController.cs` and
+  `PollController.cs` (policies and how the member id is read);
+  `NetworkingService.GetExecutiveCommitteeAsync`; `INotificationService.cs`; `IActivityService.cs`.
+- Change (only these files): `GHCAA.Application/DTOs/Meetings/MeetingDtos.cs` (new),
+  `GHCAA.Application/Interfaces/IMeetingService.cs` (new), `IMeetingSeriesService.cs` (new),
+  `GHCAA.Infrastructure/Services/MeetingService.cs` (new), `MeetingSeriesService.cs` (new),
+  `GHCAA.API/Controllers/AdminMeetingController.cs` (new), `AdminMeetingSeriesController.cs` (new),
+  `MeetingController.cs` (new), the file that registers `IPollService` (add the two services),
+  `Constants.cs`, `GHCAA.Tests/Services/MeetingServiceTests.cs` (new),
+  `GHCAA.Tests/Controllers/MeetingControllerTests.cs` (new), `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/TODO.md`.
+- Do not touch: `PollService.cs`, `NewsService`, `NetworkingService.cs` (read the rule, do not move
+  it), agenda, RSVP, decisions and to-do lists (S36, S37), any client.
+- Steps:
+  1. `MeetingService.CanSeeAsync(meeting, memberId, isAdmin, ct)`, public on the interface, the one
+     audience check: admins see all; Draft is admin-only; AllMembers is any member; EcMembers is a
+     member with an `ECMember` row in the active period with `EndDate` null; InviteesOnly is a member
+     with a `MeetingParticipant` row. -> check: one test per audience and state.
+  2. Series: create, edit, list, deactivate. -> check: service tests.
+  3. Meeting create and edit with data annotations on the DTOs: venue required for InPerson and
+     Hybrid, link required for Online and Hybrid, type and category must be active lookup values of
+     their groups (a retired value stays valid on an existing meeting). The number in the series is
+     the count of earlier meetings in it plus one. -> check: validation tests.
+  4. State changes: Draft to Scheduled, Scheduled to Held, any open state to Cancelled with a reason.
+     Other moves are refused with 409. -> check: one test per move.
+  5. A change of start, end, venue, link or mode on a Scheduled meeting, and a cancel, notify the
+     audience: `BroadcastNotificationAsync` for AllMembers, a loop over `CreateNotificationAsync` for
+     the other two. -> check: tests with a recording notification service.
+  6. Announcement block (`PollAnnouncementDto` reused): refused with 400 unless the audience is
+     AllMembers; the text is built from title, type, date, time, mode and venue and never holds the
+     link; the news id is saved on `Meeting.AnnouncementId`. Reschedule and cancel take a flag that
+     updates the post. -> check: the announcement tests.
+  7. Audit row through `IActivityService.LogActivityAsync` for create, edit, schedule and cancel,
+     with types from `Constants.Meetings`. -> check: tests read the activity rows.
+  8. Member reads: list (Scheduled, Held, Closed and Cancelled of the member's audiences) and detail;
+     outside the audience is 404. Both lists take `category`, `type`, `seriesId` and `status`,
+     applied after the audience check. -> check: filter tests.
+- Contract: `api/admin/meeting-series` (AdminOnly): GET, POST, PUT `{id}`. `api/admin/meetings`
+  (AdminOnly): GET with the four filters, GET `{id}`, POST, PUT `{id}`, POST `{id}/schedule`, POST
+  `{id}/held`, POST `{id}/cancel` (reason required). `api/meetings` (signed-in member): GET with the
+  filters, GET `{id}`. Replies: 200, 201 with the id, 400 validation, 404 unknown or outside the
+  audience, 409 wrong state. No `DbContext` in a controller.
+- Tests: `MeetingServiceTests.cs` :: `CanSee_EachAudienceAndState`, `Create_VenueAndLinkRulesPerMode`,
+  `Create_RetiredLookupValueRefused`, `StateMoves_AllowedAndRefused`, `Reschedule_NotifiesAudience`,
+  `Cancel_NotifiesAndKeepsReason`, `Announcement_CreatedWithoutLink`,
+  `Announcement_RefusedForEcAndInvitees`, `List_EachFilter`, `List_RetiredCategoryStillFilters`.
+  `MeetingControllerTests.cs` :: `Member_OutsideAudience_404`, `Member_Draft_404`,
+  `Admin_Routes_NeedAdminPolicy`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MeetingServiceTests|FullyQualifiedName~MeetingControllerTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the routes are in the registry; T002a (routes), T004, T005, T005a and T006 ticked; 84.19
+  stays IN PROGRESS with an evidence note.
+- Stop and ask if: `PollAnnouncementDto` cannot be reused without changing its fields. Default: add
+  `MeetingAnnouncementDto` with the same fields and leave the poll DTO alone.
 
-**S39 · 84.19 T016 to T018 · M** Web admin list and editor, lookup values editable, member list and
-detail, event page and dashboard links. Vitest T018.
+<a id="s36"></a>
+**S36 · 84.19 (T007 to T009) · M**
+- Goal: a meeting has an ordered agenda, invitees, RSVP answers, attendance, decisions, an outcome
+  and minutes that the audience sees only after they are published.
+- Before you start: S35 closed and its tests pass.
+- Read (only these): FR-9 to FR-15 of the spec 026 `spec.md`; `IMeetingService.cs`,
+  `MeetingService.cs` and `MeetingDtos.cs` from S35.
+- Change (only these files): `MeetingDtos.cs`, `IMeetingService.cs`,
+  `GHCAA.Infrastructure/Services/MeetingService_Agenda.cs` (new, a partial of `MeetingService`),
+  `MeetingService_Participants.cs` (new), `MeetingService_Decisions.cs` (new), `MeetingService.cs`
+  (make the class partial), `AdminMeetingController.cs`, `MeetingController.cs`, `Constants.cs`,
+  `MeetingServiceTests.cs`, `MeetingControllerTests.cs`, `docs/API_CONTRACT_REGISTRY.md`,
+  `docs/TODO.md`.
+- Do not touch: to-do lists and "create next meeting" (S37), polls and comments (S38), any client.
+- Steps:
+  1. Agenda: add, edit, delete, and reorder by a full list of ids in order. After the meeting is Held
+     each item is set to Discussed, Deferred or Dropped. -> check: reorder and status tests.
+  2. Invitees for InviteesOnly: the admin sets the member list; removing a member removes their
+     answer. -> check: service test.
+  3. RSVP: a member in the audience answers Yes, No or Maybe and may change it until `StartsAt`; after
+     that 409. A row is created on first answer for the AllMembers and EcMembers audiences.
+     -> check: `Rsvp_AfterStart_Refused`.
+  4. Attendance: the admin marks members present on a Held meeting. The detail DTO carries counts of
+     each answer and of attendance. -> check: counts test.
+  5. Decisions: text, optional agenda item, optional poll, optional for, against and abstain counts;
+     listed on the meeting and by series. -> check: service test.
+  6. Outcome and minutes: saved by the admin on a Held meeting. Publish sets `MinutesPublishedAt` and
+     moves the meeting to Closed. A member read returns no minutes text before that. A Closed meeting
+     refuses every edit of this card. -> check: `Minutes_HiddenUntilPublished`, `Closed_IsReadOnly`.
+  7. Audit rows for attendance and publish. -> check: tests read the activity rows.
+- Contract: under `api/admin/meetings/{id}`: POST `agenda`, PUT and DELETE `agenda/{itemId}`, PUT
+  `agenda/order`, PUT `agenda/{itemId}/status`, PUT `invitees`, PUT `attendance`, POST `decisions`,
+  PUT and DELETE `decisions/{decisionId}`, PUT `outcome`, PUT `minutes`, POST `minutes/publish`. GET
+  `api/admin/meeting-series/{id}/decisions`. Member: PUT `api/meetings/{id}/rsvp`. Replies as in S35.
+- Tests: `MeetingServiceTests.cs` :: `Agenda_Reorder_KeepsEveryItem`, `Agenda_StatusOnlyAfterHeld`,
+  `Rsvp_ChangeBeforeStart`, `Rsvp_AfterStart_Refused`, `Rsvp_OutsideAudience_NotFound`,
+  `Attendance_Counts`, `Decision_LinksItemAndPoll`, `Minutes_HiddenUntilPublished`,
+  `Publish_MovesToClosed`, `Closed_IsReadOnly`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MeetingServiceTests|FullyQualifiedName~MeetingControllerTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the routes are in the registry; T007, T008 and T009 ticked; 84.19 stays IN PROGRESS.
+- Stop and ask if: the owner wants minutes edited after publish. Default: no; a Closed meeting is
+  read-only except its action items (FR-4).
 
-**S40 · 84.19 T019 to T020 · M** Mobile member and admin screens (admins only, D1). Widget tests at
-phone width.
+<a id="s37"></a>
+**S37 · 84.20 (T010 to T012) · M**
+- Goal: a meeting holds named to-do lists with action items, an owner sees their open items as "My
+  to-dos", and "create next meeting" copies a meeting and carries its open work.
+- Before you start: S36 closed and its tests pass.
+- Read (only these): FR-7 and FR-18 to FR-20 of the spec 026 `spec.md`; `IMeetingService.cs`,
+  `MeetingService.cs` (`CanSeeAsync`), `MeetingService_Agenda.cs`.
+- Change (only these files): `MeetingDtos.cs`, `IMeetingService.cs`,
+  `GHCAA.Infrastructure/Services/MeetingService_Todos.cs` (new), `MeetingService.cs`,
+  `AdminMeetingController.cs`, `MeetingController.cs`, `Constants.cs`,
+  `GHCAA.Tests/Services/MeetingTodoTests.cs` (new), `MeetingControllerTests.cs`,
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: standalone tasks or notes (not built, FR-20), the dashboard clients (S39, S40),
+  polls and comments (S38).
+- Steps:
+  1. Lists: add, rename, reorder, delete an empty list; category defaults to the meeting's; an
+     admins-only flag. -> check: `SeveralLists_OnOneMeeting`.
+  2. Items: title, notes, optional owner, optional due date, priority, status, optional decision;
+     reorder inside a list; move to another list of the same meeting (another meeting is 400).
+     -> check: reorder and move tests.
+  3. Status: an admin or the item's owner may change it, also on a Closed meeting. Anyone else is
+     refused with 403. Each change writes an audit row. -> check: `Status_OwnerAndAdminOnly`.
+  4. Reads: the audience reads the lists; an admins-only list is left out for a member, but that
+     member still gets the items they own. Filters `status`, `ownerId`, `unassigned`, `due`
+     (`overdue`, `week`, `later`), `priority`, `category`. Progress is done out of total, Dropped not
+     counted. -> check: one test per filter and `AdminsOnlyList_ShowsOwnItems`.
+  5. "My to-dos": the caller's Open and InProgress items across meetings, same filters.
+     -> check: `MyTodos_OnlyOwnOpenItems`.
+  6. Create next meeting: a Draft copy with series, type, category, mode, venue, link, audience and
+     the comment setting; Deferred agenda items copied with `CarriedFromItemId`; lists that hold open
+     items copied with those items and `CarriedFromItemId`. The source is left as it is.
+     -> check: `CreateNext_CopiesFieldsAndCarriesOpenWork`.
+- Contract: under `api/admin/meetings/{id}`: POST `todo-lists`, PUT and DELETE `todo-lists/{listId}`,
+  PUT `todo-lists/order`, POST `todo-lists/{listId}/items`, PUT and DELETE `items/{itemId}`, PUT
+  `todo-lists/{listId}/items/order`, PUT `items/{itemId}/move`, POST `next` (201 with the new id).
+  Member: GET `api/meetings/{id}/todo-lists` with the filters, PUT
+  `api/meetings/items/{itemId}/status`, GET `api/meetings/my-todos` with the filters.
+- Tests: `MeetingTodoTests.cs` :: the names in the steps, plus `Item_NoOwner_FiltersAsUnassigned`,
+  `Move_ToOtherMeeting_Refused`, `Progress_IgnoresDropped`, `CreateNext_SourceUnchanged`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MeetingTodoTests|FullyQualifiedName~MeetingControllerTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the routes are in the registry; T010, T010a, T011 and T012 ticked; 84.20 gets an
+  evidence note and stays open until S41.
+- Stop and ask if: "create next meeting" should close the carried items on the old meeting. Default:
+  no, the old items stay as they are and the copies point back at them.
 
-**S41 · 84.19, 84.20 T021 · S** Registry, `PROJECT_MAP.md`, feature catalogue, swagger snapshot,
-`ci-local.py --only backend|web|mobile|contract`. Done when: 84.19 and 84.20 DONE.
+<a id="s38"></a>
+**S38 · 84.19 (T013 to T015) · M**
+- Goal: a poll attached to a meeting is seen and voted on only by the meeting's audience, and a
+  meeting has a comment thread through the existing discussion service.
+- Before you start: S37 closed. `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~PollServiceTests|FullyQualifiedName~DiscussionServiceTests"`
+  passes.
+- Read (only these): FR-16 and FR-17 of the spec 026 `spec.md`; `IPollService.cs`;
+  `PollService.GetActivePollsAsync`, `GetPollByIdAsync`, `VoteAsync`, `CreatePollAsync`;
+  `DiscussionService.ResolveContextAsync` and `FindOrCreateTopicAsync`; the comment actions in
+  `PollController.cs` and `AdminPollController.cs`; `Constants.Discussion`.
+- Change (only these files): `GHCAA.Application/DTOs/PollDtos.cs` (`MeetingId` on the create and
+  read DTOs), `PollService.cs`, `DiscussionService.cs`, `IMeetingService.cs`, `MeetingService.cs`,
+  `AdminMeetingController.cs`, `MeetingController.cs`, `MeetingDtos.cs`,
+  `GHCAA.Tests/Services/PollServiceTests.cs`, `DiscussionServiceTests.cs`, `MeetingServiceTests.cs`,
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: `IDiscussionService.cs` (no signature change), the poll comment routes, the forum
+  tables the discussion service writes to, polls with no meeting (they behave as today).
+- Steps:
+  1. Attach and detach: an admin sets `Poll.MeetingId` on an existing poll or creates a poll with it.
+     A poll already on another meeting is refused with 409. -> check: `Attach_OnePollOneMeeting`.
+  2. `PollService` reads and `VoteAsync` call `IMeetingService.CanSeeAsync` when `MeetingId` is set.
+     A poll outside the caller's audience is left out of lists and is 404 by id and on vote.
+     -> check: one test per audience, and `PollWithoutMeeting_Unchanged`.
+  3. The meeting detail DTO lists its polls; the list takes `category`. -> check: service test.
+  4. `ResolveContextAsync` gains the `Constants.Discussion.ContextMeeting` branch: it loads the
+     meeting, calls `CanSeeAsync`, returns null outside the audience, and gives a closed reason when
+     comments are off, the meeting is Draft, Closed or Cancelled. -> check: discussion tests.
+  5. Comment routes on the meeting controllers call `IDiscussionService` with `ContextMeeting`, the
+     way the poll controllers do. -> check: controller tests.
+- Contract: `api/admin/meetings/{id}/polls` PUT `{pollId}` (attach), DELETE `{pollId}` (detach).
+  `api/meetings/{id}/comments` GET and POST; `api/admin/meetings/{id}/comments/{commentId}` DELETE;
+  `api/admin/meetings/{id}/comments/lock` PUT. Request and reply bodies are the spec 028 DTOs
+  (`CommentThreadDto`, `CreateCommentDto`, `RemoveCommentDto`, `SetThreadLockDto`). `CreatePollDto`
+  and the poll read DTO gain nullable `meetingId`.
+- Tests: `PollServiceTests.cs` :: `MeetingPoll_HiddenOutsideAudience`, `MeetingPoll_VoteOutsideAudience_NotFound`,
+  `PollWithoutMeeting_Unchanged`, `Attach_OnePollOneMeeting`. `DiscussionServiceTests.cs` ::
+  `MeetingThread_AudienceOnly`, `MeetingThread_ClosedWhenMeetingClosed`,
+  `MeetingThread_OffWhenCommentsOff`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~PollServiceTests|FullyQualifiedName~DiscussionServiceTests|FullyQualifiedName~MeetingServiceTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: every poll test that passed before still passes; T013, T014 and T015 ticked; the routes
+  are in the registry; 84.19 stays IN PROGRESS.
+- Stop and ask if: `PollService` cannot take `IMeetingService` without a circular dependency.
+  Default: move the audience check to a small class both services use, `MeetingAudience` rules in
+  `GHCAA.Infrastructure/Services/MeetingAccess.cs` (new), and keep `CanSeeAsync` as a thin call to it.
 
+<a id="s39"></a>
+**S39 · 84.19 (T016 to T018, T002a web) · M**
+- Goal: on the web an admin manages series, meetings and their parts, and a member finds, reads and
+  answers meetings and sees "My to-dos".
+- Before you start: S38 closed. The local stack runs (`.\GHCAA.Tools\run-app.ps1`).
+- Read (only these): `GHCAA.Web/src/app/admin/polls/polls.component.ts` and its `polls.html` (list,
+  editor, the announcement block); `GHCAA.Web/src/app/member/polls/polls.component.ts`;
+  `GHCAA.Web/src/app/core/services/admin-poll.service.ts` and `poll.service.ts`;
+  `GHCAA.Web/src/app/common/comment-thread/comment-thread.ts` (inputs);
+  `GHCAA.Web/src/app/core/services/lookup.service.ts`; the admin and member blocks of
+  `GHCAA.Web/src/app/app.routes.ts`; `ADMIN_NAV_SECTIONS` in
+  `GHCAA.Web/src/app/core/services/nav.service.ts`; `GHCAA.Web/src/app/core/constants/app.constants.ts`
+  (the API path groups).
+- Change (only these files): in `GHCAA.Web/src/app/admin/meetings/` (new folder):
+  `meetings.component.ts` (new), `meetings.component.spec.ts` (new),
+  `meeting-editor.component.ts` (new), `meeting-editor.component.spec.ts` (new), each component
+  with its `.html` and `.scss`; in `GHCAA.Web/src/app/member/meetings/` (new folder): a second
+  `meetings.component.ts` and `meetings.component.spec.ts`, `meeting-detail.component.ts` (new),
+  `meeting-detail.component.spec.ts` (new), each component with its `.html` and `.scss`;
+  `GHCAA.Web/src/app/core/services/meeting.service.ts` (new), `admin-meeting.service.ts` (new) and
+  their specs; `app.routes.ts`, `nav.service.ts`, `app.constants.ts`, `lookup.service.ts`;
+  `GHCAA.Web/src/app/common/events/events.ts` and `events.html`;
+  `GHCAA.Web/src/app/member/dashboard/dashboard.ts` and its template; `docs/TODO.md`.
+- Do not touch: `comment-thread.ts` beyond passing it the meeting context, the poll pages, theme
+  tokens (use the ones there), the backend.
+- Steps:
+  1. Services and models for every route of S35 to S38, paths in `app.constants.ts`.
+     -> check: service specs with the HTTP testing controller.
+  2. Admin list at `admin/meetings` with filters for type, category, series and status, kept in the
+     query string; a nav entry in `ADMIN_NAV_SECTIONS`. -> check: component spec.
+  3. Editor with tabs: details (with the announcement block, shown only for All members), agenda
+     (reorder), participants and attendance, decisions and minutes, to-do lists (reorder, move,
+     filters, progress), polls. Series are managed from the same page. -> check: component spec and
+     a look in the browser.
+  4. Lookup values: a small panel on the admin meetings page adds, renames and retires `MeetingType`
+     and `DiscussionCategory` values through the `api/lookups` admin routes; `lookup.service.ts`
+     gains the three write calls. -> check: spec.
+  5. Member list at `member/meetings` (upcoming and past, category and type filter) and detail with
+     RSVP, agenda, polls, `<app-comment-thread>`, decisions, to-do lists and published minutes. The
+     category shows as a link to the filtered list. -> check: component specs.
+  6. `events.ts` shows the meetings linked to an event; the dashboard shows "My to-dos" with the
+     filters. -> check: specs.
+  7. Dates as `dd-MM-yyyy` and times as `HH:mm` through the shared date helpers. -> check: spec.
+- Contract: none new. The clients use the routes of S35 to S38.
+- Tests: `meetings.component.spec.ts` (admin) :: filters reach the service, a Draft row shows its
+  state; `meeting-editor.component.spec.ts` :: the announcement block hides for EC and invitee
+  audiences, venue and link fields follow the mode; `meetings.component.spec.ts` (member) :: the
+  filter and the two lists; `meeting-detail.component.spec.ts` :: RSVP disabled after start, minutes
+  absent before publish; the two service specs.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/meetings src/app/member/meetings src/app/core/services/meeting.service.spec.ts src/app/core/services/admin-meeting.service.spec.ts`;
+  then `python scripts/ci-local.py --only web`.
+- Done when: both areas work in the browser against the local API in the light and dark themes;
+  T016, T017 and T018 ticked; 84.19 stays IN PROGRESS.
+- Stop and ask if: the owner wants the lookup panel as its own page under Settings. Default: the
+  panel on the admin meetings page, since no lookup page exists.
+
+<a id="s40"></a>
+**S40 · 84.19 (T019 to T020, T002a mobile) · M**
+- Goal: on mobile a member uses meetings and "My to-dos", and an admin manages meetings; only admins
+  reach the admin screens.
+- Before you start: S39 closed. `cd GHCAA.Mobile; flutter analyze` is clean.
+- Read (only these): `GHCAA.Mobile/lib/features/polls/polls_screen.dart`, `poll_service.dart` and
+  `poll_comment_thread.dart`; `GHCAA.Mobile/lib/core/router/app_router.dart` (the redirect, the
+  `/polls` route and the admin routes); `GHCAA.Mobile/lib/screens/admin/admin_modules.dart`;
+  `GHCAA.Mobile/lib/screens/member/dashboard_screen.dart` and `event_details_screen.dart`;
+  `GHCAA.Mobile/test/poll_comment_thread_test.dart` (the test setup to copy).
+- Change (only these files): in `GHCAA.Mobile/lib/features/meetings/` (new folder):
+  `meeting_service.dart` (new), `meeting_models.dart` (new), `meetings_screen.dart` (new),
+  `meeting_detail_screen.dart` (new), `my_todos_screen.dart` (new),
+  `admin_meetings_screen.dart` (new), `admin_meeting_editor_screen.dart` (new); `poll_comment_thread.dart` (take a context type
+  and id; the poll use keeps working), `app_router.dart`, `admin_modules.dart`,
+  `dashboard_screen.dart`, `event_details_screen.dart`;
+  `GHCAA.Mobile/test/meetings_screen_test.dart` (new), `meeting_detail_screen_test.dart` (new), `admin_meetings_screen_test.dart` (new);
+  `docs/TODO.md`.
+- Do not touch: the other admin routes' guards (a wider guard is its own tracker item), web
+  patterns that do not fit mobile, goldens, the backend.
+- Steps:
+  1. Service and models for the member and admin routes. -> check: `flutter analyze`.
+  2. Member list (upcoming and past, category and type filter) and detail with RSVP, agenda, polls,
+     the comment thread, decisions, to-do lists and minutes. -> check: widget tests at phone width.
+  3. "My to-dos" with the filters, reached from the dashboard; linked meetings on the event screen.
+     -> check: widget test.
+  4. Admin list and editor: series, meeting fields, agenda reorder, attendance, decisions, minutes,
+     to-do lists, the announcement block for All members only. -> check: widget test.
+  5. The two admin routes redirect a signed-in user without the Admin or SuperAdmin role to the
+     dashboard, and the admin module tile shows only for those roles. -> check:
+     `AdminRoute_NonAdmin_Redirected`.
+  6. Wrap widget tests in `ProviderScope`, use a phone viewport and poll for content; do not rely on
+     `pumpAndSettle` with a duration. -> check: the tests pass three runs in a row.
+- Contract: none new.
+- Tests: `meetings_screen_test.dart` :: lists and the filter; `meeting_detail_screen_test.dart` ::
+  RSVP disabled after start, minutes absent before publish, a server message shown on 409;
+  `admin_meetings_screen_test.dart` :: `AdminRoute_NonAdmin_Redirected`, the announcement block
+  hidden for EC and invitee audiences.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/meetings_screen_test.dart test/meeting_detail_screen_test.dart test/admin_meetings_screen_test.dart test/poll_comment_thread_test.dart --exclude-tags golden`;
+  then `python scripts/ci-local.py --only mobile`.
+- Done when: T019, T019a and T020 ticked; the poll comment test still passes; 84.19 stays IN PROGRESS.
+- Stop and ask if: the role is not readable in the router redirect without a new provider. Default:
+  guard inside the two admin screens (show "Admins only" and go back) and note it in the tracker.
+
+<a id="s41"></a>
+**S41 · 84.19, 84.20 (T021) · S**
+- Goal: the meetings work is recorded in every doc that lists features and routes, and both tracker
+  items close on a full local run.
+- Before you start: S40 closed.
+- Read (only these): the meeting entries added to `docs/API_CONTRACT_REGISTRY.md` by S35 to S38; the
+  polls rows of `docs/PROJECT_MAP.md` and `docs/FEATURES.md` (the form to copy); the acceptance part
+  of the spec 026 `spec.md`.
+- Change (only these files): `docs/API_CONTRACT_REGISTRY.md`, `docs/PROJECT_MAP.md`,
+  `docs/FEATURES.md`, `docs/api/swagger.json` (regenerated by `ci-local.py`, not by hand),
+  `docs/specs/026-meetings-and-action-items/tasks.md` and `spec.md` (status line), `docs/TODO.md`,
+  card H00 in this plan (one line: meetings exist, for the book).
+- Do not touch: `docs/book/`, code (a fault found here goes back to its card or to a new tracker
+  item).
+- Steps:
+  1. Compare the registry with the controllers: every meeting route and DTO is listed once.
+     -> check: `grep -c "api/meetings\|api/admin/meeting" docs/API_CONTRACT_REGISTRY.md` against the
+     action count of the three controllers.
+  2. Add the classes, routes, pages and screens to `PROJECT_MAP.md` and the feature to `FEATURES.md`.
+     -> check: each new file of S34 to S40 is named once in the map.
+  3. Run each layer, one at a time: `python scripts/ci-local.py --only backend`, then `web`, `mobile`,
+     `contract`. The contract run refreshes the swagger snapshot. -> check: four green runs.
+  4. Walk the seven acceptance points of the spec against the tests and write the test name beside
+     each in the tracker entry. -> check: no point without a test.
+- Contract: none.
+- Tests: none new.
+- Run: the four `ci-local.py --only` runs of step 3; then `graphify update .`.
+- Done when: T021 ticked and the spec status says built; 84.19 DONE and 84.20 DONE with the commands
+  and counts; the plan check reports 0 problems.
+- Stop and ask if: an acceptance point has no test. Default: reopen the card that owns it; do not
+  close the items.
+
+<a id="s42"></a>
 **S42 · 84.59 · M**
-- Steps: typed DTOs for `IMentorshipService` (three methods), `INetworkingService.GetECPeriodsAsync`,
-  `IContactService.GetMessagesAsync`, `IChatService.GetRecentChatsAsync`, keeping the current JSON
-  property names so clients do not change; regenerate `docs/api/swagger.json`; compare web and mobile
-  models with it.
-- Tests: a serialization test per DTO pinning the property names; existing controller tests.
+- Goal: six service methods that return `IEnumerable<object>` return typed DTOs, the JSON a client
+  receives is unchanged, and the shapes are in Swagger.
+- Before you start: S41 closed. `grep -rn "IEnumerable<object>" GHCAA.Application/Interfaces` shows
+  six lines: `IMentorshipService.cs` (three), `INetworkingService.cs`, `IContactService.cs`,
+  `IChatService.cs`.
+- Read (only these): `MentorshipService.GetSentRequestsAsync`, `GetReceivedRequestsAsync` and
+  `GetAllForAdminAsync`; `NetworkingService.GetECPeriodsAsync`; `ContactService.GetMessagesAsync` (it
+  returns `ContactMessage` entities); `ChatService.GetRecentChatsAsync` (an anonymous shape sorted
+  through a `dynamic` cast); the actions that call them in `MentorshipController.cs`,
+  `NetworkingController.cs` (`GetPeriods`), `AdminController.cs` (`GetContactMessages`) and
+  `MessagingController.cs` (the `recent` and `conversations` action); the client models in
+  `GHCAA.Web/src/app/core/services/chat.service.ts`,
+  `GHCAA.Web/src/app/admin/contact-messages/contact-messages.ts`,
+  `GHCAA.Mobile/lib/features/networking/mentorship_service.dart`, `networking_service.dart` and
+  `GHCAA.Mobile/lib/features/admin/admin_service.dart`.
+- Change (only these files): `GHCAA.Application/DTOs/MentorshipRequestDtos.cs` (new),
+  `GHCAA.Application/DTOs/EcPeriodDto.cs` (new), `ContactMessageDto.cs` (new),
+  `RecentChatDto.cs` (new); the four interfaces; `MentorshipService.cs`, `NetworkingService.cs`, `ContactService.cs`,
+  `ChatService.cs`; the four controllers only where a return type is declared;
+  `GHCAA.Tests/Services/TypedReplyShapeTests.cs` (new); `docs/api/swagger.json` (regenerated),
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`. A client file only if step 5 finds a mismatch.
+- Do not touch: routes, policies, query filters and ordering; any JSON property name; the typed
+  methods of the four services.
+- Steps:
+  1. Before any change, write `TypedReplyShapeTests` so each of the six methods is serialized with
+     the API's JSON options and the property names are compared with a fixed list. -> check: the
+     tests pass on the old code. This pins today's shape.
+  2. Add the DTOs with exactly those properties, nested ones included (the mentorship rows carry a
+     `Mentor` or `Requester` object with `Id`, `FullName`, `PhotoPath`, `MembershipNumber`; the admin
+     list has both without `PhotoPath`, either may be null). -> check: build.
+  3. Change the six signatures and projections. `ContactMessageDto` holds every property the entity
+     sends today and no navigation property. `GetRecentChatsAsync` sorts on the typed property and
+     drops the `dynamic` cast. -> check: the step 1 tests pass unchanged, and the existing service
+     and controller tests pass.
+  4. Regenerate the swagger snapshot with `python scripts/ci-local.py --only contract`. -> check:
+     the six replies name their DTO in `docs/api/swagger.json`.
+  5. Compare each web and mobile model with its DTO, field by field. -> check: a line per client
+     model in the tracker entry; fix a client only where it reads a field the API never sent.
+- Contract: no route or field changes. Six replies gain a schema: `api/mentorship/sent`,
+  `api/mentorship/received`, `api/mentorship/admin/all`, `api/networking/periods`,
+  `api/admin/contact-messages`, `api/messaging/recent` (also served as `api/messaging/conversations`
+  and under `api/chat`).
+- Tests: `TypedReplyShapeTests.cs` :: one test per method, named `<Method>_KeepsPropertyNames`;
+  existing `MentorshipServiceTests`, `MentorshipControllerTests`, `ContactServiceTests`,
+  `ChatServiceTests` and `NetworkingServiceTests` unchanged.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~TypedReplyShapeTests|FullyQualifiedName~Mentorship|FullyQualifiedName~ContactService|FullyQualifiedName~ChatService|FullyQualifiedName~NetworkingService"`;
+  then `python scripts/ci-local.py --only backend` and `--only contract`.
+- Done when: `grep -rn "IEnumerable<object>" GHCAA.Application/Interfaces` shows nothing; the registry
+  has the six shapes; 84.59 DONE.
+- Stop and ask if: a property name or casing must change to make a DTO (for example the entity
+  sends a field the admin page should not get). Default: keep the name and the field, and record
+  the finding as a new tracker item.
 
+<a id="s43"></a>
 **S43 · 84.84 (backend) · L · migration 8**
-- Steps: `Member.City`, `Member.Country` (nullable, max 100), migration `AddMemberLocation`;
-  `MemberSearchFilterDto.City`, `.Country` (case-insensitive, trimmed); a member with
-  `IsAddressPublic` off is never matched by location and the fields are blanked in directory output.
-- Tests: match, case, hidden member, blanked fields.
+- Goal: a member has a home city and country, signed-in members can search the directory by either,
+  and a member who hides their address is never found or shown by location.
+- Before you start: S41 closed and migration 7 of the ledger (section 7, the migration ledger) is
+  applied locally. `grep -n "City\|Country" GHCAA.Domain/Models/Member.cs` shows nothing.
+- Read (only these): `Member` (`PresentAddress`, `PermanentAddress`, `IsAddressPublic`) in
+  `GHCAA.Domain/Models/Member.cs`; `GHCAA.Application/DTOs/BaseMemberDto.cs`, `UpdateProfileDto.cs`,
+  `MemberSummaryDto.cs`; `MemberSearchFilterDto` in `GHCAA.Application/Interfaces/INetworkingService.cs`;
+  `NetworkingService.SearchMembersAsync`, `SearchPublicDirectoryAsync`, `ToPublicListing` and
+  `MapToDto` (where the addresses become "Confidential"); the two `IsAddressPublic` lines in
+  `GHCAA.Infrastructure/Services/MemberService_Search.cs` and in `MemberService_Profile.cs`;
+  `NetworkingController.Search`.
+- Change (only these files): `Member.cs`, `Constants.cs`, `BaseMemberDto.cs`, `MemberSummaryDto.cs`,
+  `INetworkingService.cs`, `NetworkingService.cs`, `MemberService_Profile.cs`,
+  `MemberService_Search.cs`, the `Member` configuration class; a new migration `AddMemberLocation`
+  with its `.Designer.cs`, and `PgSqlApplicationDbContextModelSnapshot.cs`;
+  `GHCAA.Tests/Services/NetworkingServiceTests.cs`, `GHCAA.Tests/Services/MemberSearchOrderTests.cs`
+  only if a fixture needs the fields; `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, the ledger
+  row in this plan.
+- Do not touch: `PresentAddress` and `PermanentAddress` (no parsing of old addresses into city and
+  country), the other privacy switches, `ToPublicListing` (the public directory sends five fields
+  and stays that way), `Seed/*.json`, any client (S44).
+- Steps:
+  1. `Member.City` and `Member.Country`, nullable, max 100 from a new constant; the same two on
+     `BaseMemberDto` with `[MaxLength]`. -> check: build.
+  2. Migration per rule 5 of section 2 (the migration rule): two nullable columns, no data step.
+     -> check: the dry run in rule 5 on a fresh database and on a copy with members.
+  3. Profile save (`UpdateProfileAsync`) stores both, trimmed, empty as null. Profile read for
+     another member blanks both when `IsAddressPublic` is off, in `MapToDto` beside the address
+     lines; the owner and an admin still see them. -> check: profile tests.
+  4. `MemberSearchFilterDto.City` and `.Country`: trimmed, case-insensitive whole-value match that
+     works on both providers (compare lower-cased values). When either is set, members with
+     `IsAddressPublic` off are left out. -> check: search tests.
+  5. `MemberSummaryDto` gains `City` and `Country`, filled in `SearchMembersAsync` only for members
+     with `IsAddressPublic` on. `SearchPublicDirectoryAsync` ignores both filters and sends neither
+     field. -> check: `PublicDirectory_IgnoresLocation`.
+- Contract: `GET api/networking/search` and `api/networking/directory` take `city` and `country`
+  (signed-in callers only; ignored for anonymous ones). `MemberSummaryDto`, the profile read and
+  `UpdateProfileDto` gain nullable `city` and `country`. No new route.
+- Tests: `NetworkingServiceTests.cs` :: `Search_ByCity_Matches`, `Search_ByCountry_IgnoresCaseAndSpaces`,
+  `Search_ByLocation_SkipsHiddenAddress`, `Search_NoLocationFilter_BlanksHiddenCityAndCountry`,
+  `Search_CityAndCountry_BothMustMatch`, `PublicDirectory_IgnoresLocation`,
+  `Profile_HiddenAddress_BlanksCityAndCountry`, `Profile_Save_TrimsAndStoresNullForEmpty`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~NetworkingServiceTests|FullyQualifiedName~MemberSearchOrderTests"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: ledger row 8 has its timestamp; the registry has the two filters and fields; 84.84
+  gets an evidence note and stays open until S44.
+- Stop and ask if: the admin member search should also filter by location. Default: no, only the
+  member directory; record the wish as a new tracker item.
 
-**S44 · 84.84 (clients) · M** Profile fields and directory filters on web and mobile. Tests on both.
-Done when: 84.84 DONE.
+<a id="s44"></a>
+**S44 · 84.84 (clients) · M**
+- Goal: members set city and country on their profile and filter the directory by them, on web and
+  on mobile.
+- Before you start: S43 closed. The local API returns `city` on `GET api/networking/search`.
+- Read (only these): `GHCAA.Web/src/app/member/profile/profile.ts` and `profile.html` (the address
+  fields and the address privacy switch); `GHCAA.Web/src/app/common/directory/directory.ts` and
+  `directory.html` (the filter form and how filters reach the query);
+  `GHCAA.Mobile/lib/screens/member/profile_edit_screen.dart`, `directory_screen.dart`;
+  `GHCAA.Mobile/lib/features/networking/networking_service.dart`;
+  `GHCAA.Mobile/test/directory_filters_test.dart` and `profile_edit_screen_test.dart`.
+- Change (only these files): `profile.ts`, `profile.html`, `profile.spec.ts`, `directory.ts`,
+  `directory.html`, `directory.spec.ts`, the web member model file those two import;
+  `profile_edit_screen.dart`, `directory_screen.dart`, `networking_service.dart`, the mobile member
+  model those import, `directory_filters_test.dart`, `profile_edit_screen_test.dart`;
+  `docs/FEATURES.md`, `docs/TODO.md`.
+- Do not touch: `GHCAA.Web/src/app/public/directory/public-directory.ts` (no location there), the
+  backend, the other profile fields, goldens.
+- Steps:
+  1. Web profile: two text inputs, max 100, beside the address fields, with a hint that the address
+     switch also hides them. -> check: spec, and a save in the browser.
+  2. Web directory: city and country filter inputs sent as `city` and `country`; a card shows them
+     when the API sends them. -> check: spec.
+  3. Mobile profile edit and directory: the same two fields and filters. -> check: widget tests at
+     phone width.
+  4. Labels come from the translation or label source the neighbouring fields use, not from string
+     literals in the template. -> check: no new literal label in the four screens.
+- Contract: none new.
+- Tests: `profile.spec.ts` :: city and country are sent on save; `directory.spec.ts` :: the two
+  filters reach the service call and clear with the rest; `profile_edit_screen_test.dart` :: the
+  fields save; `directory_filters_test.dart` :: the filters reach the request.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/profile src/app/common/directory`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/directory_filters_test.dart test/profile_edit_screen_test.dart --exclude-tags golden`;
+  then `python scripts/ci-local.py --only web` and `--only mobile`.
+- Done when: a member with a hidden address is not found by city on either client; 84.84 DONE with
+  the commands and counts.
+- Stop and ask if: the owner wants country as a pick list. Default: free text on both clients; a
+  list is a new tracker item.
 
 ### Phase E. Election sessions 7 to 9
 
+<a id="s45"></a>
 **S45 · 95.2 (N1) · L · migration 9**
 - Steps: migration `AddCommitteePositionsAndTerms`: `EcEndReason` table (seeded with today's five
   `VacancyReason` values under the same ids; TermEnded and Died marked system), `ECMember` end reason
@@ -623,26 +2303,32 @@ Done when: 84.84 DONE.
 - Tests: model on SQLite; migration rule 5; rollback refusal on PostgreSQL.
 - Done when: N1 built; 95.2 stays PARTIAL until G-REL confirms preprod and the invalid-rows report.
 
+<a id="s46"></a>
 **S46 · 95.4 · M** One vacant-seat query in `GovernanceService` (holders in the active period below
 the position's seat count); filter on the web governance page and the mobile governance screen.
 Tests: ended term appears, filled seat leaves. Done when: 95.4 DONE.
 
+<a id="s47"></a>
 **S47 · 95.12 (backend) · M · security** `TermEndSweep` like `DataRetentionSweep`, off by default
 (`OrgConfig` governance setting); default term length fills a new period's end date; end-reason
 admin routes; system reasons cannot be removed; `end-term` takes a reason id and a note.
 Tests: on and off, early end with each reason, system reason delete refused.
 
+<a id="s48"></a>
 **S48 · 95.12 (clients) · M** Web end-reason admin next to positions, reason picker on web and
 mobile end-term. Done when: 95.12 DONE.
 
+<a id="s49"></a>
 **S49 · 95.5 (backend) · M** Kind on create; a by-election offers vacant seats only and refuses a held
 seat at create and at declare; declare never ends a holder (owner 2026-10-14, the older tracker text
 about ending a holder is superseded); `GetCurrentAsync` returns the general election and any live
 by-election. Tests: declare fills only the vacant seats, guards, two live elections.
 
+<a id="s50"></a>
 **S50 · 95.5 (clients) · M** Kind shown on ballot, results and ER forms; both live elections on web
 and mobile; admin create on web only. Done when: 95.5 DONE.
 
+<a id="s51"></a>
 **S51 · 37.13f · S** Close the 11 *[to confirm]* points in doc 09 against free Neon and free Render
 public docs (link and date for each); mark availability as a known limit with no SLA; backup schedule
 with RTO and RPO; branch warning in `docs/DEPLOYMENT_CHECKLIST.md`; a log line for a failed count with
@@ -650,180 +2336,229 @@ a test. Points that need the owner's dashboard values name the owner as the sour
 
 ### Phase F. P2 items
 
+<a id="s52"></a>
 **S52 · 84.4 · S** Parity table in spec 004 (or `docs/API_CONTRACT_REGISTRY.md` appendix): for each
 endpoint in the spec 004 contract table, grep `GHCAA.Web/src` and `GHCAA.Mobile/lib` for the route; columns web,
 mobile, response difference. Script it in `scripts/` if it takes more than one pass.
 
+<a id="s53"></a>
 **S53 · 93.3 · S** Find why `registerNewMemberViaUi` gets "Registration failed" on the local API (read
 `api_error.log` tail and the registration response body; the membership walkthrough records the
 API's answer). Fix the cause (seed, OrgConfig or test data), run `portal-mobile-nav.spec.ts` and
 `gallery.spec.ts`.
 
+<a id="s54"></a>
 **S54 · 84.27 (API tests) · S** `ArchiveControllerTests` for each route: 200, 401, 403, 404.
 
+<a id="s55"></a>
 **S55 · 84.27 (web page) · M** `admin/archive` moderation page with the shared admin components and
 an `ADMIN_ARCHIVE` endpoint block. Vitest. Done when: 84.27 DONE.
 
+<a id="s56"></a>
 **S56 · 84.55 · M** `CreateGalleryDto` with caller fields only, mapped in the service; test that
 extra fields are ignored; web and mobile callers checked; registry.
 
+<a id="s57"></a>
 **S57 · 84.93 · M** `POST api/admin/governance/constitution` (AdminOnly policy) with
 version, text, PDF, effective date, change summary; on the effective date the new one becomes active
 and the old gets `SupersededDate` (computed on read, so no job); public page shows the version in
 force. Tests: future date, two on the same date (refused). Web admin screen. Unblocks Secretary
 Task 5 (78.9).
 
+<a id="s58"></a>
 **S58 · 84.97 · M** Status change to Terminated or InactiveResigned requires a reason; write
 `MembershipHistory` (from, to, admin, reason); admin member page shows the history. Tests: missing
 reason 400, history row. Walkthrough: membership walkthrough terminates the new member at the
 end (missing reason refused, history shown).
 
+<a id="s59"></a>
 **S59 · 84.67 · M** Mobile Change Password screen under settings calling the web route, step-up
 dialog, `serverMessage`. Widget tests: success, wrong current password, step-up cancel.
 
+<a id="s60"></a>
 **S60 · 34.D8 · M** Fix the local admin role through the protected SuperAdmin seeder path (memory
 `feedback_protected_superadmin_pattern`), not SQL. Then the browser walk on the tracker list,
 including a member refused when creating a Notice. Record each step.
 
+<a id="s61"></a>
 **S61 · 84.65 · M** Web `admin/scholarships` page on the existing routes; list, create, edit, close,
 review applications. Vitest; spec 015.
 
+<a id="s62"></a>
 **S62 · 49.3.C · L · migration 10** `User.ContactEmail` (nullable, unique when set), migration
 `AddUserContactEmail`; SuperAdmin sets it on the roles page; reset for a no-email account sends there
 when set, else the current copy and share flow. Tests on both paths.
 
+<a id="s63"></a>
 **S63 · 97.1 (backend) · M** `OtpPurpose.EmailVerify` appended; profile routes to send and verify;
 changing the email clears `EmailVerified`; reuse the OTP service and its lock. Tests: OTP path, lock,
 clear on change, social link refused while unverified.
 
+<a id="s64"></a>
 **S64 · 97.1 (clients) · M** Badge and Verify action on web and mobile profile. Walkthrough: membership
 walkthrough shows the badge after the first login and verifies by code. Done when: 97.1 DONE.
 
+<a id="s65"></a>
 **S65 · 84.83 (backend) · L · migration 11** `Member.IsMentor` and `Member.MentorTopics` (one row per
 person, so not on `ProfessionalRecord`); migration `AddMentorOptIn`; requests only to
 opted-in members; directory filter. Tests incl. opting out with a request pending (pending stays,
 new ones refused).
 
+<a id="s66"></a>
 **S66 · 84.83 (clients) · M** Opt-in setting and directory filter on web and mobile.
 
+<a id="s67"></a>
 **S67 · 84.82 (backend) · L · migration 12** `EventFeedback` (event, member, rating 1-5, comment,
 created at; unique event and member), migration `AddEventFeedback`; only approved attendees after the
 event starts; admin summary. Tests: non-attendee, repeat.
 
+<a id="s68"></a>
 **S68 · 84.82 (clients) · M** Rating form on web and mobile; admin summary on web.
 
+<a id="s69"></a>
 **S69 · 84.72 (backend) · L · migration 13** Admin forum routes (categories CRUD, order, retire;
 pin, lock, remove with reason to the audit log, reusing spec 028 moderation); migration
 `SeedForumCategories` with a few defaults (data step). Tests.
 
+<a id="s70"></a><a id="s71"></a>
 **S70 · 84.72 (web) · M** Admin forum section. **S71 · 84.72 (mobile) · M** Same tools behind a role
 guard (memory `gotcha_mobile_admin_routes_no_role_guard`). Done when: 84.72 DONE; spec 017 updated.
 
+<a id="s72"></a>
 **S72 · 92.1 · S** Write spec 022 decisions with the owner: settings in an OrgConfig `Approvals`
 section (recommended) or a table; "off" means created approved with an audit row (recommended);
 SuperAdmin always approves (yes, protected rule); member import stays SuperAdmin and Admin.
 
+<a id="s73"></a>
 **S73 · 92.2 · L** Per spec 022. If the owner chose a table, it takes ledger row 14. Policy handler
 reading the flow's roles; unknown flow refused and logged; `MemberApprovalMode` mapped. Tests per
 the tracker; reflection tests updated.
 
+<a id="s74"></a><a id="s75"></a>
 **S74 · 92.3 · M** Web settings screen and queue filtering. **S75 · 92.4, 92.5 · S** Mobile gating
 with widget tests; FR and NFR entries, spec 002 tables, `business_flow` notes, `PROJECT_MAP.md`.
 The book part of 92.5 (§8.4, the role matrix, and its figure) goes to H00.
 
+<a id="s76"></a>
 **S76 · 37.7 (web mechanism) · M** `I18nService`, `en.ts`, `bn.ts`, `TranslatePipe`, toggle beside
 the theme toggle, self-hosted Bengali font, `<html lang>`; key-drift test. Admin stays English.
 
+<a id="s77"></a>
 **S77 · 37.7 (web strings) · M** Public site and portal nav, buttons, labels, validation messages.
 Bengali strings are drafts; 37.7 stays PARTIAL until gate G-BN.
 
+<a id="s78"></a>
 **S78 · 8.8 · M** Mobile: same keys in `app_localizations.dart` (flat dictionary, no ARB). 8.8 stays
 PARTIAL until G-BN.
 
+<a id="s79"></a>
 **S79 · 62.2 · M** Write the missing profile files for `profiles/default/` and `profiles/ghc/`:
 `email_templates.json`, `site_content.json`, `themes.json`, `membership-tiers.json`,
 `governance.json`, and the GHC `constitution.json`; match the shapes the seeders read. Tests: the
 profile pack loader test per file.
 
+<a id="s80"></a>
 **S80 · 51.4 · S** Add the excluded-type matrix (`PaymentProof`, `Certificate`, `Signature`,
 `NoticeDocument` not compressed) and the non-image fallback to `LocalFileStorageServiceTests`.
 
+<a id="s81"></a>
 **S81 · 27.1, 27.8 · M** Script the low-coverage report from `coverage.cobertura.xml` (backend), the
 Vitest V8 summary and Flutter LCOV. Question to the owner first: enforce 80 % per file now (fails
 today) or a ratchet (no file drops below its current figure, new files at least 80 %)
 (recommended). Wire the chosen gate into `ci-local.py`.
 
+<a id="s82"></a>
 **S82 · 73.5 · M** Extend `traceability.py` to generate the whole matrix from the FR and NFR tags.
 The book claim it enables goes to H00.
 
+<a id="s83"></a>
 **S83 · 73.6 · S** Test pinning the seeded constitution version and a SHA-256 of its clause text.
 
 ### Phase G. P3 and P4 items
 
+<a id="s84"></a>
 **S84 · 84.57, 84.62 · S** Named upload limits in `Constants.Uploads` used at every call site listed in
 84.57; a per-user `Assistant` rate-limit policy (default 20 per hour from OrgConfig) with a 429 test,
 checked against the global limiter.
 
+<a id="s85"></a>
 **S85 · 84.64, 93.4 · S** Mobile "mark all read" on the notifications screen (widget test). 93.4:
 ask the owner which of `/communications`, `/legacy`, `/professionals` stay (recommended: add the
 ones with a working screen to the drawer, remove the rest), and gate drawer entries on the OrgConfig
 flags.
 
+<a id="s86"></a>
 **S86 · 84.69 · M** Mobile site content list and detail from the public route; widget tests and a
 phone-viewport check.
 
+<a id="s87"></a>
 **S87 · 84.23 · M** Question to the owner: mobile signature upload (recommended yes, `POST
 api/profile/signature` exists) and the unused PDF routes (recommended: mobile downloads
 `id-card/pdf` and `certificate/pdf` and drops its own PDF builder, which also fixes Bengali names).
 
+<a id="s88"></a>
 **S88 · 96.3 · M** Messages page header and composer, directory search input, campaign form inputs
 onto the shared components.
 
+<a id="s89"></a>
 **S89 · 84.90 · M** Owner question: reuse the newest live code per type (recommended) or keep minting.
 Build the chosen rule; spec 013 FR-010.
 
+<a id="s90"></a>
 **S90 · 84.95 · S** Applied date and days waiting on the approval list, past-limit mark, both
 clients; tests for day 30 and 31; membership walkthrough checks the applied date and days waiting
 in the queue. Runs after the 78.9 sessions unless the owner says first.
 
+<a id="s91"></a>
 **S91 · 84.94 · M** Arrears report with CSV export; tests for no dues, part payment, waived due.
 Same timing rule as S90.
 
+<a id="s92"></a>
 **S92 · 84.66 · M** OrgConfig cap on pending archive submissions (default 5); API refusal message;
 both clients show it; golden snapshot.
 
+<a id="s93"></a>
 **S93 · 51.5 · M** OrgConfig `fileStorage` section read by the storage service with `Constants`
 fallback; admin settings tab.
 
+<a id="s94"></a>
 **S94 · 84.98 · M** The seven theme gaps on the tracker; color logic tests; browser check both modes
 with a light custom primary.
 
+<a id="s95"></a>
 **S95 · 90.1, 90.2 · L · migration 15** `SavedReport` with `CreatedByUserId` (spec 010 wins over the
 tracker's `CreatedBy`), migration `AddSavedReports`; `ReportService` with field whitelist and row cap.
 
+<a id="s96"></a><a id="s97"></a>
 **S96 · 90.3, 90.5 · M** Controller and tests. **S97 · 90.4 · M** Web page on the shared grid from
 S18.
 
+<a id="s99"></a><a id="s100"></a><a id="s101"></a><a id="s102"></a><a id="s103"></a>
 **S99 to S103 · 37.4, 37.5, 37.10** Build as the tracker items describe; migrations 16 and 17 for
 cohorts and memorial; 37.10 after 37.4.
 
+<a id="s104"></a><a id="s105"></a><a id="s106"></a><a id="s107"></a>
 **S104 to S107 · 62.56** Spec 025 tasks T001 to T036 in four parts: section map and key uniqueness
 (a, g); export (b); upload, mapping and preview (c, d); modes, transaction, tests and docs (e, f).
 
+<a id="s108"></a>
 **S108 · 60.3, 6.2, 8.5, 8.7, 37.9 · S** One owner question round, each with a recommended default:
 60.3 read both clients and close as a naming difference if they hit the same routes; 6.2 fold into
 84.83 (mentor and referral) or drop; 8.5 drop unless a measured slowness exists; 8.7 drop with 8.5;
 37.9 keep at P4 for after 37.4. Record each answer; build cards are added only for a "build" answer.
 
+<a id="s109"></a>
 **S109 · 37.11 · S** Refresh the WP37 baselines from a full run and update `FEATURES.md`,
 `PROJECT_MAP.md`, `SRS.md` and `ARCHITECTURE.md`. Close 37.11 when every other WP37 item is DONE or
 WONTDO; if gate items remain (G-DEV, G-BN), set it PARTIAL naming them.
 
 ### Track H. Book, on the owner's word
 
+<a id="h00"></a>
 H00 keeps the list of book facts changed by feature sessions. It starts with: 92.5 role matrix
 (§8.4, the role matrix, and its figure), 73.5 matrix claim (§3.9 and §12.2), every repository count.
 
+<a id="h01"></a><a id="h02"></a><a id="h03"></a><a id="h04"></a><a id="h05"></a><a id="h06"></a><a id="h07"></a><a id="h08"></a><a id="h09"></a>
 H01 78.10 (coverage summary, static analysis, latency, ASVS walkthrough, each with its command and
 date). H02 63.8 and 84.35 (re-take every count `wbs.py` quotes). H03 84.96 (owner restates the DC-15
 claim) and 64.8. H04 64.9 and 67.3 (diagrams). H05 to H07 67.2 placeholders chapter by chapter, and
@@ -969,7 +2704,7 @@ What counts as evidence:
 
 | Script | When to run it |
 |---|---|
-| `scripts/backlog_inventory.py` | At the start of a session, and `--check` after any tracker status change. |
+| `scripts/backlog_inventory.py` | At the start of a session, and `--check` after any tracker status change or card edit. `--card <id>` before writing or rewriting a card. |
 | `scripts/ci-local.py` | `--only <layer>` once per layer a wave touches; the full run once at the end of a wave, before handing it to the owner. `--quick` for a fast format and type check. |
 | `scripts/archive_done_todos.py` | When DONE items pile up in `TODO.md`. |
 | `scripts/verify-election.py` | After election changes, before a preprod release. |
@@ -1159,6 +2894,8 @@ brief asks for it.
 | 2026-11-13 | 84.102 (built, partial) | Duplicate application and refused event registrations answer 409 with the reason, unknown event 404; web shows one message, mobile shows the server reason. Tests written in all three layers; web app type-check clean; backend, Vitest and Flutter runs left for the Windows machine. Walkthroughs now make sure a cash payment method is enabled, creating or switching it on as the SuperAdmin | `RequestConflictException.cs`, `MemberService.cs`, `EventService.cs`, `RegistrationController.cs`, `EventsController.cs`, their tests, `register.ts`, `events.ts`, their specs, `events_service.dart`, two event screens, `events_register_error_test.dart`, `fake_services.dart`, specs 012 and 014, registry, walkthroughs |
 | 2026-11-13 | Docs sync after the walkthroughs and 84.102 | `PROJECT_MAP.md` test table lists the three walkthroughs, their helpers, runners and `local-election.py`; README testing section names them; `BUSINESS_TEST_CHECKLIST.md` points sections A and B at them; tracker items 84.80, 84.92, 84.95, 84.97 and 97.1 and cards S11, S13, S58, S64 and S90 now say which walkthrough step each adds | `docs/PROJECT_MAP.md`, `README.md`, `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/TODO.md`, this file |
 | 2026-11-14 | 84.102 (closed) | Ran the three test layers and both walkthroughs on Windows: backend 105/105, web `register.spec.ts` + `events.spec.ts` 21/21, `events_register_error_test.dart` 3/3, `run-membership-walkthrough.bat` and `run-event-walkthrough.bat` both passed. `events.spec.ts`'s "shows the server reason when a registration is refused" had a `paymentReference` of 'REF' (3 chars), short of the form's own `minLength(4)` validator, so the form's own validation message pre-empted the assertion; fixed to 'REF123'. 93.3's note no longer needs to rule out the old duplicate-500 toast, since 84.102 replaced it with a 409 and the server's reason | `events.spec.ts`, `docs/TODO.md`, this file |
+| 2026-11-15 | 99.10 (added) | Card rewrite, phases A to C: S01 to S33 in the eleven-part form, each file, route and test name checked against the code; `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`: 0 problems; `python -m unittest discover -s scripts -p test_backlog_inventory.py`: 34 of 34 OK; tracker notes on 37.16i, 84.80, 84.92, 88.4 and the phase C items | this plan, `scripts/backlog_inventory.py`, `scripts/test_backlog_inventory.py`, `docs/TODO.md`, spec 008 `spec.md`, spec 023 `delivery-plan.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, both `ghcaa-project-orchestrator` skill copies |
+| 2026-11-15 | 99.10 | Card rewrite, phase D: S34 to S44 in the eleven-part form, each file, route and test name checked against the code; `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`: 0 problems; `python -m unittest discover -s scripts -p test_backlog_inventory.py`: 34 of 34 OK; tracker notes on 84.19, 84.20, 84.59 and 84.84 | this plan, `docs/TODO.md` |
 
 <!-- backlog-check: on -->
 
