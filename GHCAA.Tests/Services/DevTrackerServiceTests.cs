@@ -118,6 +118,26 @@ public class DevTrackerServiceTests
     }
 
     [Test]
+    public async Task GetOpenItemsAsync_ReadsQuotedLetteredAndThreePartIds()
+    {
+        WriteTodo("""
+            # Work Package 28 — Config
+
+            > 28.25 [TODO] Tests: re-run the snapshots.
+            > Command: npx playwright test
+            34.D8 [TODO] Live-browser check.
+            49.3.C [TODO] **Priority: P2 | Depends on: none.** Contact email.
+            47.13.1 [DONE 2026-10-01] Closed sub-item.
+            """);
+
+        var items = await CreateService(_root).GetOpenItemsAsync(new DevTrackerFilterDto());
+
+        items.Select(i => i.Id).Should().BeEquivalentTo(new[] { "28.25", "34.D8", "49.3.C" });
+        items.Single(i => i.Id == "28.25").Summary.Should().Be("Tests: re-run the snapshots. Command: npx playwright test");
+        items.Single(i => i.Id == "49.3.C").Priority.Should().Be("P2");
+    }
+
+    [Test]
     public async Task GetOpenItemsAsync_RereadsTheFileOnEveryCall()
     {
         // The Refresh button relies on this: no caching between calls.

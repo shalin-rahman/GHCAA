@@ -236,7 +236,7 @@ the ledger row in section 7. Run top to bottom.
 | H04 | 64.9, 67.3 | [Update book diagrams](#h04) | M | book figures | | |
 | H05 | 67.2 (chapters 7, 10) | [Complete book placeholders in chapters 7 and 10](#h05) | M | book | | H01 |
 | H06 | 67.2 (chapter 9) | [Complete book placeholders in chapter 9](#h06) | M | book | | H05 |
-| H07 | 67.2 (chapters 11 to 13), 67.4 | [Complete book chapters 11 to 13 and 67.4](#h07) | M | book | | H06 |
+| H07 | 67.2 (chapters 11 to 13), 67.4, 67.10 (placeholders left in chapters 9, 10, 12, 13) | [Complete book chapters 11 to 13 and 67.4](#h07) | M | book | | H06 |
 | H08 | 67.7, 67.5 | [Join book prose and tighten page layout](#h08) | M | book | | H07 |
 | H09 | 63.34, 63.18, 74.3 | [Complete the remaining book updates](#h09) | S | book | | H08 |
 
@@ -2562,7 +2562,9 @@ H00 keeps the list of book facts changed by feature sessions. It starts with: 92
 H01 78.10 (coverage summary, static analysis, latency, ASVS walkthrough, each with its command and
 date). H02 63.8 and 84.35 (re-take every count `wbs.py` quotes). H03 84.96 (owner restates the DC-15
 claim) and 64.8. H04 64.9 and 67.3 (diagrams). H05 to H07 67.2 placeholders chapter by chapter, and
-67.4. H08 67.7 prose joins and 67.5 page tightening. H09 63.34, 63.18 (only if asked), 74.3. Each H
+67.4. Chapters 9, 10, 12 and 13 have had prose since 16 November 2026 (67.10), so H05 to H07 fill
+their numbers and figures and do not write them from headings. H08 67.7 prose joins and 67.5 page
+tightening, to the 80 to 90 pages the owner set on 16 November. H09 63.34, 63.18 (only if asked), 74.3. Each H
 card ends with `python docs/book/build/build.py --pdf --strict` clean.
 
 ## 5. Owner gate cards

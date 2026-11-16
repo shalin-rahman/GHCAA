@@ -239,10 +239,10 @@ in the outline and do the same in the chapter. This is not a convention to remem
 compares them on every build and `--strict` fails on any disagreement, in either direction,
 including a difference in order alone.
 
-Chapters 7 to 13 exist as stubs generated from the outline: the headings are real and checked, and
-each section carries a `*[Not written]*` placeholder with the outline's brief, so `--no-placeholders`
-counts exactly what is left to write. Fill a section by replacing its placeholder; do not delete the
-heading.
+Every chapter now has prose under its headings. Chapters 9, 10, 12 and 13 were written on 2026-11-16
+without figures or measured numbers: each missing value is a `*[` placeholder that names what is
+needed and its source, so `--no-placeholders` counts exactly what is left to fill. Fill one by
+replacing its placeholder; do not delete the heading.
 
 ## Diagrams
 

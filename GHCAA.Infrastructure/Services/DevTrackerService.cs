@@ -23,9 +23,11 @@ namespace GHCAA.Infrastructure.Services
         //   "82.115 [TODO] **Priority: P3 | Depends on: none.** text"
         //   "60.4 [TODO, tracked in 82.84] **Priority: P1.** text"  (note after the status word)
         //   "- **37.13m Title [TODO] Priority: P1 | Depends on: none.** text"  (WP37 bullet shape)
+        //   "> 28.25 [TODO] text"  (WP28 quotes its items)
+        //   "34.D8 [TODO] text", "49.3.C [TODO] text", "47.13.1 [TODO] text"  (lettered and three-part ids)
         // A title is only allowed after the bullet and bold, so a numbered prose line is not an item.
         private static readonly Regex ItemLinePattern = new(
-            @"^(?<bold>\s*- \*\*)?(?<id>\d+\.\d+[a-z]?)(?(bold)(?: (?<title>[^\[\n]*?))?) *" +
+            @"^(?:> )?(?<bold>\s*- \*\*)?(?<id>\d+\.(?:\d+[a-z]?(?:\.\d+|\.[A-Z])?|[A-Z]\d+))(?(bold)(?: (?<title>[^\[\n]*?))?) *" +
             @"\[(?<status>TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)[^\]]*\]\s*(?<rest>.*)$",
             RegexOptions.Compiled);
 
@@ -80,7 +82,8 @@ namespace GHCAA.Infrastructure.Services
                 {
                     var next = lines[j];
                     if (string.IsNullOrWhiteSpace(next) || next.StartsWith('#') || ItemLinePattern.IsMatch(next)) break;
-                    body.Add(next.Trim());
+                    var text = next.Trim();
+                    body.Add(text.StartsWith("> ") ? text[2..] : text);
                 }
                 var blob = string.Join(" ", body);
 

@@ -996,6 +996,19 @@ the merged section is 6.4, Component and Interface Design. renumber.py rebuilt t
 `build.py --strict` reports no outline drift and no lint finding. Still open: the prose join at each
 dropped heading, which belongs to the 67.5 pass, and a `--pdf` build to refill the contents folios.
 
+67.10 [PARTIAL 2026-11-16] **Priority: P1 | Depends on: none.** Raised by the owner 2026-11-16: write
+the remaining chapters in plain, human-sounding words, with no figures for now and no calculated
+numbers; the numbers and the content that depends on them come later. Done: chapters 9, 10, 12 and 13
+have prose under every heading, about 6,800 words in all. Each measured value, count, cost and result
+is a `*[` placeholder that names what is needed and where it comes from (38 placeholders across the
+four files). No figure or table was added, so the outline's artefact counts for these chapters are
+still owed. Chapter 10 states that the repository documents no database backup or restore, and
+chapters 12 and 13 carry that as a limitation and as the first debt to pay. Still open: fill the
+placeholders once the measurements are run; draw the figures and tables; the whole-book cut to 80 to
+90 pages, which is the 67.5 pass and was put off to a later sitting by the owner's choice. The
+`--strict` build stops on one thing these chapters did not cause: chapters 4, 7 and 11 quote 384
+commits as of 3 November 2026 and the tree now gives 404. That count is left for the numbers pass.
+
 72.4 [ONHOLD 2026-11-02, until Dependabot opens its first pull requests] **Priority: P3.** Watch the first Dependabot run. Five ecosystems opening at once
 produces a burst even with the caps, and the grouping rules are a guess until they have been seen
 against a real week's updates. Adjust the caps or the groups if the burst is unmanageable rather than
@@ -1067,6 +1080,13 @@ of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
 ---
 
 (82.115 done 2026-09-18 — see docs/TODO_ARCHIVE.md)
+
+82.118 [DONE 2026-11-16] **Priority: P3 | Depends on: none.** Raised by the owner 2026-11-16: rebuild
+`docs/book/build/tracker.html` and make the tracker screen in the application show fresh data on
+every reload. The screen already re-read `docs/TODO.md` on each request, so no caching change was
+needed. It did miss three item shapes the tracker page counts: lines quoted with `> `, lettered ids
+such as 34.D8, and three-part ids such as 49.3.C. `DevTrackerService` now reads all three, with one
+new test in `DevTrackerServiceTests` (10 pass).
 
 ---
 

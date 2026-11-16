@@ -249,59 +249,59 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 9.1 Verification and Validation Strategy and Test Levels | 86 |
 | 9.2 Software Quality Assurance Plan | 86 |
 | 9.3 Test-Case Design Techniques Applied | 86 |
-| 9.4 Unit and Component Testing | 86 |
-| 9.5 Widget and Golden Testing | 87 |
-| 9.6 Integration, System and End-to-End Testing | 87 |
-| 9.7 Regression Testing and Test Selection | 87 |
-| 9.8 Security Testing | 87 |
-| 9.9 Performance and Load Testing | 87 |
+| 9.4 Unit and Component Testing | 87 |
+| 9.5 Widget and Golden Testing | 88 |
+| 9.6 Integration, System and End-to-End Testing | 88 |
+| 9.7 Regression Testing and Test Selection | 88 |
+| 9.8 Security Testing | 88 |
+| 9.9 Performance and Load Testing | 88 |
 | 9.10 Usability and Accessibility Testing | 88 |
 | 9.11 User Acceptance Testing | 88 |
-| 9.12 Product Metrics, Static Analysis and Defect Analysis | 88 |
-| 9.13 Summary | 88 |
-| **Chapter 10 — Deployment and Operations** | 89 |
-| 10.1 Deployment Architecture, Environments and Containers | 89 |
-| 10.2 Continuous Integration and Continuous Deployment | 89 |
-| 10.3 Database Provisioning, Configuration and Secrets | 89 |
-| 10.4 Observability | 89 |
-| 10.5 Backup, Recovery, Release and Rollback | 89 |
-| 10.6 Operating Cost, Maintenance and Handover | 89 |
-| 10.7 Summary | 89 |
-| **Chapter 11 — Project Management** | 91 |
-| 11.0 The Four P's Applied | 91 |
-| 11.1 Process Model in Practice and its Deviations from Plan | 91 |
-| 11.2 Work Breakdown Structure | 91 |
-| 11.3 Scheduling, Task Network and Critical Path | 92 |
-| 11.4 Effort Estimation | 93 |
-| 11.5 How the Implementation Time Was Optimised | 94 |
-| 11.6 Progress Tracking and Earned Value | 95 |
-| 11.7 Team Structure and Responsibilities | 95 |
-| 11.8 Configuration and Change Management in Practice | 95 |
-| 11.9 Risk Monitoring Record | 96 |
-| 11.10 Quality Assurance Activities Performed | 96 |
-| 11.11 Lessons in Project Management | 96 |
-| 11.12 Summary | 97 |
-| **PART IV — EVALUATION AND CLOSURE** | 98 |
-| **Chapter 12 — Results, Evaluation and Discussion** | 98 |
-| 12.1 Overview of the Delivered Artefact | 98 |
-| 12.2 Functional Evaluation | 98 |
-| 12.3 Quality Evaluation against ISO/IEC 25010 | 98 |
-| 12.4 Performance, Security and Usability Results | 98 |
-| 12.5 Stakeholder and Expert Evaluation | 98 |
-| 12.6 Answering the Research Questions | 98 |
-| 12.7 Discussion | 98 |
-| 12.8 Comparison against the Existing Manual System | 98 |
-| 12.9 Threats to Validity | 98 |
-| 12.10 Limitations of the Artefact | 98 |
-| 12.11 Reflection on the Design Science Contribution | 98 |
-| 12.12 Summary | 99 |
-| **Chapter 13 — Conclusion and Future Work** | 100 |
-| 13.1 Summary of the Work and its Contributions | 100 |
-| 13.2 Practical Implications for Similar Institutions | 100 |
-| 13.3 Lessons Learned | 100 |
-| 13.4 Future Work | 100 |
-| 13.5 Concluding Remarks | 100 |
-| **References** | 101 |
+| 9.12 Product Metrics, Static Analysis and Defect Analysis | 89 |
+| 9.13 Summary | 89 |
+| **Chapter 10 — Deployment and Operations** | 90 |
+| 10.1 Deployment Architecture, Environments and Containers | 90 |
+| 10.2 Continuous Integration and Continuous Deployment | 90 |
+| 10.3 Database Provisioning, Configuration and Secrets | 90 |
+| 10.4 Observability | 90 |
+| 10.5 Backup, Recovery, Release and Rollback | 91 |
+| 10.6 Operating Cost, Maintenance and Handover | 91 |
+| 10.7 Summary | 91 |
+| **Chapter 11 — Project Management** | 92 |
+| 11.0 The Four P's Applied | 92 |
+| 11.1 Process Model in Practice and its Deviations from Plan | 92 |
+| 11.2 Work Breakdown Structure | 92 |
+| 11.3 Scheduling, Task Network and Critical Path | 93 |
+| 11.4 Effort Estimation | 94 |
+| 11.5 How the Implementation Time Was Optimised | 95 |
+| 11.6 Progress Tracking and Earned Value | 96 |
+| 11.7 Team Structure and Responsibilities | 96 |
+| 11.8 Configuration and Change Management in Practice | 96 |
+| 11.9 Risk Monitoring Record | 97 |
+| 11.10 Quality Assurance Activities Performed | 97 |
+| 11.11 Lessons in Project Management | 97 |
+| 11.12 Summary | 98 |
+| **PART IV — EVALUATION AND CLOSURE** | 99 |
+| **Chapter 12 — Results, Evaluation and Discussion** | 99 |
+| 12.1 Overview of the Delivered Artefact | 99 |
+| 12.2 Functional Evaluation | 99 |
+| 12.3 Quality Evaluation against ISO/IEC 25010 | 99 |
+| 12.4 Performance, Security and Usability Results | 99 |
+| 12.5 Stakeholder and Expert Evaluation | 99 |
+| 12.6 Answering the Research Questions | 99 |
+| 12.7 Discussion | 100 |
+| 12.8 Comparison against the Existing Manual System | 100 |
+| 12.9 Threats to Validity | 100 |
+| 12.10 Limitations of the Artefact | 100 |
+| 12.11 Reflection on the Design Science Contribution | 100 |
+| 12.12 Summary | 100 |
+| **Chapter 13 — Conclusion and Future Work** | 101 |
+| 13.1 Summary of the Work and its Contributions | 101 |
+| 13.2 Practical Implications for Similar Institutions | 101 |
+| 13.3 Lessons Learned | 101 |
+| 13.4 Future Work | 101 |
+| 13.5 Concluding Remarks | 101 |
+| **References** | 102 |
 
 ---
 
@@ -415,11 +415,11 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 8.3 | OWASP ASVS conformance checklist (self-assessment, ASVS 4.0.3, level 2) | 84 |
 | 8.4 | Personal-data inventory: element, purpose, lawful basis, retention | 84 |
 | 8.5 | Residual risk register | 84 |
-| 11.1 | Component activity list, CPM summary ordered by float | 92 |
-| 11.2 | Unadjusted function-point count | 93 |
-| 11.3 | General system characteristics and technical complexity factor | 93 |
-| 11.4 | Delivered size by kind, at a stated production rate | 94 |
-| 11.5 | Risk exposure, computed from Table 4.2 | 96 |
+| 11.1 | Component activity list, CPM summary ordered by float | 93 |
+| 11.2 | Unadjusted function-point count | 94 |
+| 11.3 | General system characteristics and technical complexity factor | 94 |
+| 11.4 | Delivered size by kind, at a stated production rate | 95 |
+| 11.5 | Risk exposure, computed from Table 4.2 | 97 |
 
 ---
 

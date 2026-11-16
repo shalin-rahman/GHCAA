@@ -9,13 +9,15 @@ chart types, sixteen appendices.
 
 **Page budget: under 100 pages from Chapter 1 to the end of the References.** Decided 27 September
 2026, replacing the 150 to 200 page volume set on 2 September. Front matter and appendices are not
-counted. All thirteen chapters must fit, including the four that are still mostly stubs.
+counted. All thirteen chapters must fit.
 
 On 27 September the counted range printed at 102 pages, with Chapters 9, 10, 12 and 13 at 8 pages
-between them. Writing those four up adds about 10 pages, so about 14 pages have to come out of the
-written chapters. They come from three places, in this order: tighter prose, merging sections that
-cover the same ground under one heading that names both, and cuts. Every cut is agreed with the
-author by name before it is made.
+between them. Those four were written on 16 November 2026 without figures, tables or measured
+numbers, which are held as placeholders (tracker 67.10). The counted range then printed at 95 pages.
+The author's target on that date is 80 to 90 pages, so 5 to 15 pages have to come out, and the
+figures and numbers still to be added will take some of that room back. The pages come from three
+places, in this order: tighter prose, merging sections that cover the same ground under one heading
+that names both, and cuts. Every cut is agreed with the author by name before it is made.
 
 Layout rules that already save pages, set in `docs/book/build/`:
 
