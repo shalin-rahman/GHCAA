@@ -396,14 +396,15 @@
                                             [class.is-invalid]="termsM.invalid && termsM.touched">
                                         <span class="checkmark"></span>
                                         <span class="label-text max-w-lg">I have read and understood the constitution and the 
-                                            <a href="#" (click)="$event.preventDefault(); showTerms.set(true)" class="text-accent underline">Broadened Terms and Conditions of Registration</a>, 
+                                            <a href="#" (click)="$event.preventDefault(); showTerms.set(true)" class="text-accent underline">Broadened Terms and Conditions of Registration</a> and the
+                                            <a href="/terms" target="_blank" rel="noopener" class="text-accent underline">Terms of Use</a>, 
                                             and I irrevocably agree to be bound by them.</span>
                                     </label>
                                     <label class="premium-checkbox-label mb-4">
                                         <input type="checkbox" name="gdpr" [(ngModel)]="model.HasAcceptedGdpr" required #gdprM="ngModel"
                                             [class.is-invalid]="gdprM.invalid && gdprM.touched">
                                         <span class="checkmark"></span>
-                                        <span class="label-text max-w-lg">I explicitly consent to the Association's <b>Data Privacy & GDPR</b> protocols for processing my personal information as described in the directory and privacy sections.</span>
+                                        <span class="label-text max-w-lg">I explicitly consent to the Association's <b>Data Privacy & GDPR</b> protocols for processing my personal information as described in the <a href="/privacy" target="_blank" rel="noopener" class="text-accent underline">Privacy Policy</a>.</span>
                                     </label>
                                     <label class="premium-checkbox-label">
                                         <input type="checkbox" name="agree" required ngModel #agreeM="ngModel"

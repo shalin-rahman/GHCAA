@@ -36,6 +36,24 @@ export const routes: Routes = [
                 data: { description: 'The history, mission, and legacy of {branding.institutionName}, Munshiganj and its Alumni Association.' }
             },
             {
+                path: 'privacy',
+                loadComponent: () => import('./public/policy-page/policy-page').then(m => m.PolicyPage),
+                title: 'Privacy Policy | {branding.shortName}',
+                data: { key: 'privacy-policy', heading: 'Privacy Policy', description: 'How {branding.fullName} collects, uses and protects personal information.' }
+            },
+            {
+                path: 'terms',
+                loadComponent: () => import('./public/policy-page/policy-page').then(m => m.PolicyPage),
+                title: 'Terms of Use | {branding.shortName}',
+                data: { key: 'terms-of-use', heading: 'Terms of Use', description: 'The terms for using the {branding.fullName} website and app.' }
+            },
+            {
+                path: 'faq',
+                loadComponent: () => import('./public/policy-page/policy-page').then(m => m.PolicyPage),
+                title: 'FAQ | {branding.shortName}',
+                data: { key: 'faq', heading: 'Frequently Asked Questions', description: 'Answers to common questions about {branding.fullName} membership.' }
+            },
+            {
                 path: 'contact',
                 loadComponent: () => import('./public/contact/contact').then(m => m.Contact),
                 title: 'Contact Us | {branding.shortName}',

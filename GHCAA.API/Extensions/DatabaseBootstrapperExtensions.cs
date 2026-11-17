@@ -109,6 +109,21 @@ namespace GHCAA.API.Extensions
                 app.Logger.LogWarning(ex, "Election content sync skipped; table may not exist yet.");
             }
 
+            // 3c. Privacy, terms and FAQ pages for a database the SeedPolicySiteContent migration never ran on (100.6).
+            try
+            {
+                using var policyScope = app.Services.CreateScope();
+                var policyCtx = policyScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                if (await policyCtx.Database.CanConnectAsync())
+                {
+                    await PolicyContentSeeder.SeedAsync(policyCtx, app.Logger);
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "Policy content seed skipped; table may not exist yet.");
+            }
+
             // 4. Seed the two demo FamilyLinkRequest rows for the Visual profile. These used to be
             // HasData rows, but HasData runs inside EnsureCreated before step 2b has loaded Members
             // from members.json, so the FK to Members always failed. Runs after Members exist instead.

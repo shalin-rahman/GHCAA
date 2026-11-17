@@ -41,7 +41,7 @@ export class AdminSiteContent implements OnInit {
 
     form: UpsertSiteContentDto = emptyForm();
 
-    readonly groups = ['about', 'contact', 'home', 'footer'];
+    readonly groups = ['about', 'contact', 'home', 'footer', 'policy'];
 
     filteredBlocks = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();

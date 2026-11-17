@@ -107,6 +107,12 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-11-17 — GET /api/site-content?group=policy
+- Change: new site content group `policy` with keys `privacy-policy`, `terms-of-use` and `faq`. The route and DTO are unchanged. The rows arrive by the `SeedPolicySiteContent` migration, or by `PolicyContentSeeder` at startup on a database built without migrations; the seeder runs only while the group is empty, so admin edits and deletes stay. The text is a draft, not legal advice, and admins edit it in Admin → Site Content.
+- Reason: TODO 100.6, spec 029 FR-7.
+- Web: `public/policy-page` at `/privacy`, `/terms` and `/faq`, footer links, the links on the register page, and the `policy` group in `admin/site-content`.
+- Mobile: pending. The links land in plan card S130, which waits on 84.69.
+
 ### 2026-11-07 — GET /api/news/{id}
 - Change: a post that is not approved and active now answers 404, unless the caller is an admin, its author or a collaborator. Before this, anyone could read drafts, pending and rejected posts by Id. No shape change.
 - Reason: TODO 84.86.

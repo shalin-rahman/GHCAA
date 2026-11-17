@@ -44,6 +44,14 @@ export const ELECTION_APPOINTMENT_REASON_MAX = 400;
 // 82.42: the /lookups/{group} route takes any string and matches it against the Lookups
 // table's LookupGroup column — these are the exact group names GHCAA.Mobile's DropdownService
 // already calls with, so both clients ask the API for the same rows.
+// 100.6: site content keys behind /privacy, /terms and /faq. Mirrors Constants.PolicyPages on the API.
+export const POLICY_PAGES = {
+    Group: 'policy',
+    Privacy: 'privacy-policy',
+    Terms: 'terms-of-use',
+    Faq: 'faq'
+} as const;
+
 export const LOOKUP_GROUPS = {
     MembershipStatus: 'MembershipStatus',
     MemberCategory: 'MemberCategory',

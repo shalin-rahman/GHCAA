@@ -127,6 +127,15 @@ namespace GHCAA.Domain
             public const int OtpMaxAttempts = 5;
         }
 
+        // Site content rows behind /privacy, /terms and /faq. The web reads the same names from app.constants.ts.
+        public static class PolicyPages
+        {
+            public const string Group = "policy";
+            public const string Privacy = "privacy-policy";
+            public const string Terms = "terms-of-use";
+            public const string Faq = "faq";
+        }
+
         public static class AcademicYears
         {
             public const int EarliestPassingYear = 1950;

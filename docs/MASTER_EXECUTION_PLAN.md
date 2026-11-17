@@ -20,8 +20,16 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-15. **Open:** 125 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-17. **Open:** 145 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
+- **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
+  19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
+  sit in section 3 by priority and after what they need: S110 to S113 (P1) in phase B before S14,
+  S114 to S120, S127 and S128 (P2) at the end of phase F, the rest (P3) in phase G. Their cards
+  stay together in the short form under "Phase I" in section 4; rewrite a card before running
+  it. The owner answered decisions D1 to D8 of spec 029 the same day, so no session of the
+  package waits on a gate. The decision item closed with the answers (S122, see the progress
+  log); 100.16 to 100.20 are the build items.
 - **Cards (99.10):** phases A, B, C and D (S01 to S44) are in the eleven-part form and were checked against
   the code. Phases E to G and track H are still in the short form; rewrite a phase before running
   it. `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
@@ -127,7 +135,11 @@ the ledger row in section 7. Run top to bottom.
 | S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
 | S12 | 84.80 (backend) | [Cancel event registrations and promote the waitlist](#s12) | M | API | | |
 | S13 | 84.80 (clients) | [Add registration cancellation to both clients](#s13) | M | web, mobile | | S12 |
-| S14 | 84.81 | [Send due and event reminders on schedule](#s14) | L | API, OrgConfig | 3 | |
+| S110 | 100.1, 100.2 | [Fix public links, add Join, clean index.html](#s110) | S | web | | |
+| S111 | 100.3 (API) | [Save all mail flags, add the mail check and unsubscribe](#s111) | M | API | | |
+| S112 | 100.3 (clients) | [Email preferences on web and mobile, unsubscribe page](#s112) | M | web, mobile | | S111 |
+| S113 | 100.4 | [Preview, confirm and queue batch email](#s113) | L | API, web | 2a | S111 |
+| S14 | 84.81 | [Send due and event reminders on schedule](#s14) | L | API, OrgConfig | 3 | S111 |
 | S15 | 88.1 | [Make member imports unique, CSV-capable and idempotent](#s15) | L | API | 4 | |
 | S16 | 88.2, 88.3 | [Make batch imports transactional and report row counts](#s16) | M | API | | S15 |
 | S17 | 88.5 (backend) | [Preview member imports and report cell errors](#s17) | M | API | | S16 |
@@ -201,12 +213,23 @@ the ledger row in section 7. Run top to bottom.
 | S81 | 27.1, 27.8 | [Add cross-client coverage reporting and a CI gate](#s81) | M | ci | | |
 | S82 | 73.5 | [Generate the FR and NFR traceability matrix](#s82) | M | scripts | | |
 | S83 | 73.6 | [Pin seeded constitution text in tests](#s83) | S | backend test | | |
+| S114 | 100.6 (API, web), 100.7, 100.8 | [Policy pages, skip links and fees on the home page](#s114) | M | API, web | 14a | S110 |
+| S115 | 100.5 | [Titles, prerendered link previews, sitemap and share](#s115) | L | API, web, mobile | | S110 |
+| S116 | 100.9 | [Web notifications page and bell](#s116) | M | API, web, mobile | | |
+| S117 | 100.10 | [Event pass QR, web check-in and attendance list](#s117) | L | API, web, mobile | | S13 |
+| S118 | 100.11 | [Typed admin stats, trends and a real status badge](#s118) | M | API, web, mobile | | |
+| S119 | 100.12 | [Build the shared data table and move the first lists](#s119) | L | web | | S18 |
+| S120 | 100.13 | [Warn before leaving a changed form](#s120) | M | web, mobile | | |
+| S127 | 100.19 (API) | [Record refunds with a second person's approval](#s127) | L | API | 14b | S11 |
+| S128 | 100.19 (clients) | [Show and approve refunds in both clients](#s128) | M | web, mobile | | S127 |
 | **G** | **P3 and P4 items** | | | | | |
 | S84 | 84.57, 84.62 | [Centralize upload limits and add assistant rate limits](#s84) | S | API | | |
 | S85 | 84.64, 93.4 | [Add mark-all-read and configure the mobile drawer](#s85) | S | mobile | | |
 | S86 | 84.69 | [Show public site content in the mobile app](#s86) | M | mobile | | |
+| S130 | 100.6 (mobile) | [Link the policy pages from the mobile app](#s130) | S | mobile | | S86, S114 |
 | S87 | 84.23 | [Choose and add mobile signature and PDF support](#s87) | M | mobile, API | | |
 | S88 | 96.3 | [Move shared web forms to common components](#s88) | M | web | | |
+| S121 | 100.14 | [Find members, payments and events from the admin header](#s121) | S | web | | S88 |
 | S89 | 84.90 | [Choose and implement certificate-code reuse](#s89) | M | API, both clients | | |
 | S90 | 84.95 | [Show application wait times in both clients](#s90) | S | web, mobile | | |
 | S91 | 84.94 | [Add an arrears report with CSV export](#s91) | M | API, web | | |
@@ -226,6 +249,12 @@ the ledger row in section 7. Run top to bottom.
 | S105 | 62.56 (b) | [Export organization profile packs](#s105) | M | API, web | | S104 |
 | S106 | 62.56 (c, d) | [Upload, map and preview profile-pack imports](#s106) | L | API, web | | S105 |
 | S107 | 62.56 (e, f) | [Add import modes, transactions, tests and docs](#s107) | M | API, docs | | S106 |
+| S123 | 100.16 | [Let an author or admin mark one article public](#s123) | L | API, web, mobile | 18 | S115 |
+| S124 | 100.17 | [Add alumni spotlights as a news category](#s124) | M | API, web, mobile | | S110 |
+| S125 | 100.18 (API) | [Add newsletter subscribers with double opt-in](#s125) | L | API | 19 | S112, S113 |
+| S126 | 100.18 (web) | [Add the newsletter sign-up pages and the admin send](#s126) | M | web | | S125 |
+| S129 | 100.20 | [Add Android app links on the preprod host](#s129) | M | mobile, web | | S115 |
+| S122 | done 2026-11-17, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S108 | 60.3, 6.2, 8.5, 8.7, 37.9 | [Resolve owner decisions on five deferred items](#s108) | S | decisions | | |
 | S109 | 37.11 | [Refresh WP37 baselines and close the work package](#s109) | S | WP37 gate | | S103 |
 | **H** | **Book track, on the owner's word** | | | | | |
@@ -2552,11 +2581,147 @@ cohorts and memorial; 37.10 after 37.4.
 `PROJECT_MAP.md`, `SRS.md` and `ARCHITECTURE.md`. Close 37.11 when every other WP37 item is DONE or
 WONTDO; if gate items remain (G-DEV, G-BN), set it PARTIAL naming them.
 
+### Phase I. Public site, admin and member experience gaps
+
+Added 2026-11-17 from the public and admin site reviews. Design: `docs/specs/029-public-admin-member-experience-gaps/`
+(spec, plan and task list for Work Package 100). Owner, 2026-11-17: the sessions run by their
+dependencies, so their rows sit in phases B, F and G of section 3 and only the cards are kept
+together here. S111 runs before S14 (84.81, dues and event reminders) so reminders use the same
+mail check: dues reminders always send and event reminders follow the member's preference. The
+owner answered D1 to D8 of spec 029 on 2026-11-17. Short form; rewrite into the eleven-part form
+before running.
+
+<a id="s110"></a>
+**S110 · 100.1, 100.2 · S** Point the home page news and jobs previews at public routes, add a Join
+button to the public header, and set the canonical link and JSON-LD in `GHCAA.Web/src/index.html`
+at run time. The `author` meta tag stays (owner, 2026-11-17). Guard spec for `/portal` links in public templates;
+white-label guard covers `index.html`. Browser check at phone and desktop width.
+
+<a id="s111"></a>
+**S111 · 100.3 (API) · M** First record whether the send path reads the `Notify*` flags. Save
+`NotifyRelevantUpdates`; add one mail preference check used by every batch and reminder send; add
+the signed unsubscribe route and its undo. Four kinds always send (owner, 2026-11-17): account and
+security mail, payment receipts, election notices the rules require, and membership status mail
+(approval, rejection, expiry, dues owed). Tests for each kind, for a changed token and for the
+rate limit. Registry updated.
+
+<a id="s112"></a>
+**S112 · 100.3 (clients) · M** "Email preferences" on the web member profile, the same five toggles
+on mobile profile edit, and the public unsubscribe page. Specs and a widget test. Closes 100.3.
+
+<a id="s113"></a>
+**S113 · 100.4 · L** Preview route with recipient and opted-out counts; batch and recipient rows
+with one migration (ledger row 2a in section 7); hosted worker; status
+route. Admin confirm dialog and progress. Tests: failed recipient, retry without a duplicate.
+`code-reviewer` on the migration. Split into API and web sessions if the card runs long.
+
+<a id="s114"></a>
+**S114 · 100.6 (API, web), 100.7, 100.8 · M** Three site content keys by a migration data step
+(ledger row 14a); `/privacy`, `/terms`, `/faq` on web with footer and consent links. Owner,
+2026-11-17, second answer: the pages ship with drafted standard text that an admin can edit, and
+this part is built ahead of the row's place in section 3. Skip link and `aria-expanded` in the three web layouts. Membership fees section
+on the home page from the anonymous fees route. The mobile links are S130, and 100.6 closes there.
+Built 2026-11-17: the 100.6 web and API part (migration, `PolicyContentSeeder`, `public/policy-page`,
+footer and consent links). 100.7 and 100.8 are still open in this card.
+
+<a id="s115"></a>
+**S115 · 100.5 · L** Owner, 2026-11-17: prerender the public routes at build time. Titles and Open
+Graph tags per route, a sitemap from published content that leaves out members-only news, and a
+share action in the portal and the app. A post published after the last build has no preview until
+the next build; record that on 100.5 and in the deploy notes.
+
+<a id="s116"></a>
+**S116 · 100.9 · M** Notification link constant; bell in the portal and admin layouts;
+`/portal/notifications` with mark read and mark all read; mobile maps the link to its notification
+screen. Sending push stays with 84.61.
+
+<a id="s117"></a>
+**S117 · 100.10 · L** After S13 (84.80, registration cancellation on clients). First record whether the member registration DTO returns `TicketCode`. QR on
+the pass in the portal and the app; admin web check-in page; attendance list route with CSV on web
+and a list on mobile; check-in refuses a cancelled registration. Event walkthrough gains a check-in
+step and a refusal probe, README table updated.
+
+<a id="s118"></a>
+**S118 · 100.11 · M** `AdminStatsDto` that keeps the existing field names (the mobile admin
+dashboard reads the same route) and adds monthly members, monthly dues, pending approvals by kind
+and upcoming events. Web charts with theme tokens; mobile tiles; the status badge reads the health
+endpoint or goes. Contract test pins the old names.
+
+<a id="s119"></a>
+**S119 · 100.12 · L** After S18 (88.5, editable import grid): decide whether that grid serves as
+the shared table. Build the table in `src/app/common/` with sort, paging, selection and CSV. Move
+the members and payments admin lists and the three portal tables. Guard spec on the count of
+hand-built tables; the rest of the admin lists move a few per later session and 100.12 stays
+PARTIAL until the count is zero.
+
+<a id="s120"></a>
+**S120 · 100.13 · M** `canDeactivate` guard and dirty-form contract on web, applied to the admin
+editors, the member profile and registration; back confirm on mobile profile edit and admin
+editors. Specs and a widget test.
+
+<a id="s121"></a>
+**S121 · 100.14 · S** After S88 (96.3, shared header and search): the admin header search returns
+members, payments and events through existing search routes, limited by role.
+
+<a id="s122"></a>
+**S122 · owner decisions · S** Done 2026-11-17. The owner answered all five; the answers are on the
+closed decision item of Work Package 100 and the build cards are S123 to S129. No card for an
+installable web app: the answer was no.
+
+<a id="s123"></a>
+**S123 · 100.16 · L** After S115 (100.5, sitemap and previews). `IsPublic` on the article, off by
+default, with one migration (ledger row 18); anonymous list and read routes for approved public
+articles; public articles pages on web, in the sitemap; the switch on the portal and mobile article
+forms and on the admin moderation screen. Tests: members-only, pending and rejected articles are
+refused signed out. `code-reviewer` on the migration. Split API and clients if the card runs long.
+
+<a id="s124"></a>
+**S124 · 100.17 · M** After S110 (100.1, public news links). First read how news categories are
+held. Add "Spotlight" the same way; category filter on the public news route; a home page section
+with the latest three, hidden when empty; the label and filter in the portal and the app.
+
+<a id="s125"></a>
+**S125 · 100.18 (API) · L** After S112 (100.3, the signed token) and S113 (100.4, the batch worker).
+Subscriber table with consent times, one migration (ledger row 19); sign-up, confirm and
+unsubscribe routes, anonymous and rate limited; the sign-up answer does not reveal a known address;
+newsletter subscribers as a batch audience, confirmed only, a shared address mailed once; unconfirmed
+addresses deleted after the OrgConfig number of days. `code-reviewer` and `security-reviewer`.
+
+<a id="s126"></a>
+**S126 · 100.18 (web) · M** Footer sign-up field, confirm and unsubscribe pages, admin subscriber
+list with CSV and delete, and the audience on the batch screen with its count. The privacy page
+names the list. No portal or mobile change. Closes 100.18.
+
+<a id="s127"></a>
+**S127 · 100.19 (API) · L** After S11 (84.92, payment review on clients). First read which approval
+mechanism can hold a refund and record it on 100.19. Refund record with one migration (ledger row
+14b); amount limited to the remainder; the recorder cannot approve; only an approved refund changes
+the payment status and report totals; audit rows. No gateway call. Stop and ask if no existing
+approval mechanism fits; default, wait for S73 (92.2, approval policies).
+
+<a id="s128"></a>
+**S128 · 100.19 (clients) · M** "Record refund" on the admin payment detail, the request in the
+treasurer's approval queue, refunds and net totals in the reports; the refund in the member's
+payment history on the portal and the app; approve or reject on mobile admin if its approval list
+exists. Closes 100.19.
+
+<a id="s129"></a>
+**S129 · 100.20 · M** After S115 (100.5, public addresses that are shared). `autoVerify` web link
+filter with the host from the build environment; router mapping for news, event and job addresses;
+`/.well-known/assetlinks.json` under `GHCAA.Web/public/`. Stop and ask for the SHA-256 fingerprint
+of the release signing key; it is never guessed. The phone check is the owner's. Record the steps
+to repeat for the production domain.
+
+<a id="s130"></a>
+**S130 · 100.6 (mobile) · S** After S86 (84.69, site content on mobile) and S114. The registration
+consent line and the drawer open the privacy, terms and FAQ content. Widget test. Closes 100.6.
+
 ### Track H. Book, on the owner's word
 
 <a id="h00"></a>
 H00 keeps the list of book facts changed by feature sessions. It starts with: 92.5 role matrix
 (§8.4, the role matrix, and its figure), 73.5 matrix claim (§3.9 and §12.2), every repository count.
+Work Package 100 (added 2026-11-17) changes the tracker counts quoted in chapter 11.
 
 <a id="h01"></a><a id="h02"></a><a id="h03"></a><a id="h04"></a><a id="h05"></a><a id="h06"></a><a id="h07"></a><a id="h08"></a><a id="h09"></a>
 H01 78.10 (coverage summary, static analysis, latency, ASVS walkthrough, each with its command and
@@ -2611,6 +2776,7 @@ One at a time, in this order. Each takes a timestamp later than the row above.
 |---|---|---|---|
 | 1 | `20261021100000_AddEcPositions`, `20261021110000_RetireEcPositionLookups`, `20261021120000_AddElectionFormFields` | built | Local PostgreSQL checked; preprod at G-REL |
 | 2 | `20261112120000_AddElectionFormPrints` | built | Local PostgreSQL checked; preprod at G-REL |
+| 2a | `AddMailBatches` (batch and recipient rows) | S113 | |
 | 3 | `AddReminderSentMarks` | S14 | |
 | 4 | `AddMembershipNumberUniqueIndex` | S15 | |
 | 5 | `AddNominationPhotoApproval` | S22 | |
@@ -2623,8 +2789,12 @@ One at a time, in this order. Each takes a timestamp later than the row above.
 | 12 | `AddEventFeedback` | S67 | |
 | 13 | `SeedForumCategories` | S69 | |
 | 14 | approvals table, only if chosen in S72 | S73 | |
+| 14a | `SeedPolicySiteContent` (three site content keys, data step) | S114 | Written 2026-11-17 with `PolicyContentSeeder` for databases built without migrations; not yet run on PostgreSQL |
+| 14b | `AddRefunds` | S127 | |
 | 15 | `AddSavedReports` | S95 | |
 | 16, 17 | cohorts and reunions; memorial | S99, S101 | |
+| 18 | `AddArticleIsPublic` | S123 | |
+| 19 | `AddNewsletterSubscribers` | S125 | |
 
 ## 8. Plan review, 2026-11-13
 
@@ -2675,6 +2845,7 @@ Each opens with a line that says so.
 | `docs/specs/009-campaigns-scholarships-archive/plan.md` | WP37 history | 84.27 |
 | `docs/specs/024-performance/plan.md` | Performance phases | 98.7, 98.43 |
 | `docs/TEST_COVERAGE_PLAN.md` | Coverage targets and method | 27.1, 27.8 |
+| `docs/specs/029-public-admin-member-experience-gaps/plan.md` | Per-client shape and order for the public, admin and member gaps | 100.1 to 100.14, 100.16 to 100.20 |
 
 Closed records, not scheduled: `archive/BUSINESS_REVIEW_PLAN.md` (audit snapshot of 2026-07-03),
 `FORUM_PLAN_2026-05.md`, `archive/UI_FIX_PLAN.md`, `implementation_plan.md`, and the plans of specs 001,
@@ -2898,6 +3069,9 @@ brief asks for it.
 | 2026-11-14 | 84.102 (closed) | Ran the three test layers and both walkthroughs on Windows: backend 105/105, web `register.spec.ts` + `events.spec.ts` 21/21, `events_register_error_test.dart` 3/3, `run-membership-walkthrough.bat` and `run-event-walkthrough.bat` both passed. `events.spec.ts`'s "shows the server reason when a registration is refused" had a `paymentReference` of 'REF' (3 chars), short of the form's own `minLength(4)` validator, so the form's own validation message pre-empted the assertion; fixed to 'REF123'. 93.3's note no longer needs to rule out the old duplicate-500 toast, since 84.102 replaced it with a 409 and the server's reason | `events.spec.ts`, `docs/TODO.md`, this file |
 | 2026-11-15 | 99.10 (added) | Card rewrite, phases A to C: S01 to S33 in the eleven-part form, each file, route and test name checked against the code; `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`: 0 problems; `python -m unittest discover -s scripts -p test_backlog_inventory.py`: 34 of 34 OK; tracker notes on 37.16i, 84.80, 84.92, 88.4 and the phase C items | this plan, `scripts/backlog_inventory.py`, `scripts/test_backlog_inventory.py`, `docs/TODO.md`, spec 008 `spec.md`, spec 023 `delivery-plan.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, both `ghcaa-project-orchestrator` skill copies |
 | 2026-11-15 | 99.10 | Card rewrite, phase D: S34 to S44 in the eleven-part form, each file, route and test name checked against the code; `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`: 0 problems; `python -m unittest discover -s scripts -p test_backlog_inventory.py`: 34 of 34 OK; tracker notes on 84.19, 84.20, 84.59 and 84.84 | this plan, `docs/TODO.md` |
+| 2026-11-17 | 100.1 to 100.15 (added) | Work Package 100 opened from the public and admin site reviews, each item with its member portal and mobile part; spec 029 written (spec, plan, tasks); phase I (S110 to S122) added in the short form. No code changed. | `docs/TODO.md`, `docs/specs/029-public-admin-member-experience-gaps/`, this file, `docs/book/build/wbs.py` |
+| 2026-11-17 | 100.15 (closed), 100.16 to 100.20 (added) | Owner answered D1 to D8 of spec 029 in the question dialog; answers written on 100.3, 100.5, 100.6 and 100.15; five build items opened; Work Package 100 rows moved into phases B, F and G by dependency on the owner's word; ledger rows 2a, 14a, 14b, 18, 19 added; `backlog_inventory.py --check` clean | `docs/TODO.md`, `docs/MASTER_EXECUTION_PLAN.md`, `docs/specs/029-public-admin-member-experience-gaps/` |
+| 2026-11-17 | 100.6 (web and API built, item open) | Privacy, terms and FAQ pages built ahead of S114 on the owner's word: migration 14a and a startup seeder that runs only while the policy group is empty, `/privacy`, `/terms` and `/faq` on one page component, footer and consent links. Drafted text is not legal advice; admins edit or hide it in Site Content. Backend and web specs pass; mobile part stays in S130 | `GHCAA.Infrastructure/Data/`, `GHCAA.Web/src/app/public/policy-page/`, `docs/API_CONTRACT_REGISTRY.md`, this file, `docs/TODO.md`, spec 029 tasks |
 
 <!-- backlog-check: on -->
 

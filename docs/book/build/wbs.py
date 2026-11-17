@@ -106,7 +106,7 @@ CODE = [
       "GHCAA.Infrastructure/Services/GovernanceService.cs",
       "GHCAA.Infrastructure/Services/PollService.cs",
       "GHCAA.Infrastructure/Data/ConstitutionSeeder.cs"], ["C3"]),
-    ("C7", "Content and communication", ["3", "34", "50", "59"],
+    ("C7", "Content and communication", ["3", "34", "50", "59", "100"],
      ["GHCAA.API/Controllers/NewsController.cs",
       "GHCAA.API/Controllers/CommunicationController.cs",
       "GHCAA.API/Controllers/SiteContentController.cs",
