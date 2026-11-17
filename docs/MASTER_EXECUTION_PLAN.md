@@ -257,6 +257,7 @@ the ledger row in section 7. Run top to bottom.
 | S122 | done 2026-11-17, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S108 | 60.3, 6.2, 8.5, 8.7, 37.9 | [Resolve owner decisions on five deferred items](#s108) | S | decisions | | |
 | S109 | 37.11 | [Refresh WP37 baselines and close the work package](#s109) | S | WP37 gate | | S103 |
+| S131 | 8.9 | [Move mobile to material_ui and lift the Flutter pin](#s131) | M | mobile, CI | | |
 | **H** | **Book track, on the owner's word** | | | | | |
 | H00 | book facts list | [Track book facts changed by feature work](#h00) | S | docs | | |
 | H01 | 78.10 | [Measure coverage, analysis and operational quality](#h01) | M | measurements | | |
@@ -2581,6 +2582,14 @@ cohorts and memorial; 37.10 after 37.4.
 `PROJECT_MAP.md`, `SRS.md` and `ARCHITECTURE.md`. Close 37.11 when every other WP37 item is DONE or
 WONTDO; if gate items remain (G-DEV, G-BN), set it PARTIAL naming them.
 
+<a id="s131"></a>
+**S131 · 8.9 · M** On a Flutter release that deprecates `material.dart`, add `material_ui` and `cupertino_ui` to
+`GHCAA.Mobile/pubspec.yaml` and swap `package:flutter/material.dart` for `material_ui` in about 140
+lib, test and integration_test files, plus the two localization delegates in `lib/main.dart`. Check
+the golden images, then `flutter analyze` with no infos and `flutter test --exclude-tags golden`.
+Raise the `flutter-version` pin in all three workflows under `.github/workflows/` in the
+same change. Close 8.9 when the pinned CI analyze job passes on the new version.
+
 ### Phase I. Public site, admin and member experience gaps
 
 Added 2026-11-17 from the public and admin site reviews. Design: `docs/specs/029-public-admin-member-experience-gaps/`
@@ -3072,6 +3081,7 @@ brief asks for it.
 | 2026-11-17 | 100.1 to 100.15 (added) | Work Package 100 opened from the public and admin site reviews, each item with its member portal and mobile part; spec 029 written (spec, plan, tasks); phase I (S110 to S122) added in the short form. No code changed. | `docs/TODO.md`, `docs/specs/029-public-admin-member-experience-gaps/`, this file, `docs/book/build/wbs.py` |
 | 2026-11-17 | 100.15 (closed), 100.16 to 100.20 (added) | Owner answered D1 to D8 of spec 029 in the question dialog; answers written on 100.3, 100.5, 100.6 and 100.15; five build items opened; Work Package 100 rows moved into phases B, F and G by dependency on the owner's word; ledger rows 2a, 14a, 14b, 18, 19 added; `backlog_inventory.py --check` clean | `docs/TODO.md`, `docs/MASTER_EXECUTION_PLAN.md`, `docs/specs/029-public-admin-member-experience-gaps/` |
 | 2026-11-17 | 100.6 (web and API built, item open) | Privacy, terms and FAQ pages built ahead of S114 on the owner's word: migration 14a and a startup seeder that runs only while the policy group is empty, `/privacy`, `/terms` and `/faq` on one page component, footer and consent links. Drafted text is not legal advice; admins edit or hide it in Site Content. Backend and web specs pass; mobile part stays in S130 | `GHCAA.Infrastructure/Data/`, `GHCAA.Web/src/app/public/policy-page/`, `docs/API_CONTRACT_REGISTRY.md`, this file, `docs/TODO.md`, spec 029 tasks |
+| 2026-11-17 | 8.9 (added) | Preprod CI mobile analyze failed on 144 `material.dart` deprecation infos from a newer stable Flutter. All seven Flutter setup steps now pin the local Flutter version; the import migration is S131 in phase G | `.github/workflows/`, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 

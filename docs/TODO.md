@@ -404,6 +404,7 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 - **100.17**: [TODO 2026-11-17] Alumni spotlights as a news category with a home page section.
 - **100.18**: [TODO 2026-11-17] Newsletter sign-up for non-members with double opt-in, unsubscribe and an admin send.
 - **100.20**: [TODO 2026-11-17] Android app links on the preprod host; repeat for the production domain.
+- **8.9**: [TODO 2026-11-17] Swap `material.dart` for `material_ui` so CI can leave its Flutter 3.41.5 pin.
 
 <!-- Closed Work Packages (1, 2, 3, 4, 5, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 29, 30, 31, 32, 33, 35, 36, 38, 39, 41, 44, 45, 46, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 66, 68, 69, 70, 71, 80, 43, 48, 83, 85, 87, 89) moved to docs/TODO_ARCHIVE.md on 2026-09-15 (43, 48, 83, 85, 87 and 89 on 2026-10-11) to keep this file lean. wbs.py reads both files for tracker counts. -->
 
@@ -431,6 +432,7 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 8.5 [TODO] **Priority: P4.** Persistence: Switch to High-Performance Local DB (Isar/Drift)
 8.7 [TODO] **Priority: P3.** State: Riverpod State Hydration (Local local persistence)
 8.8 [PARTIAL 2026-10-09] **Priority: P2.** i18n: Unified Localization (English + Bengali). Audit 2026-10-09: `GHCAA.Mobile/lib/core/services/app_localizations.dart` holds a small hand-written `en`/`bn` map. There is no ARB or `l10n.yaml` pipeline and most screen strings are not extracted yet.
+8.9 [TODO 2026-11-17] **Priority: P3.** Move the mobile app from `package:flutter/material.dart` to the `material_ui` package. Flutter 3.47 deprecates the old import, and `flutter analyze` treats the 144 resulting infos as a failure, so the mobile analyze job broke on preprod CI. The three workflows in `.github/workflows/` (ghcaa-ci-preprod, ghcaa-ci-standard, mobile_deployment) now pin Flutter 3.41.5, the local version, to keep CI green. To close: add `material_ui` (and `cupertino_ui` for `GlobalCupertinoLocalizations` in `lib/main.dart`), swap the import in about 140 lib, test and integration_test files, re-check golden images, run `flutter analyze` and `flutter test` on the new Flutter, then raise the pin in all three workflows together.
 ## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
 12.8 [DONE 2026-11-07] **Priority: P3 | Depends on: user approval.** `docs/` holds dated reviews, old plans, duplicate proposal versions and two files that carry secrets, next to the live docs. An audit on 2026-10-06 listed what to archive, merge, fix or untrack. Nothing gets moved or deleted until the user approves the list, and any move updates the book build refs and README links in the same change. Requested 2026-10-06.
