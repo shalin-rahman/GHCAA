@@ -15,11 +15,11 @@ Backend, in the existing layers:
   the only place that reads the flags; `CommunicationService` and the reminder work of 84.81 call it.
   Mail kinds go in `GHCAA.Domain/Constants.cs`; check for an existing constant first.
 - Unsubscribe (100.3): a token signed with the data protection provider, holding member id and mail
-  kind. `GET api/communication/unsubscribe` and an undo `POST`, both anonymous and rate limited.
+  kind. `GET api/unsubscribe` and an undo `POST api/unsubscribe/undo`, both anonymous and rate limited.
   The blanket API rate-limit policy overrides named ones, so check which policy applies.
-- Batch send (100.4): `POST api/communication/batch/preview` returns the two counts. The send
+- Batch send (100.4): `POST api/admin/comm/send-batch/preview` returns the two counts. The send
   writes a batch row and one row per recipient, and a hosted worker sends them. The per-recipient
-  row is what stops a second mail on retry. `GET api/communication/batch/{id}` returns the status.
+  row is what stops a second mail on retry. `GET api/admin/comm/batches/{id}` returns the status.
   One migration with its Designer file.
 - Notification link (100.9): the link value becomes a constant. No schema change.
 - Events (100.10): the member registration DTO gains `TicketCode` if it lacks it.
@@ -30,7 +30,8 @@ Backend, in the existing layers:
 - Site content (100.6): three keys added by a migration data step, not `Seed/*.json`.
 - Sitemap and previews (100.5): the owner chose prerendering (D1). The build prerenders the public
   routes and writes the sitemap from the public list routes, so the build needs the API address.
-- Public articles (100.16): `IsPublic` on the article, one migration; anonymous list and read
+- Public articles (100.16): `NewsPost.MembersOnly` already exists and defaults to false, so no
+  `IsPublic` column is added unless the owner says otherwise (card S123); anonymous list and read
   routes that return approved public articles only.
 - Spotlights (100.17): a news category added the way categories are held today (read first); a
   category filter on the public news route.

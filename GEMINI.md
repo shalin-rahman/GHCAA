@@ -12,7 +12,8 @@ Owner-gated items wait on gate cards (section 5), and `docs/book/` changes only 
 plan against the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
 The check also covers the cards. Section 1 of the plan says which phases have cards in the eleven-part
 form; rewrite a short-form phase before running it (`--card <id>` prints a card skeleton and the
-tracker entry).
+tracker entry). Section 3's Summary column gives a short, linked description for each session; keep
+it in sync with the detailed card.
 Other plan files are design references: they say how to build an item, never when, and a card wins
 where they differ. Do not create a new
 `PLAN.md`.

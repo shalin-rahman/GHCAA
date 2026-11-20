@@ -108,7 +108,7 @@
 
 ## Phase 12: Public articles and spotlights (100.16, 100.17)
 
-- [ ] T051 `IsPublic` on the article, one migration. Anonymous list and read routes. Tests: public
+- [ ] T051 Use the existing `NewsPost.MembersOnly` flag (card S123), with a data step only if the owner says yes. Anonymous list and read routes. Tests: public
   approved returned; members-only, pending and rejected refused; existing rows stay members only.
 - [ ] T052 Web public articles pages, in the sitemap with the FR-4 tags. Switch on the portal form
   and the admin moderation screen. Specs.

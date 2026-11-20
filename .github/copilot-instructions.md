@@ -190,7 +190,9 @@ tracker figures quoted in the outline's Chapter 11 block.
    section 3, read only that card and its tracker entries, and follow the
    session rules in its section 2. Its section 1 says which phases have cards
    in the eleven-part form; rewrite a short-form phase before running it. Book
-   edits wait for its track H.
+   edits wait for its track H. The section 3 Summary column briefly describes
+   each session and links to its detailed card; keep each summary in sync with
+   its card.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,

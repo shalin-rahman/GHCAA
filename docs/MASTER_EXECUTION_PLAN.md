@@ -20,19 +20,18 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-17. **Open:** 145 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-21. **Open:** 145 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
 - **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
   19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
   sit in section 3 by priority and after what they need: S110 to S113 (P1) in phase B before S14,
   S114 to S120, S127 and S128 (P2) at the end of phase F, the rest (P3) in phase G. Their cards
-  stay together in the short form under "Phase I" in section 4; rewrite a card before running
-  it. The owner answered decisions D1 to D8 of spec 029 the same day, so no session of the
+  stay together under "Phase I" in section 4. The owner answered decisions D1 to D8 of spec 029 the same day, so no session of the
   package waits on a gate. The decision item closed with the answers (S122, see the progress
   log); 100.16 to 100.20 are the build items.
-- **Cards (99.10):** phases A, B, C and D (S01 to S44) are in the eleven-part form and were checked against
-  the code. Phases E to G and track H are still in the short form; rewrite a phase before running
-  it. `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
+- **Cards:** every phase (A to I) and track H (H00 to H09) is in the eleven-part form, checked
+  against the code; track H landed 2026-11-21. A new card uses the same form.
+  `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
 - **Next session:** S01 (84.100). Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
@@ -116,13 +115,14 @@ These rules hold for every card. A card adds only what differs.
 ## 3. Session sequence
 
 Size: S is one file or one test file, M is one layer, L crosses layers or carries a migration. Mig is
-the ledger row in section 7. Run top to bottom.
+the ledger row in section 7. Each session's Summary links to its detailed card in section 4. Keep the
+summary text and link in sync with that card. Run top to bottom.
 
 | # | Items | Summary | Size | Layers | Mig | After |
 |---|---|---|---|---|---|---|
 | **A** | **CI health and the rest of session 2b** | | | | | |
 | S01 | 84.100 | [Fix web test isolation and CI failure detection](#s01) | M | web tests, ci-local | | |
-| S02 | 84.101, 84.99 | [Find tool manifests and repair migration SQL](#s02) | S | ci-local, migrations SQL | | |
+| S02 | 84.101, 84.99 | [Find tool manifests and repair migration SQL](#s02) | S | ci-local, migrations SQL | | S01 |
 | S03 | 37.16j | [Verify print revocation and audit atomicity](#s03) | S | backend | | |
 | S04 | 37.16k | [Rate-limit print verification and reuse print records](#s04) | M | backend | | S03 |
 | S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
@@ -139,8 +139,8 @@ the ledger row in section 7. Run top to bottom.
 | S111 | 100.3 (API) | [Save all mail flags, add the mail check and unsubscribe](#s111) | M | API | | |
 | S112 | 100.3 (clients) | [Email preferences on web and mobile, unsubscribe page](#s112) | M | web, mobile | | S111 |
 | S113 | 100.4 | [Preview, confirm and queue batch email](#s113) | L | API, web | 2a | S111 |
-| S14 | 84.81 | [Send due and event reminders on schedule](#s14) | L | API, OrgConfig | 3 | S111 |
-| S15 | 88.1 | [Make member imports unique, CSV-capable and idempotent](#s15) | L | API | 4 | |
+| S14 | 84.81 | [Send due and event reminders on schedule](#s14) | L | API, OrgConfig | 3 | S111, S13 |
+| S15 | 88.1 | [Make member imports unique, CSV-capable and idempotent](#s15) | L | API | 4 | S14 |
 | S16 | 88.2, 88.3 | [Make batch imports transactional and report row counts](#s16) | M | API | | S15 |
 | S17 | 88.5 (backend) | [Preview member imports and report cell errors](#s17) | M | API | | S16 |
 | S18 | 88.5 (grid) | [Build the shared editable import data grid](#s18) | M | web | | S17 |
@@ -150,7 +150,7 @@ the ledger row in section 7. Run top to bottom.
 | S21 | 37.16g | [Assign election winners through governance](#s21) | M | backend | | S20 |
 | S22 | 37.16h (backend) | [Add nomination photo upload and approval APIs](#s22) | L | API | 5 | S21 |
 | S23 | 37.16h (clients) | [Add approved nomination photos to both clients](#s23) | M | web, mobile | | S22 |
-| S24 | 37.14d, F2 schema | [Add election safeguards and audit schema](#s24) | L | migration | 6 | S23 |
+| S24 | 37.14d and the F2 schema | [Add election safeguards and audit schema](#s24) | L | migration | 6 | S23 |
 | S25 | 37.16e | [Enforce election conflict declarations](#s25) | M | backend | | S24 |
 | S26 | 37.1p (recount, consent, reopen) | [Add recount approval, consent and nomination reopening](#s26) | M | backend | | S25 |
 | S27 | 37.14a | [Track election key holders and readiness](#s27) | M | backend, security | | S26 |
@@ -162,18 +162,18 @@ the ledger row in section 7. Run top to bottom.
 | S33 | F6 mobile, 84.49 (B4-B5) | [Add election controls and safe key retries on mobile](#s33) | M | mobile | | S32 |
 | **D** | **Meetings, then the model work after it** | | | | | |
 | S34 | 84.19 (T002, T002a, T003) | [Add meeting entities and schema](#s34) | L | domain, migration | 7 | |
-| S35 | 84.19 (T004 to T006) | [Add meeting services and API endpoints](#s35) | M | API | | S34 |
+| S35 | 84.19 (T004 to T006, T002a routes) | [Add meeting services and API endpoints](#s35) | M | API | | S34 |
 | S36 | 84.19 (T007 to T009) | [Add meeting agendas, participants and RSVPs](#s36) | M | API | | S35 |
 | S37 | 84.20 (T010 to T012) | [Add meeting to-do lists](#s37) | M | API | | S36 |
 | S38 | 84.19 (T013 to T015) | [Link meeting polls and audience rules](#s38) | M | API | | S37 |
-| S39 | 84.19 (T016 to T018) | [Build meeting admin and member web screens](#s39) | M | web | | S38 |
-| S40 | 84.19 (T019 to T020) | [Build meeting screens on mobile](#s40) | M | mobile | | S39 |
-| S41 | 84.19, 84.20 (T021, close) | [Register and document meeting contracts](#s41) | S | docs | | S40 |
+| S39 | 84.19 (T016 to T018, T002a web) | [Build meeting admin and member web screens](#s39) | M | web | | S38 |
+| S40 | 84.19 (T019 to T020, T002a mobile) | [Build meeting screens on mobile](#s40) | M | mobile | | S39 |
+| S41 | 84.19, 84.20 (T021) | [Register and document meeting contracts](#s41) | S | docs | | S40 |
 | S42 | 84.59 | [Type shared API DTOs and compare both clients](#s42) | M | API, both clients | | S41 |
 | S43 | 84.84 (backend) | [Add private member locations and directory filters](#s43) | L | API | 8 | S41 |
 | S44 | 84.84 (clients) | [Add location fields and filters to both clients](#s44) | M | web, mobile | | S43 |
 | **E** | **Election sessions 7 to 9** | | | | | |
-| S45 | 95.2 (N1 migration) | [Add election kinds, end reasons and term settings](#s45) | L | migration | 9 | S33 |
+| S45 | 95.2 (N1) | [Add election kinds, end reasons and term settings](#s45) | L | migration | 9 | S33 |
 | S46 | 95.4 | [Show vacant governance seats](#s46) | M | API, web, mobile | | S45 |
 | S47 | 95.12 (backend) | [Automate term endings and manage end reasons](#s47) | M | API, security | | S46 |
 | S48 | 95.12 (clients) | [Add end-reason controls to both clients](#s48) | M | web, mobile | | S47 |
@@ -181,39 +181,39 @@ the ledger row in section 7. Run top to bottom.
 | S50 | 95.5 (clients) | [Show election kinds and live elections in clients](#s50) | M | web, mobile | | S49 |
 | S51 | 37.13f | [Verify hosting limits and document backup evidence](#s51) | S | docs, backend log | | S50 |
 | **F** | **P2 items** | | | | | |
-| S52 | 84.4 | [Compare spec 004 endpoints with both clients](#s52) | S | docs | | |
+| S52 | 84.4 | [Script a parity table of spec 002 endpoints against both clients](#s52) | S | scripts, docs | | |
 | S53 | 93.3 | [Diagnose and fix the member-registration E2E failure](#s53) | S | e2e | | |
 | S54 | 84.27 (API tests) | [Test archive API status and authorization paths](#s54) | S | backend | | |
 | S55 | 84.27 (web page) | [Build the admin archive moderation page](#s55) | M | web | | S54 |
 | S56 | 84.55 | [Limit gallery creation to supported fields](#s56) | M | API, clients check | | |
 | S57 | 84.93 | [Manage effective-dated constitution versions](#s57) | M | API, web | | |
 | S58 | 84.97 | [Require termination reasons and show history](#s58) | M | API, web | | |
-| S59 | 84.67 | [Add mobile password change with step-up](#s59) | M | mobile | | |
+| S59 | 84.67 | [Add mobile password change; owner decides on step-up](#s59) | M | mobile | | |
 | S60 | 34.D8 | [Repair the local admin role through the protected seeder](#s60) | M | local stack | | |
 | S61 | 84.65 | [Build the scholarship admin page](#s61) | M | web | | |
 | S62 | 49.3.C | [Add account contact email and reset delivery](#s62) | L | API, web | 10 | |
 | S63 | 97.1 (backend) | [Add email-verification OTP endpoints](#s63) | M | API | | |
 | S64 | 97.1 (clients) | [Show and complete email verification in both clients](#s64) | M | web, mobile | | S63 |
 | S65 | 84.83 (backend) | [Add mentor opt-in and directory filtering](#s65) | L | API | 11 | |
-| S66 | 84.83 (clients) | [Add mentor settings and filters to both clients](#s66) | M | web, mobile | | S65 |
+| S66 | 84.83 (clients) | [Add mentor opt-in on profile edit and a mentors filter in both clients](#s66) | M | web, mobile | | S65 |
 | S67 | 84.82 (backend) | [Add event feedback storage and admin summary](#s67) | L | API | 12 | |
 | S68 | 84.82 (clients) | [Add event ratings to both clients](#s68) | M | web, mobile | | S67 |
 | S69 | 84.72 (backend) | [Add forum moderation APIs and default categories](#s69) | L | API | 13 | |
 | S70 | 84.72 (web) | [Build the admin forum tools for web](#s70) | M | web | | S69 |
-| S71 | 84.72 (mobile) | [Build role-guarded forum tools for mobile](#s71) | M | mobile | | S70 |
+| S71 | 84.72 (mobile) | [Build role-guarded forum tools for mobile](#s71) | M | mobile | | S69 |
 | S72 | 92.1 | [Set approval-flow rules with the owner](#s72) | S | spec | | |
 | S73 | 92.2 | [Implement configurable approval policies](#s73) | L | API | 14 if table | S72 |
 | S74 | 92.3 | [Add web approval settings and queue filters](#s74) | M | web | | S73 |
-| S75 | 92.4, 92.5 | [Add mobile approval gating and update specs](#s75) | S | mobile, docs | | S74 |
+| S75 | 92.4, 92.5 | [Add mobile approval gating and update specs](#s75) | S | mobile, docs | | S73 |
 | S76 | 37.7 (web mechanism) | [Add Bengali translation support to web](#s76) | M | web | | |
 | S77 | 37.7 (web strings) | [Translate web interface strings to Bengali](#s77) | M | web | | S76 |
 | S78 | 8.8 | [Add Bengali translations to mobile](#s78) | M | mobile | | S77 |
 | S79 | 62.2 | [Complete default and GHC profile data packs](#s79) | M | profiles | | |
 | S80 | 51.4 | [Test file-storage exclusions and image fallback](#s80) | S | backend tests | | |
-| S81 | 27.1, 27.8 | [Add cross-client coverage reporting and a CI gate](#s81) | M | ci | | |
-| S82 | 73.5 | [Generate the FR and NFR traceability matrix](#s82) | M | scripts | | |
+| S81 | 27.1, 27.8 | [Add cross-client coverage reporting and a local gate](#s81) | M | scripts | | |
+| S82 | 73.5 | [Generate the FR and NFR traceability matrix](#s82) | M | book build script (owner allows) | | |
 | S83 | 73.6 | [Pin seeded constitution text in tests](#s83) | S | backend test | | |
-| S114 | 100.6 (API, web), 100.7, 100.8 | [Policy pages, skip links and fees on the home page](#s114) | M | API, web | 14a | S110 |
+| S114 | 100.7, 100.8 | [Skip links, menu state and fees on the home page](#s114) | M | API, web | 14a | S110 |
 | S115 | 100.5 | [Titles, prerendered link previews, sitemap and share](#s115) | L | API, web, mobile | | S110 |
 | S116 | 100.9 | [Web notifications page and bell](#s116) | M | API, web, mobile | | |
 | S117 | 100.10 | [Event pass QR, web check-in and attendance list](#s117) | L | API, web, mobile | | S13 |
@@ -245,7 +245,7 @@ the ledger row in section 7. Run top to bottom.
 | S101 | 37.5 (backend) | [Add the memorial register to the API](#s101) | L | API | 17 | |
 | S102 | 37.5 (clients) | [Add the memorial register to both clients](#s102) | M | web, mobile | | S101 |
 | S103 | 37.10 | [Build the annual impact report across layers](#s103) | L | API, web, mobile | | S100 |
-| S104 | 62.56 (a, g) | [Map profile-pack sections and check key uniqueness](#s104) | M | API | | S79 |
+| S104 | 62.56 (a) | [Map profile-pack sections and check key uniqueness](#s104) | M | API | | S79 |
 | S105 | 62.56 (b) | [Export organization profile packs](#s105) | M | API, web | | S104 |
 | S106 | 62.56 (c, d) | [Upload, map and preview profile-pack imports](#s106) | L | API, web | | S105 |
 | S107 | 62.56 (e, f) | [Add import modes, transactions, tests and docs](#s107) | M | API, docs | | S106 |
@@ -264,9 +264,9 @@ the ledger row in section 7. Run top to bottom.
 | H02 | 63.8, 84.35 | [Refresh the counts used in the book](#h02) | S | book counts | | H01 |
 | H03 | 84.96, 64.8 | [Update the owner-approved claims](#h03) | S | book | | |
 | H04 | 64.9, 67.3 | [Update book diagrams](#h04) | M | book figures | | |
-| H05 | 67.2 (chapters 7, 10) | [Complete book placeholders in chapters 7 and 10](#h05) | M | book | | H01 |
+| H05 | 67.2 (chapters 7, 10) | [Complete book placeholders in chapters 7 and 10](#h05) | M | book | | H01, H04 |
 | H06 | 67.2 (chapter 9) | [Complete book placeholders in chapter 9](#h06) | M | book | | H05 |
-| H07 | 67.2 (chapters 11 to 13), 67.4, 67.10 (placeholders left in chapters 9, 10, 12, 13) | [Complete book chapters 11 to 13 and 67.4](#h07) | M | book | | H06 |
+| H07 | 67.2 (chapters 11 to 13), 67.4, 67.10 | [Complete book chapters 11 to 13 and 67.4](#h07) | M | book | | H06 |
 | H08 | 67.7, 67.5 | [Join book prose and tighten page layout](#h08) | M | book | | H07 |
 | H09 | 63.34, 63.18, 74.3 | [Complete the remaining book updates](#h09) | S | book | | H08 |
 
@@ -278,7 +278,7 @@ Rules in section 2 apply to every card. A card in a rewritten phase has the elev
 this order, and the plan check fails when one is missing or when a named file does not exist. A file
 the card creates is marked "(new)". Phases still in the short form are listed by the check as owed.
 
-<!-- card-template: A B C D -->
+<!-- card-template: A B C D E F G H I -->
 
 | Part | What it holds |
 |---|---|
@@ -818,12 +818,14 @@ by name. When a name on a card is not in the code, stop and ask; do not guess a 
 **S14 · 84.81 · L · migration 3**
 - Goal: a daily job sends one reminder for each unpaid due and each approved event registration
   inside a lead window set in OrgConfig, and never sends the same reminder twice.
-- Before you start: S13 closed (it adds `Cancelled`, which this job must skip). Migration 2 of the
-  ledger (section 7) is applied locally.
+- Before you start: S111 closed (it adds the mail preference check this job must ask) and S13
+  closed (it adds `Cancelled`, which this job must skip). Migration 2a of the ledger (section 7) is
+  applied locally.
 - Read (only these): `GHCAA.API/Services/ExpiredRevokeSweep.cs` (the pattern to copy, and where it
   is registered in `Program.cs`); `GHCAA.Domain/Models/MembershipDue.cs`, `EventRegistration.cs`;
-  `WorkflowDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs` (line 144); `TemplateCodes` in
-  `GHCAA.Domain/Constants.cs` (line 80); the newest migration `20261112120000_AddElectionFormPrints`
+  `WorkflowDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs` (line 144); `TemplateCodes` and
+  `MailKinds` in `GHCAA.Domain/Constants.cs` (line 80); `IMailPreferenceService.MayReceiveAsync`
+  from S111; the newest migration `20261112120000_AddElectionFormPrints`
   with its `.Designer.cs` as the shape to copy; memory `gotcha_orgconfig_feature_flag_default_drift`.
 - Change (only these files): `MembershipDue.cs`, `EventRegistration.cs`;
   `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddReminderSentMarks.cs` (new) with its
@@ -849,17 +851,21 @@ by name. When a name on a card is not in the code, stop and ask; do not guess a 
      Dues: `IsPaid == false`, `ReminderSentAt == null`, `DueDate` from today to today plus the lead
      days. Registrations: `Approved`, `ReminderSentAt == null`, event start in the same kind of
      window. Send the email, then set `ReminderSentAt`; save after each item so a crash does not
-     resend the ones already sent. A failed send leaves the mark empty. -> check: tests.
+     resend the ones already sent. A failed send leaves the mark empty. A due reminder uses the
+     always-sent membership status kind (D8). An event reminder first calls
+     `MayReceiveAsync(memberId, kind)` with the kind for `NotifyRegistrationUpdate`, the flag
+     `NotificationService` already uses for registration notices; if it refuses, skip the member
+     and leave the mark empty. -> check: tests.
   5. Register it in `Program.cs` beside `ExpiredRevokeSweep`. -> check: the API starts.
 - Contract: no route. `WorkflowDto` gains two fields; record them in `docs/API_CONTRACT_REGISTRY.md`.
 - Tests: `ReminderSweepTests.cs` :: `Due_DayBeforeWindow_NoMail`, `Due_FirstDayOfWindow_OneMail`,
   `Due_LastDayOfWindow_OneMail`, `Due_Paid_NoMail`, `SecondRun_SendsNothing`, `LeadZero_SendsNothing`,
   `Event_ApprovedInsideWindow_OneMail`, `Event_PendingOrCancelled_NoMail`,
-  `FailedSend_LeavesMarkEmpty`.
+  `FailedSend_LeavesMarkEmpty`, `Event_MemberOptedOut_NoMail`, `Due_MemberOptedOut_StillSent`.
 - Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ReminderSweepTests|FullyQualifiedName~OrgConfigGoldenSnapshotTests"`;
   `python scripts/ci-local.py --only backend`; `python scripts/ci-local.py --only contract`; then
   the code-reviewer pass on the migration.
-- Done when: the nine tests pass; the migration dry run is recorded; 84.81 DONE; ledger row 3 marked.
+- Done when: the eleven tests pass; the migration dry run is recorded; 84.81 DONE; ledger row 3 marked.
 - Stop and ask if: no email template for a due or an event reminder exists in the database seed.
   Default: reuse `FEE_REMINDER` for dues, and for events send through the existing generic
   notification email; do not edit `Seed/*.json`. Also stop if the golden has no regeneration path.
@@ -2323,272 +2329,2117 @@ Tests carry the FR or NFR category of spec 026 (for example `[Category("FR-8")]`
 
 ### Phase E. Election sessions 7 to 9
 
+Design reference for S45 to S50: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`,
+N1 (end reasons and election kind) and F10 (vacant seats, by-election, term ending). S51 follows F7.
+Where the design reference disagrees with a card, the card wins.
+
+Names in these cards were checked against the code on 2026-11-20. What the older cards and the
+delivery plan assumed that the code does not have, or already has:
+
+- `ECMember.EndReason` is a `VacancyReason?` enum (`GHCAA.Domain/Enums.cs`, values Died, Resigned,
+  Removed, TermEnded, Other) stored as a string of at most 20 characters
+  (`ECMemberConfiguration.cs`). The FK change has to map those strings to ids.
+- Committee positions are already a table (`EcPosition`, `EcPositionIds`, migration
+  `20261021100000_AddEcPositions`), and `ECMember.Position` is already an `EcPosition` id. Migration 9
+  adds end reasons and the election kind only, so its ledger name becomes `AddEndReasonsAndElectionKind`.
+- `GovernanceService.GetCommitteeSeatsAsync(periodId)` already works out empty seats with the last
+  holder's reason, and the web governance page already has a "Vacant seats" table built from it.
+- The default term length is an OrgConfig setting, not an `ECPeriod` column. There is no governance
+  group in `OrgConfigDto` yet. The OrgConfig row is stored as JSON, and a missing group reads as its
+  defaults.
+- `ElectionService.DeclareAsync` refuses when the period already has any `ECMember`, so a by-election
+  in a running period cannot declare today.
+- `GET api/elections/current` (`ElectionService.GetCurrentAsync`) returns one election or none.
+- Background jobs live in `GHCAA.API/Services/` (`DataRetentionSweep`, `ExpiredRevokeSweep`) and are
+  registered with `AddHostedService` in `GHCAA.API/Program.cs`.
+- The vacancy reason lists are hard-coded on both clients: `VACANCY_REASON_OPTIONS` in
+  `GHCAA.Web/src/app/core/constants/app.constants.ts` and `GovernanceConstants.vacancyReasonOptions`
+  in `GHCAA.Mobile/lib/core/constants/app_constants.dart`.
+
+Tests carry the FR or NFR category of spec 023 where the delivery plan names one.
+
 <a id="s45"></a>
 **S45 · 95.2 (N1) · L · migration 9**
-- Steps: migration `AddCommitteePositionsAndTerms`: `EcEndReason` table (seeded with today's five
-  `VacancyReason` values under the same ids; TermEnded and Died marked system), `ECMember` end reason
-  FK, `Election.Kind` (General 0, ByElection 1), `ECPeriod.DefaultTermMonths` (nullable), rebuild
-  `IX_Elections_ECPeriodId_Live` on period and kind. Rollback refuses while admin-made end reasons
-  exist (raise in a DO block).
-- Tests: model on SQLite; migration rule 5; rollback refusal on PostgreSQL.
-- Done when: N1 built; 95.2 stays PARTIAL until G-REL confirms preprod and the invalid-rows report.
+- Goal: the end reason of a committee term is a row in a new `EcEndReason` table instead of an enum,
+  and an election has a kind (General or ByElection) with the live-election index keyed on period and
+  kind. One migration, no client change.
+- Before you start: S33 is closed and migration 8 of the ledger (section 7, the migration ledger) is
+  applied locally. The owner has confirmed that `20261021100000_AddEcPositions` is applied on preprod
+  and that `GET api/admin/governance/positions/invalid-rows` there returns no rows (or the repair has
+  run). Without that answer, ask through AskUserQuestion and stop.
+- Read (only these): the N1 part of the delivery plan; `GHCAA.Domain/Models/EcPosition.cs` (the model
+  and `EcPositionIds.Seed()`); `GHCAA.Domain/Models/ECMember.cs`; `GHCAA.Domain/Models/Election.cs`;
+  `GHCAA.Infrastructure/Data/Configurations/EcPositionConfiguration.cs`, `ECMemberConfiguration.cs`
+  and `ElectionConfigurations.cs`; `GHCAA.Infrastructure/Data/Migrations/PgSql/20261021100000_AddEcPositions.cs`
+  (guards, `setval`, the orphan check and the refusing Down); the live index SQL in
+  `20261009130000_AddBallotOrderAndTestElection.cs`; `WarnIfLiveElectionIndexMissingAsync` and
+  `LiveElectionsSharingAPeriodAsync` in `GHCAA.Infrastructure/Data/MigrationBootstrapper.cs`;
+  `GHCAA.Tests/Data/EcPositionSeedSyncTests.cs` and `GHCAA.Tests/Data/LiveElectionIndexCheckTests.cs`.
+- Change (only these files): `GHCAA.Domain/Enums.cs`, `GHCAA.Domain/Models/EcEndReason.cs` (new),
+  `ECMember.cs`, `Election.cs`, `GHCAA.Domain/Constants.cs`;
+  `GHCAA.Infrastructure/Data/Configurations/EcEndReasonConfiguration.cs` (new), `ECMemberConfiguration.cs`,
+  `ElectionConfigurations.cs`, `ApplicationDbContext.cs`, `MigrationBootstrapper.cs`; every file that
+  uses `VacancyReason` today: `ECHistoryDto.cs`, `GovernanceDto.cs`, `IGovernanceService.cs`,
+  `GovernanceService.cs`, `MemberService_Approval.cs`, `MemberService_Profile.cs`,
+  `MemberService_Search.cs`, `AdminGovernanceController.cs`; a new PgSql migration
+  `AddEndReasonsAndElectionKind` with its `.Designer.cs`, and `PgSqlApplicationDbContextModelSnapshot.cs`;
+  `GHCAA.Tests/Data/EcEndReasonSeedSyncTests.cs` (new), `LiveElectionIndexCheckTests.cs`,
+  `GovernanceServiceTests.cs`; `docs/TODO.md`, the ledger row in this plan.
+- Do not touch: `Seed/*.json` (the `ec_members.json` files carry no end reason), any client, the
+  election create and declare logic (S49), the end-term job (S47).
+- Steps:
+  1. `EcEndReason` with `Id`, `Key`, `Name`, `NameBn`, `DisplayOrder`, `IsSystem`, `IsActive`, shaped
+     like `EcPosition`. `EcEndReasonIds` with `Died = 1`, `Resigned = 2`, `Removed = 3`,
+     `TermEnded = 4`, `Other = 5` (the enum order, one-based) and a `Seed()` the context feeds to
+     `HasData`. `TermEnded` and `Died` are `IsSystem`: an admin cannot retire or rename them.
+     Lengths come from new constants in `Constants.Governance`. -> check: the project builds.
+  2. `ECMember.EndReason` becomes `int? EndReasonId` with a navigation `EndReason`, FK restrict on
+     delete. Add `ElectionKind { General = 0, ByElection = 1 }` to `Enums.cs` and
+     `Election.Kind` (default General). Remove `VacancyReason` from `Enums.cs`. -> check: the build
+     lists every old use; each one now reads or writes an id from `EcEndReasonIds`.
+  3. `GovernanceService.EndTerm` takes an end reason id. A note is still required for `Other`. An
+     unknown or retired id is refused with the error the end-term route already returns for a bad
+     reason. `CommitteeSeatDto` and `ECHistoryDto` carry the id and the reason name. -> check:
+     `GovernanceServiceTests` pass after the rename.
+  4. The live index moves to (`ECPeriodId`, `Kind`) in `ElectionConfigurations.cs`, keeping
+     `Constants.Elections.LiveIndexName` and the same filter. `LiveElectionsSharingAPeriodAsync`
+     groups by period and kind, and the hint in `WarnIfLiveElectionIndexMissingAsync` names both
+     columns. -> check: `LiveElectionIndexCheckTests` updated and passing.
+  5. Migration per rule 5 of section 2 (the migration rule), every statement guarded:
+     create `EcEndReasons`, insert the five rows with `ON CONFLICT DO NOTHING`, advance the identity
+     sequence with `setval(pg_get_serial_sequence(...))`; add `ECMembers.EndReasonId`, fill it from
+     the old string column with a `CASE` on the five names, then drop the string column; add the FK
+     unless an unmapped string remains, in which case `RAISE WARNING` and leave the column without
+     the FK, as `AddEcPositions` does for positions; add `Elections.Kind` with default 0; drop and
+     recreate the live index on the two columns inside the same clash-checked `DO` block the
+     older migration uses. Down refuses with `RAISE EXCEPTION` while any `EcEndReasons` row has an
+     id above 5 or any `ECMembers.EndReasonId` points at one; otherwise it restores the string column
+     from the ids. -> check: the dry run in rule 5 on a fresh database and on a copy that has ended
+     terms; a second run changes nothing; Down refuses after an admin-made reason is added.
+- Contract: `POST api/admin/governance/members/{ecMemberId}/end-term` and the assign request take
+  `endReasonId` instead of the reason name; `GET periods/{id}/seats` returns `vacancyReasonId` and
+  `vacancyReasonName`. Record it in `docs/API_CONTRACT_REGISTRY.md` as a breaking change that S48
+  takes up on both clients.
+- Tests: `EcEndReasonSeedSyncTests.cs` :: `Seed_MatchesIds` (the five ids and keys match
+  `EcEndReasonIds`), `SystemReasons_AreTermEndedAndDied`; `GovernanceServiceTests.cs` ::
+  `EndTerm_UnknownReasonId_IsRefused`, `EndTerm_RetiredReason_IsRefused`,
+  `EndTerm_Other_NeedsANote`; `LiveElectionIndexCheckTests.cs` ::
+  `GeneralAndByElection_InOnePeriod_AreNotAClash`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~EcEndReason|FullyQualifiedName~GovernanceService|FullyQualifiedName~LiveElectionIndex"`;
+  then `python scripts/ci-local.py --only backend`. Check the SQLite test database builds and
+  `dotnet ef migrations has-pending-model-changes` reports none for PgSql.
+- Done when: the migration applies twice on local PostgreSQL and rolls back; the SQLite tests pass;
+  there are no pending model changes; `code-reviewer` has read the diff; ledger row 9 has its
+  timestamp and the new name; 95.2 gets its evidence and closes if nothing else in its scope is open.
+- Stop and ask if: the old string column holds a value outside the five names on a real copy; the
+  live index clash check finds two live elections of one kind in a period; the owner has not
+  confirmed the preprod positions migration.
 
 <a id="s46"></a>
-**S46 · 95.4 · M** One vacant-seat query in `GovernanceService` (holders in the active period below
-the position's seat count); filter on the web governance page and the mobile governance screen.
-Tests: ended term appears, filled seat leaves. Done when: 95.4 DONE.
+**S46 · 95.4 · M**
+- Goal: one service method returns the empty seats of a period, the seats route can return only
+  those, and both clients show them on the admin governance screens.
+- Before you start: S45 is closed. `grep -n "GetVacantSeatsAsync" GHCAA.Infrastructure` shows nothing.
+- Read (only these): `GetCommitteeSeatsAsync` in `GHCAA.Infrastructure/Services/GovernanceService.cs`;
+  `IGovernanceService.cs`; the seats action in `GHCAA.API/Controllers/AdminGovernanceController.cs`;
+  the four `GetCommitteeSeatsAsync_*` tests in `GHCAA.Tests/Services/GovernanceServiceTests.cs`;
+  `GHCAA.Web/src/app/admin/governance/admin-governance.ts` and `.html` (the `vacantSeats` table);
+  `GHCAA.Web/src/app/core/services/admin.service.ts` (the seats call);
+  `GHCAA.Mobile/lib/screens/admin/governance_registry_screen.dart`;
+  `GHCAA.Mobile/lib/features/admin/admin_service.dart`.
+- Change (only these files): `IGovernanceService.cs`, `GovernanceService.cs`,
+  `AdminGovernanceController.cs`, `GovernanceServiceTests.cs`, `GHCAA.Tests/Controllers/AdminGovernanceControllerTests.cs`; `admin-governance.ts`, `.html`, `.spec.ts`, `admin.service.ts`;
+  `governance_registry_screen.dart`, `admin_service.dart`,
+  `GHCAA.Mobile/test/governance_registry_positions_test.dart`;
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: the public `GovernanceController` and the member governance screens; the end-term
+  dialog (S48 changes its reason list).
+- Steps:
+  1. `GetVacantSeatsAsync(int periodId, CancellationToken ct)` returns the seats of active positions
+     where the current holders are fewer than `EcPosition.SeatCount`, one row per empty seat, with
+     the last holder's reason as `GetCommitteeSeatsAsync` gives it. Build it on the same query; do
+     not copy it. A retired position is never vacant. -> check: the new tests below.
+  2. `GET periods/{id}/seats?vacantOnly=true` returns only those rows; without the flag the route
+     answers as today. An unknown period stays 404. -> check: the controller test.
+  3. Web: the "Vacant seats" table reads the existing `vacantSeats` signal; add the count to the
+     section heading and an empty state line from the existing empty-state style. No new route call.
+     -> check: `admin-governance.spec.ts`.
+  4. Mobile: the registry screen gets a "Vacant seats" section fed by the seats route with
+     `vacantOnly=true` for the selected period, with the empty state the screen already uses.
+     -> check: the widget test.
+- Contract: `GET api/admin/governance/periods/{id}/seats` gains the optional `vacantOnly` query.
+  Registry entry; both clients updated in this card.
+- Tests: `GovernanceServiceTests.cs` :: `GetVacantSeatsAsync_TwoSeatPositionWithOneHolder_ReturnsOneSeat`,
+  `GetVacantSeatsAsync_RetiredPosition_IsNeverVacant`, `GetVacantSeatsAsync_FullPosition_ReturnsNothing`,
+  `GetVacantSeatsAsync_CarriesTheLastHoldersReason`; controller test `Seats_VacantOnly_ReturnsOnlyEmptySeats`;
+  web spec "shows the vacant seat count"; mobile widget test "lists vacant seats for the period".
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~GovernanceService"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/governance/admin-governance.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/governance_registry_positions_test.dart --exclude-tags golden`.
+- Done when: the tests pass; the page and screen show the vacant seats on the local stack; 95.4 closes
+  with its evidence; `code-reviewer` has read the diff.
+- Stop and ask if: the owner wants vacant seats on the public or member committee page too (that is
+  a new public route and not in this card).
 
 <a id="s47"></a>
-**S47 · 95.12 (backend) · M · security** `TermEndSweep` like `DataRetentionSweep`, off by default
-(`OrgConfig` governance setting); default term length fills a new period's end date; end-reason
-admin routes; system reasons cannot be removed; `end-term` takes a reason id and a note.
-Tests: on and off, early end with each reason, system reason delete refused.
+**S47 · 95.12 (backend) · M · security**
+- Goal: a term ends in two ways. A daily job, off by default, ends every open term of a period whose
+  end date has passed with reason `TermEnded`. An admin ends one term early through the existing
+  end-term route with a reason and a note.
+- Before you start: S46 is closed. `grep -rn "TermEndSweep" GHCAA.API` shows nothing.
+- Read (only these): the F10 part of the delivery plan; `GHCAA.API/Services/DataRetentionSweep.cs`
+  and its registration in `GHCAA.API/Program.cs`; `GHCAA.Tests/Services/DataRetentionSweepTests.cs`;
+  `ElectionSettingsDto` and `OrgConfigDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs`; the save path
+  in `GHCAA.Infrastructure/Services/OrgConfigService.cs`; the setting read at
+  `ElectionService.cs` (`_orgConfig == null ? new ElectionSettingsDto()... : ...Elections...`);
+  `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json` with `OrgConfigGoldenSnapshotTests.cs`;
+  `EndTerm` and `RemoveMemberFromCommitteeAsync` in `GovernanceService.cs`; the end-term action in
+  `AdminGovernanceController.cs`.
+- Change (only these files): `OrgConfigDto.cs`, `OrgConfigService.cs` (defaults and audit only),
+  `GHCAA.Domain/Constants.cs`, `IGovernanceService.cs`, `GovernanceService.cs`,
+  `GHCAA.API/Services/TermEndSweep.cs` (new), `Program.cs`, `AdminGovernanceController.cs`;
+  `GHCAA.Tests/Services/TermEndSweepTests.cs` (new), `GovernanceServiceTests.cs`,
+  `AdminGovernanceControllerTests.cs`, the golden file and
+  `OrgConfigServiceTests.cs`; `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: the profile JSON under `profiles/` (hands-off rule; the defaults in the DTO cover a
+  missing group), the clients (S48), `ECPeriod` (no new column, no migration).
+- Steps:
+  1. `GovernanceSettingsDto Governance` on `OrgConfigDto` with `TermEndJobEnabled = false` and
+     `DefaultTermMonths`. The value of `DefaultTermMonths` comes from the owner (see the last part).
+     It is not under `Elections`, so the election freeze does not block it. The save writes one
+     activity row when either value changes. -> check: `OrgConfigServiceTests`, golden test updated.
+  2. `EndExpiredTermsAsync(DateTime today, CancellationToken ct)` in the governance service: for each
+     period whose end (its `EndDate`, else `StartDate` plus `DefaultTermMonths`) is before today, end
+     every open `ECMember` row with `EcEndReasonIds.TermEnded` and that end date. A row already ended
+     is left alone. Returns the number ended. -> check: the service tests.
+  3. `TermEndSweep` copies `DataRetentionSweep`: one pass at start, then every
+     `Constants.Retention.SweepHours`, a `RunOnceAsync(ct)` that reads the setting each pass and does
+     nothing when it is off, and logs a failure without stopping the host. Register it beside
+     `ExpiredRevokeSweep`. -> check: `TermEndSweepTests`.
+  4. The end-term route refuses `TermEnded` from an admin; that reason belongs to the job. `Died`
+     stays open to an admin, who records a death by hand. The note limit stays
+     `Constants.Governance.VacancyNoteMaxLength`. The action stays under `AdminOnly`. -> check: the
+     controller test.
+- Contract: no new route. `end-term` refuses `TermEnded`; OrgConfig gains the `governance` group.
+  Registry entry.
+- Tests: `TermEndSweepTests.cs` :: `RunOnce_SettingOff_EndsNothing`, `RunOnce_PastPeriodEnd_EndsOpenTerms`,
+  `RunOnce_NoEndDate_UsesDefaultTermMonths`, `RunOnce_SecondPass_ChangesNothing`;
+  `AdminGovernanceControllerTests.cs` :: `EndTerm_AdminCannotUseTermEnded`; `OrgConfigServiceTests.cs` ::
+  `Governance_MissingGroup_ReadsDefaults`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~TermEndSweep|FullyQualifiedName~GovernanceService|FullyQualifiedName~OrgConfig"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the tests pass; `security-reviewer` has read the end-term route and the job (F10 asks
+  for it); 95.12 gets an evidence note and stays IN PROGRESS until S48.
+- Stop and ask if: the constitution names a term length (use it as `DefaultTermMonths` only with the
+  owner's yes); the owner wants the job on by default; a period has neither an end date nor a start.
 
 <a id="s48"></a>
-**S48 · 95.12 (clients) · M** Web end-reason admin next to positions, reason picker on web and
-mobile end-term. Done when: 95.12 DONE.
+**S48 · 95.12 (clients) · M**
+- Goal: both clients take the end reasons from the server, send `endReasonId`, never offer
+  `TermEnded`, and the web settings page edits the two governance settings.
+- Before you start: S47 is closed.
+- Read (only these): `VACANCY_REASON_OPTIONS`, `VACANCY_REASON_OTHER`, `VACANCY_NOTE_MAX_LENGTH` and
+  `getVacancyReasonLabel` in `GHCAA.Web/src/app/core/constants/app.constants.ts`;
+  `admin-governance.ts` and `.html`; `admin.service.ts` (seats and end-term calls);
+  `GHCAA.Web/src/app/admin/org-config/org-config.html` and its `.ts`;
+  `GovernanceConstants.vacancyReasonOptions` in `GHCAA.Mobile/lib/core/constants/app_constants.dart`;
+  the end-term dialog in `governance_registry_screen.dart`; `admin_service.dart`;
+  `GHCAA.Mobile/lib/core/config/org_config.dart`.
+- Change (only these files): `AdminGovernanceController.cs` (the reasons list action),
+  `IGovernanceService.cs`, `GovernanceService.cs`, `AdminGovernanceControllerTests.cs`; `app.constants.ts`, `admin-governance.ts`, `.html`,
+  `.spec.ts`, `admin.service.ts`, the governance model file the seats type lives in,
+  `org-config.html`, `org-config.ts`, its spec; `app_constants.dart`,
+  `governance_registry_screen.dart`, `admin_service.dart`, `org_config.dart`,
+  `GHCAA.Mobile/test/governance_registry_positions_test.dart`;
+  `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: the public and member governance screens; any backend logic beyond the list action.
+- Steps:
+  1. `GET api/admin/governance/end-reasons` returns the active reasons (id, key, name, `isSystem`)
+     in display order, under `AdminOnly`. -> check: controller test.
+  2. Web: the end-term select loads that list, leaves out `TermEnded`, sends `endReasonId`, and keeps
+     the note rule for `Other` by key. Remove `VACANCY_REASON_OPTIONS` and `getVacancyReasonLabel`;
+     the seats table shows the name the server sends. Keep `VACANCY_NOTE_MAX_LENGTH`. -> check:
+     `admin-governance.spec.ts` and `npm run type-check`.
+  3. Web settings: a "Committee terms" block on the org-config page with the job switch and the
+     default term in months, using the page's existing field components. -> check: its spec.
+  4. Mobile: the dialog loads the list the same way, sends `endReasonId`; remove
+     `GovernanceConstants.vacancyReasonOptions`; `org_config.dart` reads the new group with the same
+     defaults. -> check: widget test and `flutter analyze`.
+- Contract: new `GET api/admin/governance/end-reasons`. Registry entry; both clients in this card.
+- Tests: controller `EndReasons_ReturnsActiveInOrder`; web spec "end-term list comes from the server
+  and has no Term ended"; web spec "saves the committee term settings"; mobile widget test "end-term
+  dialog sends the reason id".
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/governance/admin-governance.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/governance_registry_positions_test.dart --exclude-tags golden`;
+  then `python scripts/ci-local.py --only contract`.
+- Done when: the tests pass; ending a term works on the local stack from both clients; 95.12 closes
+  with its evidence; `code-reviewer` has read the diff.
+- Stop and ask if: the owner wants admins to add their own end reasons from a screen (that is a CRUD
+  page like positions and a new card).
 
 <a id="s49"></a>
-**S49 · 95.5 (backend) · M** Kind on create; a by-election offers vacant seats only and refuses a held
-seat at create and at declare; declare never ends a holder (owner 2026-10-14, the older tracker text
-about ending a holder is superseded); `GetCurrentAsync` returns the general election and any live
-by-election. Tests: declare fills only the vacant seats, guards, two live elections.
+**S49 · 95.5 (backend) · M**
+- Goal: an admin can create a by-election in a running period. It offers vacant seats only, refuses
+  a held seat at create and again at declare, and declare never ends a holder. The live election
+  route returns the general election and any live by-election.
+- Before you start: S48 is closed. `grep -n "ElectionKind" GHCAA.Infrastructure/Services/ElectionService.cs`
+  shows nothing.
+- Read (only these): the F10 part of the delivery plan; `CreateAsync`, `GetCurrentAsync`,
+  `AddSeatAsync`, `CheckSeatAsync` and `DeclareAsync` in
+  `GHCAA.Infrastructure/Services/ElectionService.cs`; `IElectionService.cs`; `CreateElectionDto`,
+  `CreateAdminElectionRequest`, `ElectionSummaryDto` and `AdminElectionDto` in
+  `GHCAA.Application/DTOs/ElectionDtos.cs`; the create action in
+  `GHCAA.API/Controllers/AdminElectionsController.cs`; the `current` action in `ElectionsController.cs`;
+  the field rows near "Election title" in `GHCAA.Infrastructure/Services/ElectionDocumentService.cs`;
+  `GetVacantSeatsAsync` from S46; `GHCAA.Tests/Services/ElectionServiceTests.cs`.
+- Change (only these files): `ElectionDtos.cs`, `IElectionService.cs`, `ElectionService.cs`,
+  `ElectionDocumentService.cs`, `AdminElectionsController.cs`, `ElectionsController.cs`,
+  `GHCAA.Domain/Constants.cs`; `ElectionServiceTests.cs`, `ElectionDocumentServiceTests.cs`,
+  `AdminElectionsControllerTests.cs`, `ElectionsControllerTests.cs`; `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`.
+- Do not touch: the ballot seal, count and vacuum code; the approval service; the clients (S50).
+- Steps:
+  1. `Kind` on `CreateElectionDto`, `CreateAdminElectionRequest`, `ElectionSummaryDto` and
+     `AdminElectionDto`, default General. -> check: the build and the existing tests.
+  2. Create, by-election: the period must be the active one and may already have a committee (the
+     "no committee yet" and "starts after polling" checks apply to General only). Each seat it asks
+     for must be vacant by `GetVacantSeatsAsync`, and no more seats of a position than are vacant;
+     otherwise a new error code `seat-held`. A General create is unchanged. -> check: service tests.
+  3. `AddSeatAsync` and `CheckSeatAsync` apply the same rule to a by-election. -> check: service test.
+  4. Declare, by-election: skip the "period has members" refusal; inside the existing transaction,
+     check each elected seat is still vacant and, if one is not, roll back and return false with a
+     logged reason. Winners start on the declare date, not the period start. A General declare is
+     unchanged. Declare never sets `EndDate` on any row. -> check: service tests.
+  5. `GetLiveAsync` returns every non-test election in a live phase, General first; `GetCurrentAsync`
+     keeps its shape and returns the General one if live, else the by-election, so old clients keep
+     working. New `GET api/elections/live` returns the list. -> check: controller test.
+  6. The ER forms show the kind in the field rows beside "Election title". -> check: a document
+     service test reads the row.
+- Contract: create requests and summary DTOs gain `kind`; new `GET api/elections/live`; new create
+  error `seat-held`. Registry entry; S50 takes it up on both clients.
+- Tests: `ElectionServiceTests.cs` :: `Create_ByElection_HeldSeat_IsRefused`,
+  `Create_ByElection_VacantSeat_IsAccepted`, `Create_ByElection_MoreSeatsThanVacant_IsRefused`,
+  `Declare_ByElection_DoesNotEndAnyHolder`, `Declare_ByElection_SeatFilledSinceCreate_IsRefused`,
+  `Declare_General_StillRefusesWhenPeriodHasMembers`, `GetLive_ReturnsGeneralAndByElection`;
+  `ElectionsControllerTests.cs` :: `Live_SkipsTestElections`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionService|FullyQualifiedName~ElectionsController|FullyQualifiedName~ElectionDocument"`;
+  then `python scripts/ci-local.py --only backend`.
+- Done when: the tests pass, and the existing create and declare tests pass unchanged; `code-reviewer`
+  has read the diff; 95.5 gets an evidence note and stays IN PROGRESS until S50.
+- Stop and ask if: a by-election needs its own nomination or polling rules beyond the general ones;
+  the owner wants a by-election in a period that is not active.
 
 <a id="s50"></a>
-**S50 · 95.5 (clients) · M** Kind shown on ballot, results and ER forms; both live elections on web
-and mobile; admin create on web only. Done when: 95.5 DONE.
+**S50 · 95.5 (clients) · M**
+- Goal: both clients create a by-election from the vacant seats, label the kind on the election
+  pages, ballot and results, and show the general election and a live by-election side by side.
+- Before you start: S49 is closed.
+- Read (only these): `GHCAA.Web/src/app/admin/elections/admin-elections.ts` and `.html` (the create
+  form beside `isTest`); `GHCAA.Web/src/app/core/services/elections.service.ts`;
+  `ElectionSummaryDto` in `GHCAA.Web/src/app/core/models/election.models.ts`; the `CURRENT` route in
+  `app.constants.ts`; `GHCAA.Web/src/app/public/elections/elections.ts` and `.html`;
+  `GHCAA.Mobile/lib/features/elections/election_service.dart` (`ElectionSummary`);
+  `GHCAA.Mobile/lib/screens/admin/election_management_screen.dart` (the create dialog beside
+  `isTest`); `GHCAA.Mobile/lib/screens/member/election_screen.dart` and `election_results_screen.dart`.
+- Change (only these files): the web files above and their specs; the four mobile files above and
+  `GHCAA.Mobile/test/election_management_screen_test.dart`, `election_screen_test.dart`,
+  `election_results_screen_test.dart`; `docs/API_CONTRACT_REGISTRY.md` (client column),
+  `docs/TODO.md`; `GHCAA.Web/tests/e2e/election-walkthrough/election.walkthrough.ts` and its
+  `README.md` (one step and one table row).
+- Do not touch: any backend file; the ballot sealing code on either client; the walkthrough's
+  `scenario.json` (hands-off JSON data).
+- Steps:
+  1. Web admin create: a kind choice. For a by-election, the seats come from
+     `GET .../seats?vacantOnly=true` of the active period and only those can be picked; the
+     `seat-held` error shows its message. -> check: `admin-elections.spec.ts`.
+  2. Web public elections page: read `GET api/elections/live` and show each election with a
+     "By-election" label where the kind says so; the label also shows on the ballot and results
+     views of that page. -> check: `elections.spec.ts`.
+  3. Mobile admin create: the same kind choice and vacant-seat list. -> check: widget test.
+  4. Mobile member election and results screens: read the live list, show both, label the kind.
+     -> check: widget tests and `flutter analyze`.
+  5. Walkthrough: add a by-election step after the declare step and a row in the README's "What the
+     run covers" table. -> check: the step runs on the local stack.
+- Contract: no change; both clients switch to `GET api/elections/live`.
+- Tests: web spec "by-election offers only vacant seats"; web spec "shows the by-election label";
+  mobile widget tests "create dialog lists vacant seats for a by-election" and "member screen shows
+  two live elections".
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/elections/admin-elections.spec.ts src/app/public/elections/elections.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/election_management_screen_test.dart test/election_screen_test.dart test/election_results_screen_test.dart --exclude-tags golden`;
+  then the walkthrough as its `README.md` says (`npm run test:e2e:walkthrough` with the stage variables).
+- Done when: the tests and the walkthrough step pass; 95.5 closes with its evidence; `code-reviewer`
+  has read the diff.
+- Stop and ask if: showing two live elections on the member screen needs a layout the owner has not
+  seen; the walkthrough step needs a change to `scenario.json`.
 
 <a id="s51"></a>
-**S51 · 37.13f · S** Close the 11 *[to confirm]* points in doc 09 against free Neon and free Render
-public docs (link and date for each); mark availability as a known limit with no SLA; backup schedule
-with RTO and RPO; branch warning in `docs/DEPLOYMENT_CHECKLIST.md`; a log line for a failed count with
-a test. Points that need the owner's dashboard values name the owner as the source still owed.
+**S51 · 37.13f · S**
+- Goal: every *[to confirm]* mark in `docs/Elections/09-Election-Security-and-Compliance.md` is
+  answered or turned into a stated known limit, and a failed count writes a log line.
+- Before you start: S50 closed (run order only; no shared files). `grep -c "to confirm" docs/Elections/09-Election-Security-and-Compliance.md`
+  gives 13 lines today (11 open points plus the line that explains the mark and one repeat).
+- Read (only these): the 37.13f entry in `docs/TODO.md`; doc 09; the F7 part of the delivery plan;
+  `docs/DEPLOYMENT_CHECKLIST.md` (the branch and backup lines); `docs/RECOVERY_RUNBOOK.md` Scenario 2;
+  `CountAsync` in `GHCAA.Infrastructure/Services/ElectionService.cs` (the `wrong-key`, `integrity`,
+  `below-threshold` and `unreadable` returns).
+- Change (only these files): doc 09, `docs/DEPLOYMENT_CHECKLIST.md`, `ElectionService.cs`,
+  `GHCAA.Tests/Services/ElectionServiceTests.cs`, `docs/TODO.md`.
+- Do not touch: the constitution and regulation text; `docs/book/`.
+- Steps:
+  1. Doc 09: Render and Neon points take the owner's 2026-11-12 decision (free Neon, free Render):
+     availability is a known limit with no SLA and no DDoS cover beyond the platform's; log retention
+     and backup are what the free plans give, with RTO and RPO stated from them and the manual Neon
+     branch backup in the checklist. -> check: no Render or Neon *[to confirm]* left.
+  2. The point at the "regulations do not name this case" line goes to the owner as a regulation
+     change, as F7 says: replace the mark with "Open with the owner as a regulation change" and the
+     tracker id. -> check: grep shows only the explaining line.
+  3. `DEPLOYMENT_CHECKLIST.md`: a warning that a push to `preprod` deploys, beside the existing
+     branch line. -> check: read it back.
+  4. `CountAsync` logs one warning with the election id and the error code on each failed return,
+     with no key, ballot or voter data in the line. -> check: the test below.
+- Contract: none.
+- Tests: `ElectionServiceTests.cs` :: `Count_WrongKey_LogsAWarningWithoutTheKey`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionServiceTests.Count"`;
+  then read the changed lines of doc 09 back against the tone rules.
+- Done when: doc 09 has no open *[to confirm]* mark; the test passes; 37.13f closes with its evidence
+  or keeps only the owner's regulation point open.
+- Stop and ask if: a free-plan figure (log retention, backup window) cannot be found in the Render or
+  Neon docs; the owner wants a paid plan named.
 
 ### Phase F. P2 items
 
+Names in these cards were checked against the code on 2026-11-20. What the older cards assumed that
+the code does not have, or already has:
+
+- Spec 004 has no endpoint table. The endpoint tables are the domain files in
+  `docs/specs/002-workflow-contracts-and-validation/evidence/`, and spec 002 Story 4 defines the
+  parity table.
+- `MembershipHistory` already exists (`RecordMembershipChangeAsync`, `GET` behind
+  `FinancialsController.GetMembershipHistory`), but `AdminUpdateMemberAsync` writes it only for a
+  membership type change, not for a status change.
+- `POST api/profile/change-password` has no `[RequireStepUp]`. Mobile has no change-password call
+  and no settings screen.
+- The scholarship API has no edit or close routes.
+- `User` already has `Email`. A member cannot change their own email; only the admin update can.
+- `ForumTopic` already has `IsPinned` and `IsLocked`. The mobile admin routes have no role guard.
+- `EventRegistration` has no "attended" status: attendance is `Approved` or `IsCheckedIn`.
+- Spec 022 lists its nine flows in the "In scope" line and its open questions under "Decisions to
+  confirm before implementation". `MemberApprovalMode` is read by no C# code.
+- The web app has no i18n layer and no Bengali font. Mobile has a flat dictionary of 29 keys in
+  `app_localizations.dart`.
+- `membership-tiers.json` and `governance.json` have no reader anywhere. `ProfilePackFiles` reads
+  `email_templates.json`, `site_content.json`, `themes.json` and `constitution.json`, falling back to
+  `GHCAA.Infrastructure/Data/Seed/`.
+- `traceability.py` lives in `docs/book/build/` and scans C# tags only. `ci-local.py` collects no
+  coverage; the CI workflow does.
+
 <a id="s52"></a>
-**S52 · 84.4 · S** Parity table in spec 004 (or `docs/API_CONTRACT_REGISTRY.md` appendix): for each
-endpoint in the spec 004 contract table, grep `GHCAA.Web/src` and `GHCAA.Mobile/lib` for the route; columns web,
-mobile, response difference. Script it in `scripts/` if it takes more than one pass.
+**S52 · 84.4 · S**
+- Goal: one parity table that says, for each endpoint in the spec 002 domain contract tables, whether
+  web and mobile call it and how each reads the response.
+- Before you start: no card dependency. The domain tables in spec 002 `evidence/` are complete.
+- Read (only these): spec 002 `spec.md` Story 4 (the parity table definition); the seven domain files
+  in `docs/specs/002-workflow-contracts-and-validation/evidence/` (`events-domain.md`,
+  `governance-domain.md`, `jobs-domain.md`, `mentorship-domain.md`, `news-domain.md`,
+  `payments-domain.md`, `polls-domain.md`); `docs/api/diff_swagger.py` for its route parsing.
+- Change (only these files): `scripts/client_parity.py` (new);
+  `docs/specs/002-workflow-contracts-and-validation/evidence/client-parity.md` (new);
+  `scripts/test_client_parity.py` (new); `docs/TODO.md`.
+- Do not touch: client code; the domain tables (report a wrong row instead of fixing it here).
+- Steps:
+  1. The script reads each domain table's method and route, turns route parameters into a pattern,
+     and searches `GHCAA.Web/src` (`.ts`) and `GHCAA.Mobile/lib` (`.dart`) for the route literal or
+     its `API_ENDPOINTS` constant. -> check: it finds the known web and mobile callers of
+     `GET api/events`.
+  2. It writes `client-parity.md` with columns endpoint, web file, mobile file, response difference.
+     The difference column is filled by reading the two call sites for each row both clients call.
+     -> check: no row has an empty web and mobile cell without a "not called" mark.
+  3. The script has `--check`, which exits non-zero when the table is stale. -> check: run twice; the
+     second run reports no change.
+- Contract: none.
+- Tests: `scripts/test_client_parity.py` :: `test_route_with_parameter_matches`,
+  `test_constant_reference_matches`, `test_uncalled_route_is_marked`.
+- Run: `python scripts/client_parity.py --check </dev/null`;
+  `python -m unittest discover -s scripts -p test_client_parity.py`.
+- Done when: the table exists and the check passes; 84.4 closes with the table as evidence; each
+  mismatch found becomes its own tracker line.
+- Stop and ask if: a domain table route does not exist in the controllers.
 
 <a id="s53"></a>
-**S53 · 93.3 · S** Find why `registerNewMemberViaUi` gets "Registration failed" on the local API (read
-`api_error.log` tail and the registration response body; the membership walkthrough records the
-API's answer). Fix the cause (seed, OrgConfig or test data), run `portal-mobile-nav.spec.ts` and
-`gallery.spec.ts`.
+**S53 · 93.3 · S**
+- Goal: `registerNewMemberViaUi` registers a member on the local API again, so the five specs that use
+  it run.
+- Before you start: the local stack runs (`.\GHCAA.Tools\run-app.ps1`).
+- Read (only these): the 93.3 entry; `GHCAA.Web/tests/e2e/utils/ui-helper.ts` (`registerNewMemberViaUi`
+  at line 41); the tail of `api_error.log` after one failing run; the registration response body the
+  helper receives; `GHCAA.Web/tests/e2e/membership-walkthrough/membership.walkthrough.ts` (the
+  registration step that works).
+- Change (only these files): `GHCAA.Web/tests/e2e/utils/ui-helper.ts`, or the one source file the cause
+  is in; `docs/TODO.md`.
+- Do not touch: `Seed/*.json`; `scenario.json`; secrets and connection strings.
+- Steps:
+  1. Run `portal-mobile-nav.spec.ts` once and capture the API's answer. -> check: the cause is named
+     (a field, a setting or a validation message).
+  2. Fix the cause where it lives. Test data in the helper is fixed in the helper; a server bug is
+     fixed in the server with a unit test. -> check: the same run passes.
+- Contract: none, unless the cause is a server bug that changes a response.
+- Tests: the five specs that call the helper; a unit test only when the fix is server code.
+- Run: `cd GHCAA.Web; npx playwright test tests/e2e/portal-mobile-nav.spec.ts tests/e2e/gallery.spec.ts tests/e2e/admin-workflow.spec.ts tests/e2e/article-editorial.spec.ts tests/e2e/job-hub.spec.ts`.
+- Done when: the five specs pass locally; 93.3 closes with the cause and the run.
+- Stop and ask if: the fix needs an OrgConfig change on the shared database; the cause is a seed
+  file.
 
 <a id="s54"></a>
-**S54 · 84.27 (API tests) · S** `ArchiveControllerTests` for each route: 200, 401, 403, 404.
+**S54 · 84.27 (API tests) · S**
+- Goal: every `ArchiveController` route has controller tests for success, no login, wrong role and
+  not found.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.API/Controllers/ArchiveController.cs`; `IArchiveService`;
+  `GHCAA.Tests/Controllers/GalleryControllerTests.cs` (the pattern: NUnit, Moq, controller built with
+  `new`, a `ClaimsPrincipal`); `GHCAA.Tests/Controllers/AuthorizationPolicyReflectionTests.cs`.
+- Change (only these files): `GHCAA.Tests/Controllers/ArchiveControllerTests.cs` (new).
+- Do not touch: the controller and service, unless a test finds a bug; then stop and ask.
+- Steps:
+  1. One test per route for the success result: GET public, GET `items/{id}`, the eight `admin`
+     routes and POST items. -> check: each test passes.
+  2. Not found: `items/{id}`, the admin item and collection PUT, DELETE and moderate return 404 when
+     the service returns null or false. -> check: passes.
+  3. Roles: a reflection test that the admin routes carry `AdminOnly`, POST items carries
+     `[Authorize]` and the two public GETs allow anonymous. 401 and 403 come from the policy, so they
+     are checked this way, not by calling the action. -> check: passes.
+  4. POST items by a non-admin is passed to the service as Draft or Pending, whatever status the body
+     asks for. -> check: passes.
+- Contract: none.
+- Tests: `ArchiveControllerTests.cs` :: `GetPublic_ReturnsOk`, `GetItem_Missing_ReturnsNotFound`,
+  `AdminRoutes_RequireAdminOnly`, `PublicRoutes_AllowAnonymous`,
+  `CreateItem_ByMember_IsNeverPublished`, and one success test per admin route.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ArchiveControllerTests"`.
+- Done when: the tests pass; the 84.27 entry records the API part done.
+- Stop and ask if: a test shows a route that leaks a non-public item to anonymous callers.
 
 <a id="s55"></a>
-**S55 · 84.27 (web page) · M** `admin/archive` moderation page with the shared admin components and
-an `ADMIN_ARCHIVE` endpoint block. Vitest. Done when: 84.27 DONE.
+**S55 · 84.27 (web page) · M**
+- Goal: admins moderate archive items and collections on an `admin/archive` page.
+- Before you start: S54 is closed.
+- Read (only these): `ArchiveController.cs` (admin routes); `GHCAA.Web/src/app/core/services/archive.service.ts`;
+  `GHCAA.Web/src/app/admin/polls/polls.component.ts` and its template (the model page);
+  `app.routes.ts` around line 295; `API_ENDPOINTS` in `core/constants/app.constants.ts` (`ADMIN` at
+  line 582, `ARCHIVE` at 643); `ADMIN_NAV_SECTIONS` in `core/services/nav.service.ts`.
+- Change (only these files): `app.constants.ts` (an `ADMIN_ARCHIVE` block); `archive.service.ts`;
+  `GHCAA.Web/src/app/admin/archive/admin-archive.ts` (new), `admin-archive.html` (new),
+  `admin-archive.scss` (new), `admin-archive.spec.ts` (new); `app.routes.ts`; `nav.service.ts`;
+  `docs/TODO.md`.
+- Do not touch: the public archive page; mobile; the API.
+- Steps:
+  1. `ADMIN_ARCHIVE` endpoints and admin methods in `archive.service.ts`. -> check: type-check.
+  2. The page uses `PageHeaderComponent`, `SearchBarComponent`, `LoadingPanelComponent`,
+     `ModalHeaderComponent` and `Icon`, as the polls page does: an items list with a status filter,
+     moderate (approve or reject with a reason), edit and delete; a collections tab with create, edit
+     and delete. -> check: the page renders against the local API in both themes.
+  3. Route under the admin routes and a nav entry in the content section. -> check: the nav spec
+     passes.
+- Contract: none (routes exist).
+- Tests: `admin-archive.spec.ts` :: loads items, moderates with a reason, refuses an empty reason,
+  deletes after confirm; `nav.service.spec.ts` :: the archive entry is present.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/archive src/app/core/services/nav.service.spec.ts`.
+- Done when: tests pass; the page was checked in the browser; 84.27 DONE.
+- Stop and ask if: a moderation action the page needs has no route.
 
 <a id="s56"></a>
-**S56 · 84.55 · M** `CreateGalleryDto` with caller fields only, mapped in the service; test that
-extra fields are ignored; web and mobile callers checked; registry.
+**S56 · 84.55 · M**
+- Goal: `POST api/gallery/admin` binds a DTO with the fields a caller may set, not the `EventGallery`
+  entity.
+- Before you start: no card dependency.
+- Read (only these): `GalleryController.cs` (`CreateGallery` at line 106); `GalleryService.cs`
+  (`CreateEventGalleryAsync` at line 27); `GHCAA.Domain/Models/EventGallery.cs`; web
+  `core/services/gallery.service.ts` (`createGallery`) and `admin/gallery/admin-gallery.ts` (`onSubmit`);
+  mobile `features/content/content_service.dart` (`createGallery`) and `screens/admin/admin_modules.dart`
+  (`_showGalleryDialog`).
+- Change (only these files): `GHCAA.Application/DTOs/GalleryDtos.cs` (new); `IGalleryService.cs`;
+  `GalleryService.cs`; `GalleryController.cs`; `GHCAA.Tests/Services/GalleryServiceTests.cs`;
+  `GHCAA.Tests/Controllers/GalleryControllerTests.cs`; `gallery.service.ts`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: the update route; other gallery routes; the model.
+- Steps:
+  1. List the fields both clients send today. `CreateGalleryDto` holds those and nothing else, with
+     DataAnnotations lengths from `Constants`. -> check: build.
+  2. The service maps the DTO to a new entity; status, ids, counts and dates are set by the server.
+     -> check: the test below.
+  3. Type the web `createGallery` argument. Mobile sends a map with the same keys; change it only if a
+     key name differs. -> check: web type-check; `flutter analyze`.
+- Contract: request body of `POST api/gallery/admin` becomes `CreateGalleryDto`; record it in the
+  registry (same keys, extra keys ignored).
+- Tests: `GalleryServiceTests.cs` :: `CreateGallery_IgnoresServerFields`;
+  `GalleryControllerTests.cs` :: `CreateGallery_PassesTheDto`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Gallery"`;
+  `cd GHCAA.Web; npm run type-check`; `cd GHCAA.Mobile; flutter analyze`.
+- Done when: tests pass; one gallery is created from each client locally; 84.55 DONE.
+- Stop and ask if: a client sends a field the DTO should not accept but the page needs.
 
 <a id="s57"></a>
-**S57 · 84.93 · M** `POST api/admin/governance/constitution` (AdminOnly policy) with
-version, text, PDF, effective date, change summary; on the effective date the new one becomes active
-and the old gets `SupersededDate` (computed on read, so no job); public page shows the version in
-force. Tests: future date, two on the same date (refused). Web admin screen. Unblocks Secretary
-Task 5 (78.9).
+**S57 · 84.93 · M**
+- Goal: an admin publishes a new constitution version with an effective date; the public page shows
+  the version in force.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Domain/Models/Constitution.cs`; `GovernanceController.cs` (constitution
+  routes at lines 50 to 68); `GetActiveConstitutionAsync` in `IGovernanceService.cs` and
+  `GovernanceService.cs` (line 355); `GHCAA.Infrastructure/Data/ConstitutionSeeder.cs`;
+  `AdminGovernanceController.cs`; web `public/constitution/constitution.ts` and
+  `admin/governance/admin-governance.ts`.
+- Change (only these files): `GHCAA.Application/DTOs/ConstitutionDtos.cs` (new);
+  `IGovernanceService.cs`; `GovernanceService.cs`; `AdminGovernanceController.cs`;
+  `GHCAA.Tests/Services/GovernanceServiceTests.cs`;
+  `GHCAA.Tests/Controllers/AdminGovernanceControllerTests.cs`; web `app.constants.ts`,
+  `admin-governance.ts`, its template and `admin-governance.spec.ts`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: `ConstitutionSeeder.cs` and the seed file; the amendment vote routes; mobile.
+- Steps:
+  1. `POST api/admin/governance/constitution` (AdminOnly) takes version, content, PDF URL, effective
+     date and change summary. A second version on the same effective date is refused. -> check: the
+     tests below.
+  2. The version in force is the newest with an effective date on or before today; a superseded
+     version's `SupersededDate` is the next version's effective date, computed on read, so no job.
+     `GetActiveConstitutionAsync` follows that rule. -> check: a future version is not shown yet.
+  3. A "New version" form on the admin governance page and a list of versions. -> check: browser.
+  4. Check that the seeder does not undo an admin version on the next boot. -> check: restart the
+     API locally and read the page.
+- Contract: new route; record it in the registry.
+- Tests: `GovernanceServiceTests.cs` :: `PublishConstitution_FutureDate_NotActiveYet`,
+  `PublishConstitution_SameEffectiveDate_IsRefused`, `ActiveConstitution_IsNewestInForce`;
+  `AdminGovernanceControllerTests.cs` :: `PublishConstitution_RequiresAdminOnly`;
+  `admin-governance.spec.ts` :: submits the form.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Governance"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/governance`.
+- Done when: tests pass; 84.93 DONE; Secretary Task 5 (78.9, the secretary's constitution task) is
+  told it is unblocked in its entry.
+- Stop and ask if: the seeder overwrites admin versions and changing it is needed.
 
 <a id="s58"></a>
-**S58 · 84.97 · M** Status change to Terminated or InactiveResigned requires a reason; write
-`MembershipHistory` (from, to, admin, reason); admin member page shows the history. Tests: missing
-reason 400, history row. Walkthrough: membership walkthrough terminates the new member at the
-end (missing reason refused, history shown).
+**S58 · 84.97 · M**
+- Goal: an admin status change to Terminated or InactiveResigned needs a reason and writes a
+  `MembershipHistory` row; the admin member page shows the history.
+- Before you start: no card dependency.
+- Read (only these): `AdminMemberUpdateDto`; `AdminUpdateMemberAsync` in
+  `GHCAA.Infrastructure/Services/MemberService_Search.cs` (line 243, the type-change history and line
+  304); `RecordMembershipChangeAsync` and `GetMemberMembershipHistoryAsync` in `IFinancialService`;
+  `FinancialsController.GetMembershipHistory` (line 193); web `admin/members/admin-members.ts`;
+  `MembershipHistory` in `core/models/business.models.ts`; the membership walkthrough `README.md`.
+- Change (only these files): `MemberService_Search.cs`; `GHCAA.Tests/Services/MemberServiceTests.cs`;
+  `GHCAA.Tests/Controllers/AdminControllerTests.cs`; web `admin-members.ts`, its template and
+  `admin-members.spec.ts`; `GHCAA.Web/tests/e2e/membership-walkthrough/membership.walkthrough.ts` and
+  `README.md`; `docs/TODO.md`.
+- Do not touch: the `MembershipHistory` model and table; `scenario.json`; mobile.
+- Steps:
+  1. When `dto.Status` moves to Terminated or InactiveResigned and `MembershipChangeReason` is empty,
+     refuse with 400 before any write. -> check: test.
+  2. Write a history row for every status change, from and to the status, with the admin and the
+     reason, through `RecordMembershipChangeAsync`. -> check: test.
+  3. The member detail on the admin page shows the history from the existing route, newest first,
+     dates `dd-MM-yyyy`; the status select asks for a reason when one is needed. -> check: browser.
+  4. Walkthrough: a last step terminates the new member, first without a reason (refused), then with
+     one, and reads the history. Add the row to "What the run covers". -> check: walkthrough run.
+- Contract: `PUT api/admin/members/{id}` now returns 400 for the case above; record it.
+- Tests: `MemberServiceTests.cs` :: `AdminUpdate_TerminateWithoutReason_IsRefused`,
+  `AdminUpdate_StatusChange_WritesHistory`; `admin-members.spec.ts` :: shows history, asks for reason.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MemberService|FullyQualifiedName~AdminController"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/members`; the walkthrough.
+- Done when: tests and walkthrough pass; 84.97 DONE with a note that the table already existed.
+- Stop and ask if: the history route is not readable by the admin role the page uses.
 
 <a id="s59"></a>
-**S59 · 84.67 · M** Mobile Change Password screen under settings calling the web route, step-up
-dialog, `serverMessage`. Widget tests: success, wrong current password, step-up cancel.
+**S59 · 84.67 · M**
+- Goal: a member changes their password in the mobile app.
+- Before you start: no card dependency. Ask the owner (AskUserQuestion) whether the route gets
+  `[RequireStepUp]`: it has none today, and adding it changes the web flow too. Recommended: no
+  step-up, as today, so web stays as it is; the current password is the check.
+- Read (only these): `ProfileController.cs` lines 73 to 104; web `profile.service.ts` (line 84) and
+  `member/change-password/change-password.ts`; mobile `screens/member/profile_screen.dart` (the
+  "Security & Audits" section, lines 82 to 89), `core/router/app_router.dart` lines 158 to 166,
+  `core/api/api_exception.dart` (`serverMessage`), `core/widgets/step_up_dialog.dart`.
+- Change (only these files): `GHCAA.Mobile/lib/screens/member/change_password_screen.dart` (new);
+  `GHCAA.Mobile/lib/features/auth/auth_service.dart` (it already holds the profile calls);
+  `profile_screen.dart`; `app_router.dart`; `GHCAA.Mobile/test/change_password_screen_test.dart` (new);
+  `docs/TODO.md`. If the owner chose step-up: `ProfileController.cs`, `ProfileControllerTests.cs`,
+  `change-password.ts` and `docs/API_CONTRACT_REGISTRY.md` too.
+- Do not touch: the web page unless step-up was chosen.
+- Steps:
+  1. A service method calling `POST api/profile/change-password` with the web's body. -> check:
+     `flutter analyze`.
+  2. Screen with current, new and confirm fields, the password rules the API enforces, and errors
+     through `serverMessage`. -> check: widget tests.
+  3. A "Change password" row in the Security section and a `/profile/change-password` route in the
+     shell. -> check: `router_test.dart` passes.
+  4. If step-up: the attribute on the route; the interceptor shows the dialog on mobile; web handles
+     the step-up answer. -> check: both clients locally.
+- Contract: none unless step-up was chosen.
+- Tests: `change_password_screen_test.dart` :: success, wrong current password shows the server
+  message, mismatch refused before sending; with step-up, cancel leaves the form.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/change_password_screen_test.dart test/router_test.dart --exclude-tags golden`.
+- Done when: tests pass; the password is changed on a phone build against the local API; 84.67 DONE.
+- Stop and ask if: the call does not fit `auth_service.dart`; ask before creating a new service.
 
 <a id="s60"></a>
-**S60 · 34.D8 · M** Fix the local admin role through the protected SuperAdmin seeder path (memory
-`feedback_protected_superadmin_pattern`), not SQL. Then the browser walk on the tracker list,
-including a member refused when creating a Notice. Record each step.
+**S60 · 34.D8 · M**
+- Goal: the local admin account gets its role through the protected SuperAdmin seeder, then the
+  browser walk in the 34.D8 entry is done and recorded.
+- Before you start: the local stack runs.
+- Read (only these): the 34.D8 entry (the walk list); `GHCAA.Infrastructure/Data/ProtectedSuperAdminSeeder.cs`;
+  `DatabaseBootstrapperExtensions.cs` lines 167 to 197; `ProtectedSuperAdmins` in
+  `ConfigurationOptions.cs` (line 139); `adminGuard` in `core/guards/auth.guard.ts`.
+- Change (only these files): `docs/TODO.md`, and the local user secrets for `ProtectedSuperAdmins`
+  if the owner adds them (the owner edits secrets, not the session).
+- Do not touch: SQL on any database; `appsettings*.json`; the seeder code.
+- Steps:
+  1. Find why the local admin lacks the role: the configured address, or a bootstrap that did not run.
+     -> check: the cause is named.
+  2. If config is the cause, give the owner the exact key and value to set, then restart. -> check:
+     the admin pages open.
+  3. Walk each step in the entry, including a member refused when creating a Notice. Record pass or
+     fail per step in the entry. -> check: every step has a result.
+- Contract: none.
+- Tests: none new; a failed step becomes its own tracker line.
+- Run: `.\GHCAA.Tools\run-app.ps1`; the browser.
+- Done when: every walk step is recorded; 34.D8 closes or names the failed steps.
+- Stop and ask if: the fix needs a SQL change or a seeder code change.
 
 <a id="s61"></a>
-**S61 · 84.65 · M** Web `admin/scholarships` page on the existing routes; list, create, edit, close,
-review applications. Vitest; spec 015.
+**S61 · 84.65 · M**
+- Goal: an admin manages scholarships on a web `admin/scholarships` page using the existing routes.
+- Before you start: the API has no edit or close routes for funds or calls. Ask the owner
+  (AskUserQuestion): build the page on the existing routes only (recommended; edit and close become a
+  new tracker line), or add `PUT` routes first in this card.
+- Read (only these): `ScholarshipsController.cs`; `IScholarshipService.cs`; `ScholarshipDtos.cs`; web
+  `core/services/scholarship.service.ts`; `public/scholarships/scholarships.ts`; the polls admin page
+  (model); `docs/specs/015-payments-finance/spec.md` (the scholarship part).
+- Change (only these files): `app.constants.ts`; `scholarship.service.ts`;
+  `GHCAA.Web/src/app/admin/scholarships/admin-scholarships.ts` (new), `admin-scholarships.html` (new),
+  `admin-scholarships.scss` (new), `admin-scholarships.spec.ts` (new); `app.routes.ts`;
+  `nav.service.ts`; spec 015; `docs/TODO.md`.
+- Do not touch: the public page; mobile; the API unless the owner chose new routes.
+- Steps:
+  1. Admin methods in the service for the five admin routes. -> check: type-check.
+  2. Tabs: applications (list, open, award), funds (create), calls (create), awards (disburse). Shared
+     admin components; amounts formatted as the public page does. -> check: browser in both themes.
+  3. Route and nav entry. -> check: nav spec.
+  4. Spec 015 lists the page and what it does not do yet. -> check: read back.
+- Contract: none unless routes were added.
+- Tests: `admin-scholarships.spec.ts` :: loads applications, creates a fund, creates a call, disburses
+  an award after confirm.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/scholarships`.
+- Done when: tests pass; browser check done; 84.65 DONE, or PARTIAL naming edit and close.
+- Stop and ask if: the review queue (MemberOnly) is wanted on this admin page.
 
 <a id="s62"></a>
-**S62 · 49.3.C · L · migration 10** `User.ContactEmail` (nullable, unique when set), migration
-`AddUserContactEmail`; SuperAdmin sets it on the roles page; reset for a no-email account sends there
-when set, else the current copy and share flow. Tests on both paths.
+**S62 · 49.3.C · L · migration 10**
+- Goal: a SuperAdmin can set a contact email on a user account, and a password reset for that account
+  is sent there; without one, the copy-and-share link flow stays.
+- Before you start: migration 9 of the ledger (section 7) is applied locally.
+- Read (only these): `GHCAA.Domain/Models/User.cs`; its EF configuration; `RolesController.cs`
+  (`reset-password-admin`, lines 139 to 148); `UserService.SendAdminPasswordResetLinkAsync` (lines 226
+  to 248); the templated email pattern in `MemberService_Profile.cs` lines 406 to 478; web
+  `admin/roles/admin-roles.ts`.
+- Change (only these files): `User.cs`; its configuration; `GHCAA.Domain/Constants.cs`; a new PgSql
+  migration `AddUserContactEmail` with its `.Designer.cs`; `PgSqlApplicationDbContextModelSnapshot.cs`;
+  `UserService.cs` and its interface; `RolesController.cs`; a DTO for the set route;
+  `GHCAA.Tests/Services/UserServiceTests.cs`; `GHCAA.Tests/Controllers/RolesControllerTests.cs`;
+  web `admin-roles.ts`, its template and `admin-roles.spec.ts`; `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`; ledger row 10.
+- Do not touch: `User.Email`; member accounts; `Seed/*.json`.
+- Steps:
+  1. `User.ContactEmail` nullable, length from `Constants`, unique index filtered to non-null.
+     -> check: build.
+  2. Migration per rule 5 of section 2 (the migration rule), guarded, with a Down that drops the
+     index and column. -> check: applies twice and rolls back locally.
+  3. `PUT api/roles/users/{id}/contact-email` (SuperAdminOnly) sets or clears it; a duplicate is
+     refused. -> check: test.
+  4. The reset sends the email to `ContactEmail` when set and returns no URL; otherwise it returns
+     `ResetUrl` as today. -> check: tests on both paths.
+  5. Roles page: a contact email field per user; the reset button says which path it will take.
+     -> check: browser.
+- Contract: new route; reset response has no `ResetUrl` when an email was sent. Record both.
+- Tests: `UserServiceTests.cs` :: `AdminReset_WithContactEmail_SendsEmail`,
+  `AdminReset_WithoutContactEmail_ReturnsUrl`, `SetContactEmail_Duplicate_IsRefused`;
+  `admin-roles.spec.ts` :: saves the field.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~UserService|FullyQualifiedName~RolesController"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/roles`.
+- Done when: tests pass; no pending model changes; `code-reviewer` has read the migration; ledger
+  row 10 has its timestamp; 49.3.C DONE.
+- Stop and ask if: the email template needs a new seed row (seed JSON is hands off).
 
 <a id="s63"></a>
-**S63 · 97.1 (backend) · M** `OtpPurpose.EmailVerify` appended; profile routes to send and verify;
-changing the email clears `EmailVerified`; reuse the OTP service and its lock. Tests: OTP path, lock,
-clear on change, social link refused while unverified.
+**S63 · 97.1 (backend) · M**
+- Goal: a member verifies their email from the profile with a one-time code.
+- Before you start: no card dependency. A member cannot change their own email today; only
+  `AdminUpdateMemberAsync` can, so "a change clears the flag" applies there.
+- Read (only these): `OtpPurpose` in `GHCAA.Domain/Enums.cs`; `IOtpService` and `OtpService`;
+  `OtpMaxAttempts` in `Constants.cs`; `RegistrationController` `verify-email` and `resend-otp`;
+  `MemberService.VerifyEmailAsync`; `Member.EmailVerified`; `AuthService.cs` lines 272 and 285;
+  `AdminUpdateMemberAsync`; `ProfileController.cs`; `GHCAA.Tests/Services/OtpPurposeIsolationTests.cs`.
+- Change (only these files): `Enums.cs`; `IMemberService` and `MemberService_Profile.cs`;
+  `MemberService_Search.cs`; `ProfileController.cs`; `GHCAA.Tests/Services/MemberServiceTests.cs`;
+  `GHCAA.Tests/Services/OtpPurposeIsolationTests.cs`; `GHCAA.Tests/Controllers/ProfileControllerTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: the registration verify routes; the OTP lock code.
+- Steps:
+  1. Append `OtpPurpose.EmailVerify` at the end of the enum. -> check: isolation test covers it.
+  2. `POST api/profile/email/send-code` and `POST api/profile/email/verify` for the logged-in member,
+     using the OTP service and its attempt lock. -> check: tests.
+  3. `AdminUpdateMemberAsync` clears `EmailVerified` when the email changes. -> check: test.
+  4. Linking a social login is refused while the email is unverified. -> check: test.
+- Contract: two new routes; record them.
+- Tests: `MemberServiceTests.cs` :: `VerifyEmail_RightCode_SetsFlag`, `VerifyEmail_Locked_IsRefused`,
+  `AdminUpdate_EmailChange_ClearsVerified`, `SocialLink_Unverified_IsRefused`;
+  `OtpPurposeIsolationTests.cs` :: the new purpose cannot use a registration code.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MemberService|FullyQualifiedName~Otp|FullyQualifiedName~ProfileController"`.
+- Done when: tests pass; 97.1 records the backend part.
+- Stop and ask if: social login linking lives somewhere that does not know the member.
 
 <a id="s64"></a>
-**S64 · 97.1 (clients) · M** Badge and Verify action on web and mobile profile. Walkthrough: membership
-walkthrough shows the badge after the first login and verifies by code. Done when: 97.1 DONE.
+**S64 · 97.1 (clients) · M**
+- Goal: web and mobile profiles show a verified badge or a Verify action that runs the code flow.
+- Before you start: S63 is closed.
+- Read (only these): the S63 routes in the registry; web `member/profile/profile.ts`; mobile
+  `screens/member/profile_screen.dart` and `profile_edit_screen.dart`; the membership walkthrough
+  `README.md` and `membership.walkthrough.ts`.
+- Change (only these files): web `profile.service.ts`, `profile.ts`, its template and `profile.spec.ts`;
+  `app.constants.ts`; mobile `profile_screen.dart`, its service, `GHCAA.Mobile/test/profile_verify_email_test.dart` (new);
+  the walkthrough and its `README.md`; `docs/TODO.md`.
+- Do not touch: the API.
+- Steps:
+  1. Web: badge when verified; otherwise "Verify email", send code, code box, verify, errors from the
+     server. -> check: spec.
+  2. Mobile: the same with `serverMessage`. -> check: widget test.
+  3. Walkthrough: after the first login the badge is absent, the step verifies by code (read from the
+     local email log as the walkthrough does for registration), then the badge shows. Update "What
+     the run covers". -> check: walkthrough run.
+- Contract: none.
+- Tests: `profile.spec.ts` :: shows the badge, runs verify; `profile_verify_email_test.dart` :: badge,
+  wrong code message.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/profile`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/profile_verify_email_test.dart --exclude-tags golden`; the walkthrough.
+- Done when: tests and walkthrough pass; 97.1 DONE.
+- Stop and ask if: the walkthrough cannot read the code locally.
 
 <a id="s65"></a>
-**S65 · 84.83 (backend) · L · migration 11** `Member.IsMentor` and `Member.MentorTopics` (one row per
-person, so not on `ProfessionalRecord`); migration `AddMentorOptIn`; requests only to
-opted-in members; directory filter. Tests incl. opting out with a request pending (pending stays,
-new ones refused).
+**S65 · 84.83 (backend) · L · migration 11**
+- Goal: members opt in as mentors with topics; mentorship requests go only to opted-in members; the
+  directory filters by mentor.
+- Before you start: migration 10 of the ledger is applied locally.
+- Read (only these): `Member.cs` (visibility flags, lines 41 to 45); `MentorshipController.cs`;
+  `IMentorshipService.SendRequestAsync` and `MentorshipService.cs` (line 23); `MemberSearchFilterDto`
+  (`INetworkingService.cs`, line 15) and `SearchPublicDirectoryAsync`; `UpdateProfileAsync` in
+  `MemberService_Profile.cs`.
+- Change (only these files): `Member.cs`; `MemberConfiguration.cs`; `Constants.cs`; a new PgSql migration
+  `AddMentorOptIn` with its `.Designer.cs`; `PgSqlApplicationDbContextModelSnapshot.cs`; the profile
+  update DTO and `MemberService_Profile.cs`; `MentorshipService.cs`; `INetworkingService.cs` and its
+  implementation; `GHCAA.Tests/Services/MentorshipServiceTests.cs`;
+  `GHCAA.Tests/Services/NetworkingServiceTests.cs`; `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`;
+  ledger row 11.
+- Do not touch: `ProfessionalRecord`; mentorship statuses; clients.
+- Steps:
+  1. `Member.IsMentor` (default false) and `Member.MentorTopics` (nullable, length from `Constants`).
+     -> check: build.
+  2. Migration per rule 5, guarded, Down drops both columns. -> check: applies twice, rolls back.
+  3. Profile update sets both fields. -> check: test.
+  4. `SendRequestAsync` refuses a mentor who has not opted in. Opting out leaves pending requests
+     as they are. -> check: tests.
+  5. `MemberSearchFilterDto.MentorsOnly`; the directory returns only opted-in members when set.
+     -> check: test.
+- Contract: profile update and directory filter gain fields; record them.
+- Tests: `MentorshipServiceTests.cs` :: `SendRequest_ToNonMentor_IsRefused`,
+  `OptOut_WithPendingRequest_KeepsIt`; `NetworkingServiceTests.cs` :: `Directory_MentorsOnly_Filters`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Mentorship|FullyQualifiedName~Networking"`.
+- Done when: tests pass; no pending model changes; `code-reviewer` has read the migration; ledger row
+  11 has its timestamp.
+- Stop and ask if: existing requests point at members who would be refused and the owner has not said
+  to keep them.
 
 <a id="s66"></a>
-**S66 · 84.83 (clients) · M** Opt-in setting and directory filter on web and mobile.
+**S66 · 84.83 (clients) · M**
+- Goal: members set the mentor opt-in on their profile and filter the directory by mentors, on web and
+  mobile.
+- Before you start: S65 is closed. Neither client has a settings screen; the opt-in goes on the
+  profile edit form.
+- Read (only these): S65's registry entries; web `member/profile/profile.ts`, `common/directory/directory.ts`;
+  mobile `screens/member/profile_edit_screen.dart`, `screens/member/directory_screen.dart`.
+- Change (only these files): web `profile.ts` and template, `profile.spec.ts`, `directory.ts` and
+  template, `directory.spec.ts`; mobile `profile_edit_screen.dart`, `directory_screen.dart`,
+  `GHCAA.Mobile/test/profile_edit_screen_test.dart`, `GHCAA.Mobile/test/directory_filters_test.dart`;
+  `docs/TODO.md`.
+- Do not touch: the public directory page; the API.
+- Steps:
+  1. Profile edit: an "Open to mentoring" switch and a topics field shown when it is on. -> check:
+     specs and widget test.
+  2. Directory: a "Mentors only" filter on both clients. -> check: specs and widget test.
+- Contract: none.
+- Tests: `profile.spec.ts`, `directory.spec.ts`, `profile_edit_screen_test.dart`,
+  `directory_filters_test.dart` :: one case each for the new control.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/profile src/app/common/directory`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/profile_edit_screen_test.dart test/directory_filters_test.dart --exclude-tags golden`.
+- Done when: tests pass; both clients checked locally; 84.83 DONE.
+- Stop and ask if: labels need new OrgConfig keys.
 
 <a id="s67"></a>
-**S67 · 84.82 (backend) · L · migration 12** `EventFeedback` (event, member, rating 1-5, comment,
-created at; unique event and member), migration `AddEventFeedback`; only approved attendees after the
-event starts; admin summary. Tests: non-attendee, repeat.
+**S67 · 84.82 (backend) · L · migration 12**
+- Goal: a member who attended an event rates it once (1 to 5, optional comment); admins see a summary.
+- Before you start: migration 11 of the ledger is applied locally. "Attended" means an `Approved`
+  registration; ask the owner whether check-in (`IsCheckedIn`) is required instead.
+- Read (only these): `AlumniEvent` and `EventRegistration` models; `EventsController.cs`;
+  `IEventService` and `EventService.cs`; the `AlumniEvent` global query filter gotcha (admin reads use
+  `IgnoreQueryFilters()`).
+- Change (only these files): `GHCAA.Domain/Models/EventFeedback.cs` (new);
+  `GHCAA.Infrastructure/Data/Configurations/EventFeedbackConfiguration.cs` (new); `ApplicationDbContext.cs`;
+  `Constants.cs`; a new PgSql migration `AddEventFeedback` with its `.Designer.cs`; the snapshot;
+  `GHCAA.Application/DTOs/EventFeedbackDtos.cs` (new); `IEventService.cs`; `EventService.cs`;
+  `EventsController.cs`; `GHCAA.Tests/Services/EventServiceTests.cs`;
+  `GHCAA.Tests/Controllers/EventsControllerTests.cs`; `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`;
+  ledger row 12.
+- Do not touch: registration statuses; clients.
+- Steps:
+  1. `EventFeedback` with event, member, rating, comment, created at; unique on event and member;
+     comment length from `Constants`. -> check: build.
+  2. Migration per rule 5, guarded, Down drops the table. -> check: applies twice, rolls back.
+  3. `POST api/events/{id}/feedback` for members: refused before the event starts, for a member with
+     no approved registration, and for a repeat. -> check: tests.
+  4. `GET api/events/admin/{id}/feedback-summary` (AdminOnly): count, average, rating counts and
+     comments. -> check: test.
+- Contract: two new routes; record them.
+- Tests: `EventServiceTests.cs` :: `Feedback_NonAttendee_IsRefused`, `Feedback_BeforeStart_IsRefused`,
+  `Feedback_Repeat_IsRefused`, `FeedbackSummary_Averages`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Event"`.
+- Done when: tests pass; no pending model changes; `code-reviewer` has read the migration; ledger row
+  12 has its timestamp.
+- Stop and ask if: the owner wants anonymous feedback.
 
 <a id="s68"></a>
-**S68 · 84.82 (clients) · M** Rating form on web and mobile; admin summary on web.
+**S68 · 84.82 (clients) · M**
+- Goal: members rate an event on web and mobile; admins see the summary on web.
+- Before you start: S67 is closed.
+- Read (only these): S67's registry entries; web `common/events/events.ts` (detail) and
+  `admin/events/admin-events.ts`; mobile `screens/member/event_details_screen.dart`; the event
+  walkthrough `README.md`.
+- Change (only these files): web `core/services/events.service.ts`, `events.service.spec.ts`, `events.ts` and template, `events.spec.ts`,
+  `admin-events.ts` and template, `admin-events.spec.ts`; mobile `event_details_screen.dart`, its
+  service, `GHCAA.Mobile/test/event_feedback_test.dart` (new); the event walkthrough and `README.md`;
+  `docs/TODO.md`.
+- Do not touch: the API.
+- Steps:
+  1. Detail page: a rating form after the event starts for an attendee; a "Thanks" state after
+     sending. -> check: spec and widget test.
+  2. Admin events: a feedback summary panel per event. -> check: spec.
+  3. Walkthrough: the attendee rates the event; add the row to "What the run covers". -> check: run.
+- Contract: none.
+- Tests: `events.spec.ts` :: form shown only to attendees; `admin-events.spec.ts` :: summary renders;
+  `event_feedback_test.dart` :: send and repeat message.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/common/events src/app/admin/events`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/event_feedback_test.dart --exclude-tags golden`; the walkthrough.
+- Done when: tests and walkthrough pass; 84.82 DONE.
+- Stop and ask if: the walkthrough's event has not started at the step's time.
 
 <a id="s69"></a>
-**S69 · 84.72 (backend) · L · migration 13** Admin forum routes (categories CRUD, order, retire;
-pin, lock, remove with reason to the audit log, reusing spec 028 moderation); migration
-`SeedForumCategories` with a few defaults (data step). Tests.
+**S69 · 84.72 (backend) · L · migration 13**
+- Goal: admins manage forum categories and moderate topics and posts, with removals audited as in spec
+  028.
+- Before you start: migration 12 of the ledger is applied locally. `ForumTopic` already has
+  `IsPinned`, `IsLocked` and `IsActive`; no model change is needed for pin and lock.
+- Read (only these): `ForumCategory`, `ForumTopic`, `ForumPost` models; `ForumController.cs`;
+  `IForumService` and `ForumService.cs` (lock check at line 153); spec 028 moderation in
+  `DiscussionService.cs` (`RemoveCommentAsync` line 227, `SetLockedAsync` line 255),
+  `RemoveCommentDto` and `Constants.Discussion.AuditTypes`.
+- Change (only these files): `GHCAA.Application/DTOs/ForumAdminDtos.cs` (new); `IForumService.cs`;
+  `ForumService.cs`; `GHCAA.API/Controllers/AdminForumController.cs` (new); `Constants.cs` (forum audit
+  types); a new PgSql migration `SeedForumCategories` with its `.Designer.cs`;
+  `GHCAA.Infrastructure/Data/ForumCategorySeeder.cs` (new) for databases built without migrations;
+  `GHCAA.Tests/Services/ForumServiceTests.cs`; `GHCAA.Tests/Controllers/AuthorizationPolicyReflectionTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`; ledger row 13.
+- Do not touch: member forum routes; `Seed/*.json`; clients.
+- Steps:
+  1. `api/admin/forum` (AdminOnly): categories list, create, edit, reorder, retire (sets `IsActive`
+     false); topic pin, lock and unlock; topic and post remove with a required reason. -> check: tests.
+  2. Each remove, lock and unlock writes an activity row through `IActivityService.LogActivityAsync`
+     with new forum audit types beside `Constants.Discussion.AuditTypes`. -> check: test.
+  3. Data migration inserts three default categories only when the table is empty, with
+     `ON CONFLICT DO NOTHING` and the sequence advanced; the startup seeder does the same for an empty
+     table. -> check: runs twice; a database with categories is unchanged.
+- Contract: the new admin routes; record them.
+- Tests: `ForumServiceTests.cs` :: `RemovePost_NeedsReason`, `RemovePost_WritesAudit`,
+  `RetireCategory_HidesIt`, `ReorderCategories_SavesOrder`, `Lock_BlocksNewPosts`;
+  `AuthorizationPolicyReflectionTests.cs` covers the new controller.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Forum|FullyQualifiedName~AuthorizationPolicyReflection"`.
+- Done when: tests pass; `code-reviewer` has read the migration and seeder; ledger row 13 has its
+  timestamp.
+- Stop and ask if: the owner has not named the default categories (offer three in the question).
 
-<a id="s70"></a><a id="s71"></a>
-**S70 · 84.72 (web) · M** Admin forum section. **S71 · 84.72 (mobile) · M** Same tools behind a role
-guard (memory `gotcha_mobile_admin_routes_no_role_guard`). Done when: 84.72 DONE; spec 017 updated.
+<a id="s70"></a>
+**S70 · 84.72 (web) · M**
+- Goal: an admin forum section on web for categories and moderation.
+- Before you start: S69 is closed.
+- Read (only these): S69's registry entries; `member/forum/forum.ts` and `topic-detail.ts`;
+  `core/services/forum.service.ts`; the polls admin page (model); `app.routes.ts` (the `enableForum`
+  `featureGuard`, line 285); `nav.service.ts`.
+- Change (only these files): `app.constants.ts`; `forum.service.ts`;
+  `GHCAA.Web/src/app/admin/forum/admin-forum.ts` (new), `admin-forum.html` (new), `admin-forum.scss` (new),
+  `admin-forum.spec.ts` (new); `topic-detail.ts` and template (admin pin, lock, remove buttons);
+  `GHCAA.Web/src/app/member/forum/topic-detail.spec.ts` (new);
+  `app.routes.ts`; `nav.service.ts`; `docs/TODO.md`.
+- Do not touch: mobile; the API.
+- Steps:
+  1. Admin methods in the service. -> check: type-check.
+  2. Categories page: list, add, edit, drag or up and down reorder, retire. -> check: browser.
+  3. Topic detail shows pin, lock and remove (reason required) to admins only. -> check: spec.
+  4. Route behind the admin guard and the forum feature flag; nav entry. -> check: nav spec.
+- Contract: none.
+- Tests: `admin-forum.spec.ts` :: list, create, retire;
+  `GHCAA.Web/src/app/member/forum/topic-detail.spec.ts` (new) :: admin buttons hidden for members,
+  remove needs a reason.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/forum src/app/member/forum`.
+- Done when: tests pass; browser check done; 84.72 records the web part.
+- Stop and ask if: the forum flag is off locally and turning it on needs an OrgConfig change.
+
+<a id="s71"></a>
+**S71 · 84.72 (mobile) · M**
+- Goal: admins moderate the forum on mobile, behind a role check the mobile admin routes lack today.
+- Before you start: S69 is closed.
+- Read (only these): `core/router/app_router.dart` (admin routes, lines 244 to 258); `rolesInclude` in
+  `core/models/auth_models.dart`; `screens/member/forum/*`; `features/forum/forum_service.dart`;
+  `docs/specs/017-communication/spec.md`.
+- Change (only these files): `forum_service.dart`; the forum topic screen in `screens/member/forum/`;
+  `GHCAA.Mobile/lib/screens/admin/admin_forum_screen.dart` (new); `app_router.dart`;
+  `GHCAA.Mobile/test/admin_forum_screen_test.dart` (new); `GHCAA.Mobile/test/router_test.dart`;
+  spec 017; `docs/TODO.md`.
+- Do not touch: other admin screens' routes beyond adding the shared guard to the forum route.
+- Steps:
+  1. Admin methods in the forum service. -> check: `flutter analyze`.
+  2. Admin forum screen: categories list, add, edit, retire. Topic screen shows pin, lock and remove
+     with a reason to admins. -> check: widget test.
+  3. The admin forum route redirects a non-admin, using `rolesInclude`. -> check: router test.
+  4. Spec 017 describes the moderation tools on both clients. -> check: read back.
+- Contract: none.
+- Tests: `admin_forum_screen_test.dart` :: list, retire, remove needs reason; `router_test.dart` ::
+  member is redirected from the admin forum route.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/admin_forum_screen_test.dart test/router_test.dart --exclude-tags golden`.
+- Done when: tests pass; 84.72 DONE; the missing guard on the other admin routes stays its own
+  tracker line.
+- Stop and ask if: the guard needs a change to the shell route that touches other screens.
 
 <a id="s72"></a>
-**S72 · 92.1 · S** Write spec 022 decisions with the owner: settings in an OrgConfig `Approvals`
-section (recommended) or a table; "off" means created approved with an audit row (recommended);
-SuperAdmin always approves (yes, protected rule); member import stays SuperAdmin and Admin.
+**S72 · 92.1 · S**
+- Goal: the four open questions of spec 022 are answered by the owner and written into the spec.
+- Before you start: no card dependency.
+- Read (only these): `docs/specs/022-configurable-approval-workflows/spec.md` (the "In scope" line and
+  "Decisions to confirm before implementation", lines 30 to 39), `plan.md`, `tasks.md`; the 92.1 entry.
+- Change (only these files): spec 022 `spec.md`, `plan.md`, `tasks.md`; ledger row 14 (filled or marked
+  not needed); `docs/TODO.md`.
+- Do not touch: code.
+- Steps:
+  1. Ask through AskUserQuestion, one question per open point, with these recommended answers: settings
+     in an OrgConfig `Approvals` group, not a table; "off" means the item is created approved with an
+     audit row; SuperAdmin can always approve; member import stays SuperAdmin and Admin. -> check:
+     every point has an answer.
+  2. Rename the section to "Decisions taken" with the date and the answers; list the nine flows with
+     their keys. -> check: no open question left.
+  3. Ledger row 14 says "not needed" if the owner chose OrgConfig. -> check: read back.
+- Contract: none.
+- Tests: none.
+- Run: `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+- Done when: spec 022 has its decisions; 92.1 DONE.
+- Stop and ask if: the owner wants a flow outside the nine.
 
 <a id="s73"></a>
-**S73 · 92.2 · L** Per spec 022. If the owner chose a table, it takes ledger row 14. Policy handler
-reading the flow's roles; unknown flow refused and logged; `MemberApprovalMode` mapped. Tests per
-the tracker; reflection tests updated.
+**S73 · 92.2 · L · migration 14 (only if S72 chose a table)**
+- Goal: each approval flow can be off or given to other roles; approve and reject routes check the
+  flow's roles instead of `AdminOnly`.
+- Before you start: S72 is closed. If it chose a table, migration 13 is applied locally.
+- Read (only these): spec 022 decisions; the 92.2 entry; `MemberApprovalMode` in
+  `GHCAA.Application/DTOs/OrgConfigDto.cs` (line 146); the approve and reject actions in
+  `AdminController.cs` (lines 91 and 135), `EventsController.cs` (239), `GalleryController.cs`
+  (238 to 262), `JobHubController.cs` (105, 113), `NewsController.cs` (135, 144);
+  `AddAppAuthorization` in `GHCAA.API/Extensions/ServiceExtensions.cs`;
+  `GHCAA.Tests/Controllers/AuthorizationPolicyReflectionTests.cs`.
+- Change (only these files): `OrgConfigDto.cs` (an `Approvals` group, or the table files if chosen);
+  `Constants.cs` (flow keys and defaults); `GHCAA.Application/Interfaces/IApprovalSettings.cs` (new);
+  `GHCAA.Infrastructure/Services/ApprovalSettingsService.cs` (new);
+  `GHCAA.API/Authorization/ApprovalFlowRequirement.cs` (new) and its handler; `ServiceExtensions.cs`;
+  the five controllers above; the create paths of the nine flows' services; a SuperAdmin settings
+  route in `RolesController.cs` or a new `AdminApprovalsController.cs` (new);
+  `GHCAA.Tests/Services/ApprovalSettingsServiceTests.cs` (new); `AuthorizationPolicyReflectionTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: election nomination approval (it uses `ElectionStaff` and election permissions);
+  `PendingApprovalsController.cs` except its counts; clients.
+- Steps:
+  1. Flow keys and defaults (on, SuperAdmin and Admin) in `Constants`. Missing settings read as the
+     defaults, so nothing changes on deploy. -> check: default test.
+  2. `MemberApprovalMode` maps to the member registration flow: Auto is off, ManualReview is on.
+     Registration reads it. -> check: test.
+  3. The requirement handler reads the flow's roles; an unknown key is refused, logged and grants
+     nothing. -> check: tests.
+  4. Each approve and reject route uses the flow policy. When a flow is off, the create path sets the
+     approved state and writes an audit row. -> check: tests per flow.
+  5. SuperAdmin route to read and change the settings, each change audited. -> check: test.
+- Contract: the settings routes; approve routes' 403 depends on settings. Record both.
+- Tests: `ApprovalSettingsServiceTests.cs` :: per flow on, off, allowed role, refused role, defaults;
+  `UnknownFlow_IsRefusedAndLogged`; `AuthorizationPolicyReflectionTests.cs` updated for the new policy.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Approval|FullyQualifiedName~AuthorizationPolicyReflection"`;
+  `python scripts/ci-local.py --only backend`.
+- Done when: tests pass; `code-reviewer` and `security-reviewer` have read the diff; 92.2 DONE.
+- Stop and ask if: a flow's create path has no single place to set the approved state.
 
-<a id="s74"></a><a id="s75"></a>
-**S74 · 92.3 · M** Web settings screen and queue filtering. **S75 · 92.4, 92.5 · S** Mobile gating
-with widget tests; FR and NFR entries, spec 002 tables, `business_flow` notes, `PROJECT_MAP.md`.
-The book part of 92.5 (§8.4, the role matrix, and its figure) goes to H00.
+<a id="s74"></a>
+**S74 · 92.3 · M**
+- Goal: SuperAdmin edits approval settings on web, and the pending queue shows only flows the viewer
+  may approve.
+- Before you start: S73 is closed.
+- Read (only these): S73's registry entries; `admin/org-config/org-config.ts` and its template
+  (`MemberApprovalMode` at line 172 of the template); the pending approvals page and service on web.
+- Change (only these files): `app.constants.ts`; `GHCAA.Web/src/app/admin/approval-settings/approval-settings.ts` (new),
+  `approval-settings.html` (new), `approval-settings.spec.ts` (new); the pending approvals component
+  and its spec; `app.routes.ts`; `nav.service.ts`; `org-config.html` (remove the old switch, link to
+  the new page); `GHCAA.Web/scripts/generate-org-config-fallback.mjs` if the field moves;
+  `docs/TODO.md`.
+- Do not touch: mobile; the API.
+- Steps:
+  1. Settings page: one row per flow with on or off and role checkboxes; SuperAdmin only. -> check:
+     spec.
+  2. Queue hides flows the viewer may not approve. -> check: spec.
+  3. The member approval switch moves to the new page. -> check: org-config spec.
+- Contract: none.
+- Tests: `approval-settings.spec.ts` :: saves a change, hidden from Admin; queue spec :: filters.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/approval-settings src/app/admin/org-config`.
+- Done when: tests pass; browser check done; 92.3 DONE.
+- Stop and ask if: the fallback generator needs a shape change the API does not send.
+
+<a id="s75"></a>
+**S75 · 92.4, 92.5 · S**
+- Goal: mobile approve and reject controls follow the flow settings; requirements and docs record the
+  feature.
+- Before you start: S73 is closed.
+- Read (only these): S73's registry entries; mobile `screens/admin/approval_queue_screen.dart`,
+  `screens/member/member_details_screen.dart`, `screens/admin/article_approval_screen.dart`,
+  `gallery_approval_screen.dart`, `job_approval_screen.dart`,
+  `screens/officials/officials_approvals_screen.dart`; spec 002 authorization catalogue;
+  `docs/PROJECT_MAP.md`.
+- Change (only these files): the six mobile screens above; a settings read in the mobile service the
+  queue uses; `GHCAA.Mobile/test/approval_gating_test.dart` (new);
+  `docs/specs/002-workflow-contracts-and-validation/evidence/authorization-catalog.md`; spec 022;
+  `docs/PROJECT_MAP.md`; `docs/TODO.md`; card H00 in this plan.
+- Do not touch: `docs/book/`; `election_form_records_sheet.dart` (nomination approval is not a flow).
+- Steps:
+  1. Mobile reads the settings and hides approve and reject where the user's role is not allowed.
+     -> check: widget test.
+  2. FR and NFR rows in spec 022; spec 002 authorization catalogue; `PROJECT_MAP.md` and the
+     `business_flow` memory notes. -> check: read back.
+  3. Add a line to H00 for the book's role matrix and its figure. -> check: H00 has it.
+- Contract: none.
+- Tests: `approval_gating_test.dart` :: control hidden for a refused role, shown for an allowed one.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/approval_gating_test.dart --exclude-tags golden`.
+- Done when: tests pass; 92.4 and 92.5 DONE with the book part handed to H00.
+- Stop and ask if: a screen gets its role from somewhere other than the session.
 
 <a id="s76"></a>
-**S76 · 37.7 (web mechanism) · M** `I18nService`, `en.ts`, `bn.ts`, `TranslatePipe`, toggle beside
-the theme toggle, self-hosted Bengali font, `<html lang>`; key-drift test. Admin stays English.
+**S76 · 37.7 (web mechanism) · M**
+- Goal: the web app has a runtime English and Bengali switch with a translate pipe; admin stays
+  English.
+- Before you start: no card dependency. No i18n code exists. Do not install `@angular/localize` or
+  `ngx-translate` (37.7 entry).
+- Read (only these): the 37.7 entry; `common/theme-toggle/theme-toggle.ts`; `common/user-menu/user-menu.html`;
+  `layouts/public-layout/public-layout.html` (line 59); `src/index.html` (font link, line 47);
+  `src/styles.scss`.
+- Change (only these files): `GHCAA.Web/src/app/core/services/i18n.service.ts` (new),
+  `i18n.service.spec.ts` (new); `GHCAA.Web/src/app/core/i18n/en.ts` (new), `bn.ts` (new);
+  `GHCAA.Web/src/app/core/pipes/translate.pipe.ts` (new), `translate.pipe.spec.ts` (new);
+  `GHCAA.Web/src/app/common/language-toggle/language-toggle.ts` (new); `user-menu.html` and
+  `public-layout.html`; `styles.scss`;
+  `GHCAA.Web/public/assets/fonts/` (new), holding one Bengali font file and its licence; `docs/TODO.md`.
+- Do not touch: admin templates; mobile.
+- Steps:
+  1. Service with a `signal<'en' | 'bn'>` saved in `localStorage` (inside try and catch), setting
+     `<html lang>`. -> check: spec.
+  2. `en.ts` is the key source; `bn.ts` is a partial record. The pure `t` pipe returns Bengali, then
+     English, then the key. -> check: spec.
+  3. A language toggle beside the theme toggle in the user menu and the public layout. -> check:
+     browser.
+  4. Self-host a Bengali font with an open licence; apply it under `:lang(bn)`. -> check: an offline
+     `ng build` succeeds.
+- Contract: none.
+- Tests: `translate.pipe.spec.ts` :: Bengali, English fallback, key fallback, every `en` key resolves;
+  `i18n.service.spec.ts` :: choice survives a new instance.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/core/i18n src/app/core/pipes src/app/core/services/i18n.service.spec.ts`.
+- Done when: tests pass; the toggle works in the browser; 37.7 records the mechanism.
+- Stop and ask if: no Bengali font with an open licence fits under the page weight limit.
 
 <a id="s77"></a>
-**S77 · 37.7 (web strings) · M** Public site and portal nav, buttons, labels, validation messages.
-Bengali strings are drafts; 37.7 stays PARTIAL until gate G-BN.
+**S77 · 37.7 (web strings) · M**
+- Goal: public site and member portal nav, buttons, labels and validation messages go through the
+  pipe, with draft Bengali strings.
+- Before you start: S76 is closed.
+- Read (only these): `en.ts`, `bn.ts`; the public and portal layout templates; the shared form error
+  component.
+- Change (only these files): `en.ts`, `bn.ts`; public and portal templates under `GHCAA.Web/src/app/public/`,
+  `GHCAA.Web/src/app/member/` and `GHCAA.Web/src/app/layouts/`; `docs/TODO.md` (list of draft strings).
+- Do not touch: admin; server content (constitution, news, election documents); OrgConfig labels.
+- Steps:
+  1. Replace literals with keys, area by area: layouts, public pages, portal pages, validation
+     messages. -> check: the drift test after each area.
+  2. Write Bengali drafts; list them in the 37.7 entry as unreviewed. -> check: entry updated.
+- Contract: none.
+- Tests: the drift test in `translate.pipe.spec.ts`; existing specs of changed components still pass.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit`.
+- Done when: tests pass; both languages checked in the browser; 37.7 stays PARTIAL until gate G-BN.
+- Stop and ask if: a label comes from OrgConfig (it stays as it is).
 
 <a id="s78"></a>
-**S78 · 8.8 · M** Mobile: same keys in `app_localizations.dart` (flat dictionary, no ARB). 8.8 stays
-PARTIAL until G-BN.
+**S78 · 8.8 · M**
+- Goal: mobile uses the same keys as web in its flat dictionary.
+- Before you start: S77 is closed.
+- Read (only these): `GHCAA.Mobile/lib/core/services/app_localizations.dart`; `en.ts` and `bn.ts`;
+  the 8.8 entry.
+- Change (only these files): `app_localizations.dart`; the member-facing screens whose strings move;
+  `GHCAA.Mobile/test/app_localizations_test.dart` (new); `docs/TODO.md`.
+- Do not touch: admin screens; no ARB files.
+- Steps:
+  1. Rename the 29 existing keys to the web keys where they mean the same thing, and add the rest the
+     member screens need. -> check: test that `en` and `bn` hold the same keys.
+  2. Replace literals in member screens. -> check: `flutter analyze`; widget tests pass.
+- Contract: none.
+- Tests: `app_localizations_test.dart` :: same keys in both maps; missing Bengali falls back to
+  English; unknown key returns the key.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test --exclude-tags golden`.
+- Done when: tests pass; 8.8 stays PARTIAL until G-BN.
+- Stop and ask if: golden tests change; ask before updating them.
 
 <a id="s79"></a>
-**S79 · 62.2 · M** Write the missing profile files for `profiles/default/` and `profiles/ghc/`:
-`email_templates.json`, `site_content.json`, `themes.json`, `membership-tiers.json`,
-`governance.json`, and the GHC `constitution.json`; match the shapes the seeders read. Tests: the
-profile pack loader test per file.
+**S79 · 62.2 · M**
+- Goal: both profiles have the four files `ProfilePackFiles` reads, so a profile no longer falls back
+  to the shared seed by accident.
+- Before you start: no card dependency. The two other files the 62.2 entry asks for (membership
+  tiers and governance) have no reader, so they are dropped from 62.2, not written.
+- Read (only these): `ProfilePackFiles`, `ResolveProfilePackPath` and `LoadSeed<T>` in
+  `ApplicationDbContext.cs` (lines 95 to 132); `GHCAA.Infrastructure/Data/Seed/email_templates.json`,
+  `themes.json`, `site_content.json`; `profiles/default/` and `profiles/ghc/`;
+  `GHCAA.Tests/Services/InstitutionProfileProviderTests.cs`; `GHCAA.Tests/Data/SeedDataIntegrityTests.cs`.
+- Change (only these files): `profiles/default/email_templates.json` (new), `profiles/default/themes.json` (new),
+  `profiles/default/site_content.json` (new); `profiles/ghc/email_templates.json` (new),
+  `profiles/ghc/themes.json` (new), `profiles/ghc/site_content.json` (new),
+  `profiles/ghc/constitution.json` (new); `GHCAA.Tests/Data/ProfilePackFilesTests.cs` (new);
+  `docs/TODO.md`.
+- Do not touch: `GHCAA.Infrastructure/Data/Seed/*.json`; `ApplicationDbContext.cs`.
+- Steps:
+  1. The default profile files are byte copies of the shared seed files. -> check: test compares them.
+  2. GHC files: the owner supplies or approves any GHC-specific text; until then they are copies of
+     the default. -> check: owner answer recorded.
+  3. A test loads each file through `LoadSeed<T>` for both profiles and checks it parses into the
+     model. -> check: passes.
+- Contract: none.
+- Tests: `ProfilePackFilesTests.cs` :: `EveryProfile_HasEachPackFile`, `PackFile_ParsesIntoItsModel`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ProfilePack|FullyQualifiedName~InstitutionProfileProvider"`.
+- Done when: tests pass; 62.2 DONE with the two dropped files named.
+- Stop and ask if: a copy would put GHC text in the default profile (white-label rule, WP62).
 
 <a id="s80"></a>
-**S80 · 51.4 · S** Add the excluded-type matrix (`PaymentProof`, `Certificate`, `Signature`,
-`NoticeDocument` not compressed) and the non-image fallback to `LocalFileStorageServiceTests`.
+**S80 · 51.4 · S**
+- Goal: storage tests prove that excluded types are never compressed and that a non-image tagged
+  with a compressible type is saved as sent.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Tests/Services/LocalFileStorageServiceTests.cs`; `IsCompressibleImageType`
+  in `GHCAA.Infrastructure/Services/FileStorageServiceBase.cs` (lines 56 to 61); `FileUploadType`.
+- Change (only these files): `LocalFileStorageServiceTests.cs`; `docs/TODO.md`.
+- Do not touch: storage code, unless a test fails; then stop and ask.
+- Steps:
+  1. A `[TestCase]` per excluded type (`PaymentProof`, `Certificate`, `Signature`, `NoticeDocument`)
+     saving a large JPEG with compression on: the stored bytes equal the input. -> check: passes.
+  2. A `Photo` and a `NewsImage` with non-image bytes and compression on: saved unchanged, no
+     exception. -> check: passes.
+- Contract: none.
+- Tests: `LocalFileStorageServiceTests.cs` :: `SaveFileAsync_ExcludedType_IsNeverCompressed`,
+  `SaveFileAsync_CompressibleTypeThatIsNotAnImage_SavesTheOriginal`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~LocalFileStorageServiceTests"`.
+- Done when: tests pass; 51.4 DONE.
+- Stop and ask if: a test fails.
 
 <a id="s81"></a>
-**S81 · 27.1, 27.8 · M** Script the low-coverage report from `coverage.cobertura.xml` (backend), the
-Vitest V8 summary and Flutter LCOV. Question to the owner first: enforce 80 % per file now (fails
-today) or a ratchet (no file drops below its current figure, new files at least 80 %)
-(recommended). Wire the chosen gate into `ci-local.py`.
+**S81 · 27.1, 27.8 · M**
+- Goal: one script reports low-coverage files for backend, web and mobile, and `ci-local.py` runs the
+  gate the owner chose.
+- Before you start: ask the owner (AskUserQuestion): enforce 80 % per file now (fails today), or a
+  ratchet where no file drops below its recorded figure and new files need 80 % (recommended).
+- Read (only these): the 27.1 and 27.8 entries; `scripts/ci-local.py`; the coverage steps in
+  `.github/workflows/ghcaa-ci-standard.yml`; `GHCAA.Web/vitest.config.ts` (it already writes a
+  `json-summary` report); `docs/TEST_COVERAGE_PLAN.md`.
+- Change (only these files): `scripts/coverage_report.py` (new); `scripts/test_coverage_report.py` (new);
+  `scripts/ci-coverage-baseline.json` (new, ratchet only; a name starting "coverage" is gitignored);
+  `scripts/ci-local.py`; `docs/TEST_COVERAGE_PLAN.md`; `docs/TODO.md`.
+- Do not touch: the CI workflow (the owner owns it); test thresholds in `vitest.config.ts`.
+- Steps:
+  1. The script parses the backend Cobertura XML, the web `json-summary` file and the Flutter
+     `lcov.info`, and prints the files under 80 % per layer. -> check: unit tests
+     on small fixtures.
+  2. Ratchet: `--update-baseline` writes the per-file figures; `--check` fails on a drop or a new file
+     under 80 %. Fixed: `--check` fails on any file under 80 %. -> check: unit tests.
+  3. `ci-local.py --coverage` collects coverage for the chosen layers and runs the check. -> check: one
+     local run per layer.
+- Contract: none.
+- Tests: `scripts/test_coverage_report.py` :: parses each format, flags a drop, flags a new low file,
+  passes an unchanged baseline.
+- Run: `python -m unittest discover -s scripts -p test_coverage_report.py`;
+  `python scripts/ci-local.py --only backend --coverage`.
+- Done when: tests pass; the baseline is recorded with the date; 27.1 DONE; 27.8 DONE or PARTIAL
+  naming the files still under the line.
+- Stop and ask if: coverage collection needs a new package.
 
 <a id="s82"></a>
-**S82 · 73.5 · M** Extend `traceability.py` to generate the whole matrix from the FR and NFR tags.
-The book claim it enables goes to H00.
+**S82 · 73.5 · M**
+- Goal: `traceability.py` builds the whole requirements matrix from the FR, NFR and DC tags in C#,
+  TypeScript and Dart tests.
+- Before you start: the script is in `docs/book/build/`, so rule 13 (the book rule) applies. Ask the
+  owner whether this card may change the build script outside track H; otherwise it moves to track H.
+  The chapter text stays in H00 either way.
+- Read (only these): `docs/book/build/traceability.py`; the requirements table in
+  `docs/book/03-requirements.md` (read only); the tag forms: C# `[Category("FR-39")]`, TS `// FR-39:` comments, Dart test names
+  starting `'FR-34: '`.
+- Change (only these files): `traceability.py`; `docs/book/build/test_traceability.py` (new);
+  `docs/TODO.md`; card H00 in this plan.
+- Do not touch: chapter files and the outline.
+- Steps:
+  1. Scan `GHCAA.Web/src` spec files and `GHCAA.Mobile/test` beside `GHCAA.Tests`. -> check: a known
+     tag from each layer is found.
+  2. `--markdown` prints the full matrix (requirement, tests per layer, count). `--check` keeps its
+     meaning. -> check: unit tests.
+  3. Add a line to H00: the book can restore the §3.9 claim (the requirements traceability section)
+     from this output. -> check: H00 has it.
+- Contract: none.
+- Tests: `test_traceability.py` :: each tag form parsed; a requirement with no tests is listed.
+- Run: `python -m unittest discover -s docs/book/build -p test_traceability.py`;
+  `python docs/book/build/traceability.py --markdown </dev/null`.
+- Done when: tests pass; 73.5 DONE.
+- Stop and ask if: the owner keeps the script frozen until track H.
 
 <a id="s83"></a>
-**S83 · 73.6 · S** Test pinning the seeded constitution version and a SHA-256 of its clause text.
+**S83 · 73.6 · S**
+- Goal: a test fails when the seeded constitution text or version changes without the test changing
+  too.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Infrastructure/Data/ConstitutionSeeder.cs`;
+  `GHCAA.Infrastructure/Data/Seed/constitution.json` (read only); `LoadSeed<T>` in
+  `ApplicationDbContext.cs`; `GHCAA.Tests/Data/SeedDataIntegrityTests.cs`.
+- Change (only these files): `GHCAA.Tests/Data/ConstitutionPinTests.cs` (new); `docs/TODO.md`.
+- Do not touch: the seed file and the seeder.
+- Steps:
+  1. Load the active row from the seed as the seeder does. -> check: version read.
+  2. Pin the version string and the SHA-256 of `Content` with line endings normalised to LF.
+     -> check: passes; changing one character fails it.
+  3. The failure message says to update the pin only after the text is ratified. -> check: read it.
+- Contract: none.
+- Tests: `ConstitutionPinTests.cs` :: `SeededConstitution_MatchesPinnedVersionAndHash`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ConstitutionPin"`.
+- Done when: the test passes; 73.6 DONE.
+- Stop and ask if: the seed holds more than one active version.
 
 ### Phase G. P3 and P4 items
 
+Names in these cards were checked against the code on 2026-11-20. What the older cards assumed that
+the code does not have, or already has:
+
+- `Constants.Uploads` does not exist. The 19 `* 1024 * 1024` sites are all `ValidateFormFile`
+  arguments, and the tracker's line numbers for `AdminController` and `NewsController` have moved.
+- Every rate-limit policy is keyed by IP; there is no per-user partition, and
+  `Constants.RateLimitPolicies.Api` is not used anywhere. The limiter fixes a partition's options
+  when the partition is created, so the assistant limit is a `Constants.Defaults` value, not an
+  OrgConfig key.
+- Mobile has no site content code and no HTML rendering package. Mobile's credential download
+  (`member_details_screen.dart` `_downloadCredential`) opens the PDF route without the auth header.
+- `MemberSummaryDto.AppliedDate` is already sent; neither client shows it. The 30-day rule (DC-08)
+  is only in the docs. Dues have no waived state and no part payment.
+- No web or mobile screen submits archive items, so the S92 refusal is API-only for now.
+- File storage settings are bound through `FileStorageOptions`; the `Constants.ConfigKeys`
+  FileStorage keys are not read.
+- Nothing for saved reports, cohorts, reunions or memorial entries exists yet. `ProfilePackFiles`
+  does not exist yet; S79 creates it.
+- Spec 025 tasks T033 to T036 (62.56 part g) are already checked, so S104 covers part a only.
+- `api/messaging` and `api/chat` are two prefixes on the same `MessagingController`.
+
 <a id="s84"></a>
-**S84 · 84.57, 84.62 · S** Named upload limits in `Constants.Uploads` used at every call site listed in
-84.57; a per-user `Assistant` rate-limit policy (default 20 per hour from OrgConfig) with a 429 test,
-checked against the global limiter.
+**S84 · 84.57, 84.62 · S**
+- Goal: every upload size limit is a named constant, and the AI assistant has a per-user limit that
+  returns 429 past 20 asks an hour.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Domain/Constants.cs` (`ConfigKeys`, `RateLimitPolicies`, `Defaults`,
+  `ErrorCodes`); `GHCAA.API/Extensions/RateLimitingExtensions.cs`;
+  `GHCAA.API/Controllers/AssistantController.cs`; `GHCAA.Tests/Integration/ErrorResponseShapeTests.cs`
+  (the 429 test and how it builds its client).
+- Change (only these files): `GHCAA.Domain/Constants.cs`; the eight controllers with a
+  `* 1024 * 1024` argument (`AdminController`, `EventsController`, `FinancialsController`,
+  `GalleryController`, `MemberImportController`, `NewsController`, `ProfileController`,
+  `RegistrationController`, all in `GHCAA.API/Controllers/`); `RateLimitingExtensions.cs`;
+  `AssistantController.cs`; `GHCAA.Tests/Integration/AssistantRateLimitTests.cs` (new);
+  `GHCAA.Tests/Services/FileValidationServiceTests.cs`; `docs/TODO.md`.
+- Do not touch: `Constants.Defaults.MaxFileSizeBytes` (the storage limit); the other limiter
+  policies; `Constants.RateLimitPolicies.Api` (report it as dead, do not delete it).
+- Steps:
+  1. Add `Constants.Uploads` with `ImageMaxBytes` (5 MB), `SignatureMaxBytes` (2 MB) and
+     `DocumentMaxBytes` (10 MB) as `long` values. -> check: build passes.
+  2. Replace each of the 19 `N * 1024 * 1024` arguments with the matching constant, and the
+     `[RequestSizeLimit(10_485_760)]` on `RegistrationController` with `DocumentMaxBytes` if the
+     attribute takes a constant. -> check: `grep -rn "1024 \* 1024" GHCAA.API/Controllers` prints
+     nothing.
+  3. Add `Constants.RateLimitPolicies.Assistant` and `Constants.Defaults.AssistantAsksPerHour = 20`.
+     Register a fixed-window policy partitioned by the `ClaimTypes.NameIdentifier` claim, falling
+     back to the IP when the claim is missing, using the same Development key handling as the
+     other policies. -> check: the limiter still builds in Development and Production.
+  4. Put `[EnableRateLimiting(Constants.RateLimitPolicies.Assistant)]` on `Ask`. -> check: the 21st
+     ask by one user in an hour gets 429 with `Constants.ErrorCodes.RateLimited`; a second user is
+     not blocked.
+  5. Confirm the global limiter (100 a minute per IP) still applies to `Ask`. -> check: a test or a
+     read of the chained limiter shows both run.
+- Contract: no route change. `POST api/assistant/ask` can now return 429; add that to its row in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `GHCAA.Tests/Integration/AssistantRateLimitTests.cs` ::
+  `Ask_AfterUserLimit_Returns429WithRateLimitedCode`, `Ask_OtherUser_NotBlockedByFirstUsersLimit`;
+  `GHCAA.Tests/Services/FileValidationServiceTests.cs` :: `ValidateFormFile_AtUploadConstant_Passes`,
+  `ValidateFormFile_OneByteOverConstant_Fails`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~AssistantRateLimit|FullyQualifiedName~FileValidationService"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: no literal size math is left in controllers; the per-user 429 test passes; 84.57 and
+  84.62 close with the test names as evidence.
+- Stop and ask if: the owner wants the assistant limit changeable at run time (that needs a custom
+  partitioned limiter, which is a bigger card); the Development test key makes per-user testing
+  impossible without changing the shared limiter setup.
 
 <a id="s85"></a>
-**S85 · 84.64, 93.4 · S** Mobile "mark all read" on the notifications screen (widget test). 93.4:
-ask the owner which of `/communications`, `/legacy`, `/professionals` stay (recommended: add the
-ones with a working screen to the drawer, remove the rest), and gate drawer entries on the OrgConfig
-flags.
+**S85 · 84.64, 93.4 · S**
+- Goal: mobile can mark every notification read in one tap, and the drawer reaches the three
+  routed screens it is missing, each hidden when its feature is off.
+- Before you start: ask the owner 93.4's question with this default: add `/legacy`,
+  `/communications` and `/professionals` to the drawer, and gate `/legacy` on
+  `enableLegacyArchive`. The other two have no flag and stay always shown.
+- Read (only these): `GHCAA.Mobile/lib/screens/member/notification_screen.dart`;
+  `GHCAA.Mobile/lib/features/notifications/notification_service.dart`;
+  `GHCAA.Mobile/lib/core/widgets/app_drawer.dart`; `GHCAA.Mobile/lib/core/router/app_router.dart`
+  (the three routes); `FeatureToggles` in `GHCAA.Mobile/lib/core/config/org_config.dart`;
+  `orgConfigProvider` in `org_config_service.dart`.
+- Change (only these files): `notification_service.dart`; `notification_screen.dart`;
+  `app_drawer.dart`; `GHCAA.Mobile/test/notification_screen_test.dart` (new);
+  `GHCAA.Mobile/test/app_drawer_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the backend (`POST api/notifications/read-all` exists); the web client; the router.
+- Steps:
+  1. Add `markAllAsRead()` to `notification_service.dart`, posting to `'/notifications/read-all'`
+     the same way `markAsRead` posts. -> check: `flutter analyze` is clean.
+  2. Add a "Mark all read" action to the screen's app bar, shown only when an unread item exists;
+     on success invalidate `notificationsListProvider`. -> check: the widget test sees no unread
+     marks after the tap.
+  3. Make `AppDrawer` watch `orgConfigProvider` and add the three entries, hiding `/legacy` when
+     `enableLegacyArchive` is false. While config loads, show entries without a flag only.
+     -> check: the drawer test passes with the flag on and off.
+  4. Refresh the drawer golden in `comprehensive_visual_freeze_test.dart` only if it fails because
+     of the new entries. -> check: the diff shows only the new rows.
+- Contract: none (the route exists and web already calls it).
+- Tests: `GHCAA.Mobile/test/notification_screen_test.dart` ::
+  `mark all read clears unread items`, `mark all read hidden when nothing unread`;
+  `GHCAA.Mobile/test/app_drawer_test.dart` :: `legacy entry hidden when flag off`,
+  `communications and professionals always shown`. Wrap each in `ProviderScope` and use a phone
+  viewport.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/notification_screen_test.dart test/app_drawer_test.dart --exclude-tags golden`.
+- Done when: both tests pass; 84.64 and 93.4 close with the owner's answer recorded on 93.4.
+- Stop and ask if: the owner wants a screen removed instead of added; the drawer has no place for a
+  provider read without turning other drawer tests red.
 
 <a id="s86"></a>
-**S86 · 84.69 · M** Mobile site content list and detail from the public route; widget tests and a
-phone-viewport check.
+**S86 · 84.69 · M**
+- Goal: mobile shows the site content pages (about, policy, contact groups) from the public route.
+- Before you start: no card dependency. S130 in phase I builds on this card.
+- Read (only these): `GHCAA.API/Controllers/SiteContentController.cs` (`GetByGroup`);
+  `SiteContentDto`; the web readers `about.ts`, `policy-page.ts` (`POLICY_PAGES`) and `contact.ts`;
+  `GHCAA.Mobile/lib/screens/member/about_screen.dart`; `GHCAA.Mobile/pubspec.yaml`.
+- Change (only these files): `GHCAA.Mobile/lib/models/site_content.dart` (new);
+  `GHCAA.Mobile/lib/features/site_content/site_content_service.dart` (new);
+  `GHCAA.Mobile/lib/screens/member/site_content_screen.dart` (new); `about_screen.dart`;
+  `GHCAA.Mobile/lib/core/router/app_router.dart`; `GHCAA.Mobile/lib/core/constants/app_constants.dart`;
+  `GHCAA.Mobile/test/site_content_screen_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the API; the web pages; `pubspec.yaml` unless the owner approves a package.
+- Steps:
+  1. Add the model with the DTO's fields and a service method `getByGroup(String group)` calling
+     `'/site-content?group=$group'`. Put the group names in `app_constants.dart`, matching the web
+     values. -> check: a unit test parses a sample response.
+  2. Render `BodyHtml` as plain text: strip tags, turn `<p>` and `<br>` into line breaks and
+     `<li>` into bullets. -> check: a test shows a paragraph and a list come out readable.
+  3. Build a list screen (titles in `DisplayOrder`, active items only) and a detail view, with
+     loading, empty and error states. -> check: the widget test covers all three states.
+  4. Route to it from `about_screen.dart` and add a route for each group. -> check: tapping an
+     item opens its detail on a phone viewport.
+- Contract: none (reads an existing public route). Add the mobile caller to the route's row in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `GHCAA.Mobile/test/site_content_screen_test.dart` :: `lists active items in display order`,
+  `shows empty state`, `shows error state`, `strips html to readable text`.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/site_content_screen_test.dart --exclude-tags golden`.
+- Done when: the tests pass and a phone-viewport run shows each group; 84.69 closes.
+- Stop and ask if: plain text loses content the owner cares about (tables, links, images); that
+  needs an HTML package, which the owner must approve.
 
 <a id="s87"></a>
-**S87 · 84.23 · M** Question to the owner: mobile signature upload (recommended yes, `POST
-api/profile/signature` exists) and the unused PDF routes (recommended: mobile downloads
-`id-card/pdf` and `certificate/pdf` and drops its own PDF builder, which also fixes Bengali names).
+**S87 · 84.23 · M**
+- Goal: mobile uploads a signature and downloads the server ID card and certificate PDFs, and stops
+  building its own PDF.
+- Before you start: ask the owner with these defaults: yes to signature upload; yes to using the
+  server PDFs and removing the mobile PDF builder (the server PDF already renders Bengali names).
+- Read (only these): `ProfileController` signature and PDF actions; `GHCAA.Mobile/lib/screens/member/digital_id_screen.dart`
+  (`_handlePrint`); `member_details_screen.dart` (`_downloadCredential`);
+  `GHCAA.Mobile/lib/features/files/file_service.dart` (`uploadProfilePhoto`, `UploadFileNaming`).
+- Change (only these files): `file_service.dart`; `digital_id_screen.dart`;
+  `member_details_screen.dart`; the profile edit screen that hosts the photo upload;
+  `GHCAA.Mobile/test/file_service_test.dart` (new);
+  `GHCAA.Mobile/test/digital_id_screen_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the API; the web client; `pubspec.yaml` (`pdf` and `printing` stay if anything
+  else imports them; check with grep).
+- Steps:
+  1. Add `uploadSignature(File)` beside `uploadProfilePhoto`, posting to `'/profile/signature'` with
+     jpeg, png or webp and a 2 MB check before upload. -> check: a test rejects a 3 MB file
+     without a network call.
+  2. Add `downloadCredentialPdf(String path)` that fetches bytes through the authenticated Dio
+     client. -> check: a test sees the auth header on the request.
+  3. Make `_handlePrint` and `_downloadCredential` use it and pass the bytes to `Printing`. Remove
+     the local PDF building code. -> check: grep finds no `pw.Document` left in the two screens.
+  4. Add the signature picker to the profile edit screen. -> check: phone-viewport run uploads and
+     shows the new signature on the ID card.
+- Contract: none (routes exist). Add the mobile callers in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `GHCAA.Mobile/test/file_service_test.dart` :: `signature over 2 MB rejected before upload`,
+  `credential download sends auth header`; `GHCAA.Mobile/test/digital_id_screen_test.dart` ::
+  `print uses server pdf bytes`.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/file_service_test.dart test/digital_id_screen_test.dart --exclude-tags golden`.
+- Done when: the tests pass; the admin download on `member_details_screen.dart` works on a real run;
+  84.23 closes with the owner's answer.
+- Stop and ask if: the owner says no to either part; the server PDF fails for a member the mobile
+  builder handled.
 
 <a id="s88"></a>
-**S88 · 96.3 · M** Messages page header and composer, directory search input, campaign form inputs
-onto the shared components.
+**S88 · 96.3 · M**
+- Goal: the messages page, directory search and campaign form use the shared components.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Web/src/app/common/page-header/page-header.component.ts`;
+  the shared `app-search-bar` and `app-date-input` components in `common/`;
+  `GHCAA.Web/src/app/admin/ledger/ledger.html` (the model page);
+  `GHCAA.Web/src/app/member/messages/messages.html`;
+  `GHCAA.Web/src/app/common/directory/directory.html`;
+  `GHCAA.Web/src/app/admin/campaigns/admin-campaigns.html`.
+- Change (only these files): `messages.html`, `messages.ts`, `messages.scss`; `directory.html`,
+  `directory.ts`; `admin-campaigns.html`, `admin-campaigns.ts`;
+  `GHCAA.Web/src/app/member/messages/messages.spec.ts` (new);
+  `GHCAA.Web/src/app/admin/campaigns/admin-campaigns.spec.ts` (new);
+  `GHCAA.Web/src/app/common/directory/directory.spec.ts`; `docs/TODO.md`.
+- Do not touch: the shared components themselves; theme files. There is no `app-input`, so plain
+  inputs keep the shared form classes.
+- Steps:
+  1. Messages: add `app-page-header`; style the composer with the shared form classes the ledger
+     page uses. -> check: the spec finds the header and the composer.
+  2. Directory: replace the raw search input with `app-search-bar`, keeping the same debounce and
+     query behaviour. -> check: the directory spec still filters on typed text.
+  3. Campaigns: the two date fields become `app-date-input`; the other fields take the shared form
+     classes. -> check: the spec shows a picked date saves as before and displays `dd-MM-yyyy`.
+  4. Browser check each page in light and dark mode. -> check: no hardcoded colour was added.
+- Contract: none.
+- Tests: `messages.spec.ts` :: `renders page header`, `sends from composer`;
+  `directory.spec.ts` :: `filters through shared search bar`; `admin-campaigns.spec.ts` ::
+  `dates use app-date-input`, `saves campaign with picked dates`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/messages src/app/common/directory src/app/admin/campaigns`.
+- Done when: the specs pass and the browser check is done; 96.3 closes.
+- Stop and ask if: a shared component lacks an input these pages need (change the shared component
+  in its own card instead).
 
 <a id="s89"></a>
-**S89 · 84.90 · M** Owner question: reuse the newest live code per type (recommended) or keep minting.
-Build the chosen rule; spec 013 FR-010.
+**S89 · 84.90 · M**
+- Goal: generating an ID card or certificate reuses the member's newest live code for that type
+  instead of minting a new one each time.
+- Before you start: ask the owner with this default: reuse the newest unrevoked, unexpired code per
+  type; mint only when none exists. The revoke and reissue work closed 2026-11-07 stays as is.
+- Read (only these): `GHCAA.Infrastructure/Services/IDCardService.cs` (`IssueCredentialAsync`,
+  `NewCredentialAsync`, `ReissueCredentialAsync`, `VerifyCredentialAsync`); `IssuedCredential`;
+  spec 013 FR-010.
+- Change (only these files): `IDCardService.cs`;
+  `GHCAA.Tests/Services/IDCardServiceCredentialTests.cs`;
+  `docs/specs/013-*/spec.md` (FR-010 text); `docs/TODO.md`.
+- Do not touch: `ReissueCredentialAsync` and revoke; `CredentialCodeGenerator`; the verify controller.
+- Steps:
+  1. In `IssueCredentialAsync`, look up the newest row for the member and type that is not revoked
+     and not expired; return it when found. -> check: two calls return the same short code.
+  2. Keep minting through `NewCredentialAsync` when no live row exists, and after a revoke or
+     expiry. -> check: a revoked code leads to a new code on the next call.
+  3. All four generators go through the changed method. -> check: grep shows no direct
+     `NewCredentialAsync` call outside it and the reissue path.
+  4. Update FR-010 to say codes are reused. -> check: the spec text matches the code.
+- Contract: none (response shape unchanged).
+- Tests: `GHCAA.Tests/Services/IDCardServiceCredentialTests.cs` ::
+  `Issue_TwiceSameType_ReusesLiveCode`, `Issue_AfterRevoke_MintsNewCode`,
+  `Issue_AfterExpiry_MintsNewCode`, `Issue_DifferentType_GetsOwnCode`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~IDCardService|FullyQualifiedName~CredentialVerification"`.
+- Done when: tests pass; a code-reviewer pass is clean; 84.90 closes with the owner's answer.
+- Stop and ask if: the owner chooses to keep minting; two concurrent first calls can mint two codes
+  (decide between a unique index and accepting it).
 
 <a id="s90"></a>
-**S90 · 84.95 · S** Applied date and days waiting on the approval list, past-limit mark, both
-clients; tests for day 30 and 31; membership walkthrough checks the applied date and days waiting
-in the queue. Runs after the 78.9 sessions unless the owner says first.
+**S90 · 84.95 · S**
+- Goal: the approval queue on both clients shows the applied date and days waiting, and marks an
+  application past the review limit.
+- Before you start: runs after the 78.9 sessions (gate G-EVAL) unless the owner says first.
+- Read (only these): `MemberSummaryDto` (`AppliedDate`); `WorkflowDto` in `OrgConfigDto.cs`
+  (`NewsImageUploadsPerDay` as the example key);
+  `GHCAA.Web/src/app/admin/member-approval/member-approval.ts` and `.html`;
+  `GHCAA.Mobile/lib/screens/admin/approval_queue_screen.dart`; `OrgWorkflow` in
+  `GHCAA.Mobile/lib/core/config/org_config.dart`;
+  `GHCAA.Web/tests/e2e/membership-walkthrough/README.md` and `membership.walkthrough.ts`.
+- Change (only these files): `OrgConfigDto.cs` (`ApprovalReviewDays`, default 30);
+  `GHCAA.Domain/Constants.cs` (the default); the OrgConfig defaults and golden
+  `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json`; `member-approval.ts`, `.html`,
+  `member-approval.spec.ts`; `org_config.dart`; `approval_queue_screen.dart`;
+  `GHCAA.Mobile/test/approval_queue_screen_test.dart` (new); the walkthrough README and
+  `membership.walkthrough.ts`; `docs/CONFIG_DRIVEN_FRAMEWORK.md`; `docs/TODO.md`.
+- Do not touch: the approval actions; the members search query.
+- Steps:
+  1. Add `ApprovalReviewDays` to the workflow settings with default 30. -> check: the golden
+     snapshot test passes after the golden update.
+  2. Web: show the applied date (`dd-MM-yyyy`) and days waiting; mark rows where days waiting is
+     more than the setting. -> check: the spec marks day 31 and not day 30.
+  3. Mobile: the same on the queue screen, reading the setting from `orgConfigProvider`. -> check:
+     the widget test marks day 31 and not day 30.
+  4. Walkthrough: check the applied date and days waiting in the queue, and add the row to the
+     README table. -> check: the walkthrough step passes locally.
+- Contract: OrgConfig gains a field; record it in `docs/API_CONTRACT_REGISTRY.md` and run the
+  contract check.
+- Tests: `member-approval.spec.ts` :: `shows applied date and days waiting`,
+  `marks day 31 not day 30`; `GHCAA.Mobile/test/approval_queue_screen_test.dart` ::
+  `marks day 31 not day 30`; `OrgConfigGoldenSnapshotTests`.
+- Run: `cd GHCAA.Web; npm run test:unit -- src/app/admin/member-approval`;
+  `cd GHCAA.Mobile; flutter test test/approval_queue_screen_test.dart --exclude-tags golden`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: both clients mark past-limit rows; walkthrough updated; 84.95 closes.
+- Stop and ask if: the owner wants the limit fixed rather than a setting.
 
 <a id="s91"></a>
-**S91 · 84.94 · M** Arrears report with CSV export; tests for no dues, part payment, waived due.
-Same timing rule as S90.
+**S91 · 84.94 · M**
+- Goal: a SuperAdmin arrears report listing unpaid dues per member, with CSV export.
+- Before you start: same timing rule as S90. Ask the owner with this default: waived dues and part
+  payments are not modelled today, so leave them out and add a tracker line if wanted.
+- Read (only these): `GHCAA.API/Controllers/FinancialLedgerController.cs` (`export/csv`);
+  `IFinancialLedgerService.cs`; `FinancialLedgerService.cs`; `MembershipDue`;
+  `GHCAA.Web/src/app/admin/ledger/ledger.html` and `ledger.service.ts`.
+- Change (only these files): `IFinancialLedgerService.cs`; `FinancialLedgerService.cs`;
+  `FinancialLedgerController.cs`; an `ArrearsRowDto` in the Application DTOs folder (new);
+  `ledger.html`, `ledger.ts`, `ledger.service.ts`; `GHCAA.Web/src/app/core/constants/app.constants.ts`;
+  `GHCAA.Tests/Services/FinancialLedgerServiceTests.cs`;
+  `GHCAA.Tests/Controllers/FinancialLedgerControllerTests.cs`; `ledger.spec.ts`,
+  `ledger.service.spec.ts`; `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: `MembershipDue`; the existing ledger export.
+- Steps:
+  1. `GetArrearsAsync(DateTime asOf)` returns members with unpaid dues past `DueDate`: member,
+     count, total and oldest due date. -> check: the service test with no dues returns an empty list.
+  2. `GET api/ledger/arrears` and `GET api/ledger/arrears/csv`, SuperAdminOnly like the rest of the
+     controller. -> check: a non-SuperAdmin gets 403.
+  3. Web: an arrears tab on the ledger page with the CSV button through the shared export
+     component. -> check: the spec downloads a file named from a constant.
+  4. Run `python scripts/authz_catalog.py --write`. -> check: the two routes appear.
+- Contract: two new routes; record them and run the contract check.
+- Tests: `FinancialLedgerServiceTests.cs` :: `Arrears_NoDues_ReturnsEmpty`,
+  `Arrears_PaidDue_Excluded`, `Arrears_NotYetDue_Excluded`, `Arrears_TwoUnpaid_SummedPerMember`;
+  `FinancialLedgerControllerTests.cs` :: `ArrearsCsv_ReturnsCsvFile`; `ledger.spec.ts` ::
+  `shows arrears tab`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FinancialLedger"`;
+  `cd GHCAA.Web; npm run test:unit -- src/app/admin/ledger`; `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; 84.94 closes, with the waived and part-payment
+  answer recorded.
+- Stop and ask if: the owner wants waived or part-paid dues (that needs a migration and its own card).
 
 <a id="s92"></a>
-**S92 · 84.66 · M** OrgConfig cap on pending archive submissions (default 5); API refusal message;
-both clients show it; golden snapshot.
+**S92 · 84.66 · M**
+- Goal: a member cannot have more than a set number of pending archive submissions.
+- Before you start: no card dependency.
+- Read (only these): `ArchiveController.CreateItem`; `ArchiveService.CreateItemAsync`;
+  `ArchiveItem` (`CreatedByMemberId`); `Enums.ArchiveModerationState`; `WorkflowDto`;
+  `GHCAA.Tests/OrgConfig/OrgConfigGoldenSnapshotTests.cs`.
+- Change (only these files): `OrgConfigDto.cs` (`ArchivePendingLimit`, default 5);
+  `GHCAA.Domain/Constants.cs` (the default and an `ErrorCodes.ArchivePendingLimit` code);
+  `ArchiveService.cs`; `ArchiveController.cs`; `org-config-ghc.golden.json`;
+  `GHCAA.Tests/Services/ArchiveServiceTests.cs`; `docs/CONFIG_DRIVEN_FRAMEWORK.md`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: admin submissions (they skip moderation and the cap); client code.
+- Steps:
+  1. Add the setting with default 5. -> check: golden snapshot passes after the golden update.
+  2. In `CreateItemAsync`, for a non-admin, count the member's items in `Pending`; refuse at the
+     limit with the new error code. -> check: the sixth pending item is refused.
+  3. The controller maps the refusal to 409 with the standard error body. -> check: controller test.
+- Contract: `POST api/archive/items` can return 409 with the new code; record it.
+- Tests: `ArchiveServiceTests.cs` :: `CreateItem_AtPendingLimit_Refused`,
+  `CreateItem_AfterOneApproved_Allowed`, `CreateItem_Admin_NotCapped`; `OrgConfigGoldenSnapshotTests`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Archive|FullyQualifiedName~OrgConfigGolden"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; 84.66 closes noting that no client submits archive items yet.
+- Stop and ask if: `ArchiveServiceTests.cs` does not exist and the archive tests live elsewhere
+  (use that file instead and say so).
 
 <a id="s93"></a>
-**S93 · 51.5 · M** OrgConfig `fileStorage` section read by the storage service with `Constants`
-fallback; admin settings tab.
+**S93 · 51.5 · M**
+- Goal: file storage limits and image settings are read from OrgConfig at run time, with
+  `Constants.Defaults` as fallback, and edited on an admin settings tab.
+- Before you start: after S80.
+- Read (only these): `FileStorageOptions` and `ImageCompressionOptions` in
+  `GHCAA.Infrastructure/Options/ConfigurationOptions.cs`; `FileStorageServiceBase.cs`;
+  `DependencyInjection.cs` (storage registration); `IOrgConfigService`;
+  `GHCAA.Web/src/app/admin/org-config/org-config.ts` (tabs).
+- Change (only these files): `OrgConfigDto.cs` (a `FileStorage` section: `MaxFileSizeBytes`,
+  `ImageQuality`, `FallbackImageQuality`, `TargetImageSizeKB`, `ImageMaxDimensionPx`);
+  `FileStorageServiceBase.cs`; `LocalFileStorageService.cs`; `S3FileStorageService.cs`;
+  `org-config.ts`, `org-config.html`; the golden json; `LocalFileStorageServiceTests.cs`,
+  `S3FileStorageServiceTests.cs`; `org-config.spec.ts`; `docs/CONFIG_DRIVEN_FRAMEWORK.md`;
+  `docs/TODO.md`.
+- Do not touch: `appsettings*.json` (the options binding stays as the base); S3 credentials.
+- Steps:
+  1. Add the section with null meaning "use the bound option, then `Constants.Defaults`".
+     -> check: golden passes after update.
+  2. `FileStorageServiceBase` takes `IOrgConfigService` and reads the section per call (both
+     storages are scoped). -> check: a test with a set OrgConfig value uses it; a null falls back.
+  3. Admin tab "File storage" with number inputs and range checks matching the server's.
+     -> check: the spec saves a value and rejects an out-of-range one.
+  4. Remove the unused `Constants.ConfigKeys` FileStorage keys only if this change made them
+     replaceable; otherwise report them. -> check: build passes.
+- Contract: OrgConfig gains a section; record it and run the contract check.
+- Tests: `LocalFileStorageServiceTests.cs` :: `Save_UsesOrgConfigMaxSize`,
+  `Save_NullOrgConfig_FallsBackToOptions`; `S3FileStorageServiceTests.cs` ::
+  `Save_UsesOrgConfigImageQuality`; `org-config.spec.ts` :: `saves file storage tab`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FileStorage|FullyQualifiedName~OrgConfigGolden"`;
+  `cd GHCAA.Web; npm run test:unit -- src/app/admin/org-config`; `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; 51.5 closes.
+- Stop and ask if: reading OrgConfig in the storage service creates a dependency cycle in DI.
 
 <a id="s94"></a>
-**S94 · 84.98 · M** The seven theme gaps on the tracker; color logic tests; browser check both modes
-with a light custom primary.
+**S94 · 84.98 · M**
+- Goal: the seven theme gaps on 84.98 are each fixed or recorded as intended.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Web/src/app/core/utils/color-math.ts`; `org-config.service.ts`
+  (accent checks); `GHCAA.Web/src/styles/themes/_light.scss` and `_dark.scss`;
+  `GHCAA.Mobile/lib/core/theme/app_theme.dart`;
+  `GHCAA.Mobile/lib/features/theme/dynamic_theme_service.dart`.
+- Change (only these files): `color-math.ts`, `color-math.spec.ts`; `org-config.service.ts`,
+  `org-config.service.spec.ts`; `_light.scss`, `_dark.scss`; `directory.scss`; the component SCSS
+  files that `grep -rln "text-on-dark" GHCAA.Web/src/app` lists beside `--primary-color`; the files
+  with `:focus` box-shadow from `grep -rln ":focus\b" GHCAA.Web/src`; `dynamic_theme_service.dart`;
+  `GHCAA.Mobile/test/special_theme_parse_test.dart`; `docs/TODO.md`.
+- Do not touch: OrgConfig data; the theme token names.
+- Steps:
+  1. Light accent check uses the darkest light surface (`--surface-color`), not `#ffffff`.
+     -> check: the spec fails an accent that passes on white but not on `#f8f9fa`.
+  2. Pick one 8-digit hex order (RRGGBBAA, the CSS order) and make Dart parse the same; both
+     `readableTextOn` treat alpha by blending on the surface. -> check: web and Dart tests give the
+     same result for one 8-digit value.
+  3. `--accent-gold-bright` follows the narrowed gradient spread. -> check: `.applied` text meets
+     AA contrast.
+  4. Disabled `.btn-primary` visible on a dark card. -> check: browser check in default dark mode.
+  5. Swap `--text-on-dark` for `--text-on-primary` where the fill is `--primary-color`. -> check:
+     a light custom primary keeps nav and footer text readable.
+  6. Move `:focus` box-shadow rules to `:focus-visible`. -> check: mouse click shows no ring;
+     Tab shows it.
+  7. Tab through the admin table and a modal. -> check: focus is visible and stays in the modal.
+- Contract: none.
+- Tests: `color-math.spec.ts` :: `readable text counts alpha`, `light check uses surface colour`;
+  `org-config.service.spec.ts` :: `accent check against surface`;
+  `GHCAA.Mobile/test/special_theme_parse_test.dart` :: `eight digit hex is RRGGBBAA`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/core/utils src/app/core/services/org-config.service.spec.ts`;
+  `cd GHCAA.Mobile; flutter test test/special_theme_parse_test.dart test/app_theme_contrast_test.dart --exclude-tags golden`.
+- Done when: each of the seven gaps has a fix or a written reason; browser check in both modes with
+  a light custom primary; 84.98 closes.
+- Stop and ask if: changing Dart's hex order breaks stored themes (check the seed and OrgConfig
+  values first).
 
 <a id="s95"></a>
-**S95 · 90.1, 90.2 · L · migration 15** `SavedReport` with `CreatedByUserId` (spec 010 wins over the
-tracker's `CreatedBy`), migration `AddSavedReports`; `ReportService` with field whitelist and row cap.
+**S95 · 90.1, 90.2 · L · migration 15**
+- Goal: saved reports are stored, and `ReportService` runs a whitelisted, capped query per entity and
+  exports to Excel.
+- Before you start: after S18. Read spec 010 and its `tasks.md`; spec 010 wins over the tracker
+  (`CreatedByUserId`).
+- Read (only these): `docs/specs/010-ad-hoc-reporting/spec.md` and `tasks.md`; one entity
+  configuration in `GHCAA.Infrastructure/Data/Configurations/`; the latest PgSql migration
+  (`20261117120000_SeedPolicySiteContent`) and its `.Designer.cs`; how `MemberImportService.cs`
+  uses ClosedXML.
+- Change (only these files): `GHCAA.Domain/Models/SavedReport.cs` (new);
+  `GHCAA.Infrastructure/Data/Configurations/SavedReportConfiguration.cs` (new);
+  `ApplicationDbContext.cs` (DbSet); `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddSavedReports.cs`
+  (new) and its `.Designer.cs` (new); the model snapshot;
+  `GHCAA.Application/Interfaces/IReportService.cs` (new); `GHCAA.Application/DTOs/Reports/` (new);
+  `GHCAA.Infrastructure/Services/ReportService.cs` (new); `DependencyInjection.cs`;
+  `GHCAA.Domain/Constants.cs` (`Reports.RowCap`, entity names);
+  `GHCAA.Tests/Services/ReportServiceTests.cs` (new); the plan's migration ledger row 15; `docs/TODO.md`.
+- Do not touch: other migrations; the import service.
+- Steps:
+  1. Model with `Id`, `Name`, `EntityType`, `FiltersJson`, `ColumnsJson`, `CreatedByUserId`,
+     `CreatedAt`; configuration and hand-written migration. -> check: `dotnet ef migrations
+     has-pending-model-changes` reports none.
+  2. `IReportService` with `GetEntityFields`, `RunReport`, `SaveReport`, `GetSavedReports`,
+     `ExportToExcel`. Entities: Members, Financial Records, Scholarships, Campaigns, Election
+     turnout. -> check: build passes.
+  3. Each entity has a field whitelist; any other field is refused. Queries compose `IQueryable`,
+     never raw SQL. -> check: test with an unknown field fails with a validation error.
+  4. Results stop at `Constants.Reports.RowCap` and say so. -> check: a test with more rows is cut
+     and flagged.
+  5. Excel export with ClosedXML, one sheet, header row from the chosen columns. -> check: test
+     reads back the row count.
+- Contract: none yet (S96 adds routes).
+- Tests: `GHCAA.Tests/Services/ReportServiceTests.cs` :: `Run_UnknownField_Rejected`,
+  `Run_OverRowCap_TruncatedAndFlagged`, `SaveReport_RoundTrip`, `Export_RowCountMatches`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ReportService"`.
+- Done when: tests pass; migration has its Designer and snapshot edit; code-reviewer pass clean;
+  ledger row 15 marked built; 90.1 and 90.2 close.
+- Stop and ask if: an entity in the spec has no clear field list; election turnout needs data that
+  breaks ballot secrecy (stop and ask, never expose per-voter rows).
 
-<a id="s96"></a><a id="s97"></a>
-**S96 · 90.3, 90.5 · M** Controller and tests. **S97 · 90.4 · M** Web page on the shared grid from
-S18.
+<a id="s96"></a>
+**S96 · 90.3, 90.5 · M**
+- Goal: admins call the report service through `api/admin/reports`, with tests for every route.
+- Before you start: after S95.
+- Read (only these): `IReportService.cs`; `CampaignsController.cs` for the `Constants.Policies.AdminOnly`
+  pattern; spec 010 `tasks.md` Phase 4.
+- Change (only these files): `GHCAA.API/Controllers/AdminReportsController.cs` (new);
+  `GHCAA.Tests/Controllers/AdminReportsControllerTests.cs` (new); `ReportServiceTests.cs` (new in S95, FR tags);
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: `ReportService` logic, unless a test shows a bug (then fix it and say so).
+- Steps:
+  1. Routes `GET entities`, `POST run`, `POST export`, `POST saved`, `GET saved`,
+     `POST saved/{id}/run` under `api/admin/reports`, all `AdminOnly`. -> check: build passes.
+  2. Saved reports belong to the caller's user id; another admin's id gives 404. -> check: test.
+  3. Export returns the xlsx content type and a file name from a constant. -> check: test.
+  4. Run `python scripts/authz_catalog.py --write`. -> check: six routes listed.
+- Contract: six new routes; record them and run the contract check.
+- Tests: `AdminReportsControllerTests.cs` :: `Run_NonAdmin_Forbidden`, `Run_ValidRequest_ReturnsRows`,
+  `SavedRun_OtherUsersReport_NotFound`, `Export_ReturnsXlsx`. FR-tag new tests.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Report"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; 90.3 and 90.5 close (the vitest part of 90.5
+  closes in S97).
+- Stop and ask if: saved reports should be shared between admins (spec says per user).
 
-<a id="s99"></a><a id="s100"></a><a id="s101"></a><a id="s102"></a><a id="s103"></a>
-**S99 to S103 · 37.4, 37.5, 37.10** Build as the tracker items describe; migrations 16 and 17 for
-cohorts and memorial; 37.10 after 37.4.
+<a id="s97"></a>
+**S97 · 90.4 · M**
+- Goal: an admin reports page with entity picker, filter form, result grid and export.
+- Before you start: after S96, and S18's `DataGridComponent` must exist in
+  `GHCAA.Web/src/app/common/data-grid/`.
+- Read (only these): `DataGridComponent`; `app-page-header`, `app-search-bar`, `app-pagination`,
+  `app-export-buttons`, `app-loading-panel` in `common/`; `AdminReportsController` routes;
+  `GHCAA.Web/src/app/core/services/nav.service.ts` (admin sections).
+- Change (only these files): `GHCAA.Web/src/app/admin/reports/` (new: component, template, styles,
+  spec); `GHCAA.Web/src/app/core/services/report.service.ts` (new);
+  `report.service.spec.ts` (new);
+  `app.constants.ts` (`ADMIN_REPORTS` in `API_ENDPOINTS`); the admin routes file; `nav.service.ts`;
+  `docs/TODO.md`.
+- Do not touch: the shared components; other admin pages.
+- Steps:
+  1. Service methods for the six routes using `ADMIN_REPORTS`. -> check: service spec hits each URL.
+  2. Page: pick entity, then fields and filters from `GET entities`; run shows rows in the grid with
+     pagination; a cut result shows the row-cap note. -> check: component spec.
+  3. Save and re-run saved reports; export downloads xlsx. -> check: spec.
+  4. Nav entry for admins and a guarded route. -> check: a member cannot open it.
+  5. Browser check in light and dark mode. -> check: no hardcoded colours.
+- Contract: none new (client of S96 routes).
+- Tests: `GHCAA.Web/src/app/admin/reports/reports.spec.ts` :: `runs report into grid`,
+  `shows row cap note`, `saves and reruns report`; `report.service.spec.ts` :: `calls run route`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/reports src/app/core/services/report.service.spec.ts`.
+- Done when: specs pass; browser check done; 90.4 closes and the vitest part of 90.5 is noted.
+- Stop and ask if: the shared grid cannot show typed columns (dates, money) without a change to it.
 
-<a id="s104"></a><a id="s105"></a><a id="s106"></a><a id="s107"></a>
-**S104 to S107 · 62.56** Spec 025 tasks T001 to T036 in four parts: section map and key uniqueness
-(a, g); export (b); upload, mapping and preview (c, d); modes, transaction, tests and docs (e, f).
+<a id="s99"></a>
+**S99 · 37.4 (backend) · L · migration 16**
+- Goal: batch cohorts and reunions exist as data with admin create and edit routes.
+- Before you start: no card dependency. Read the 37.4 tracker entry for the field list.
+- Read (only these): `AcademicRecord` (`PassingYear`, `IsOrgProfile`); `AlumniEvent`; one
+  configuration file; the latest PgSql migration and its `.Designer.cs`.
+- Change (only these files): `GHCAA.Domain/Models/BatchCohort.cs` (new);
+  `GHCAA.Domain/Models/Reunion.cs` (new); their configurations in
+  `GHCAA.Infrastructure/Data/Configurations/` (new); `ApplicationDbContext.cs`;
+  `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddBatchCohortsAndReunions.cs` (new) and
+  its `.Designer.cs` (new); the snapshot; `GHCAA.Application/Interfaces/ICohortService.cs` (new);
+  `GHCAA.Infrastructure/Services/CohortService.cs` (new);
+  `GHCAA.API/Controllers/CohortsController.cs` (new); `DependencyInjection.cs`; `GHCAA.Tests/Services/CohortServiceTests.cs` (new); ledger row 16;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: `AcademicRecord`; event code.
+- Steps:
+  1. `BatchCohort` (`Id`, `PassingYear` unique, `Title`, `Story?`, `CoverImagePath?`,
+     `RepresentativeMemberId?`, `IsActive`) and `Reunion` (`Id`, `BatchCohortId?`, `AlumniEventId`,
+     `Theme`, `SouvenirUrl?`); migration by hand. -> check: no pending model changes.
+  2. Service: list active cohorts with member count from `AcademicRecord.PassingYear` where
+     `IsOrgProfile`; get one with its reunions; admin create and update; `Story` sanitized with the
+     service's static HtmlSanitizer. -> check: tests.
+  3. Routes: public `GET api/cohorts`, `GET api/cohorts/{year}`; admin `POST` and `PUT`. Run
+     `authz_catalog.py --write`. -> check: a member cannot create.
+- Contract: four new routes; record them and run the contract check.
+- Tests: `CohortServiceTests.cs` :: `List_CountsOrgProfileMembersByYear`,
+  `Create_DuplicateYear_Refused`, `Update_StorySanitized`, `Get_IncludesReunions`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Cohort"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; ledger row 16 marked built.
+- Stop and ask if: a reunion should exist without an event.
+
+<a id="s100"></a>
+**S100 · 37.4 (clients) · M**
+- Goal: a public cohort list and cohort page on web and mobile, and an admin cohort editor on web.
+- Before you start: after S99.
+- Read (only these): `CohortsController`; one public list page on web (`common/directory/`) and on
+  mobile; the shared components in `common/`.
+- Change (only these files): `GHCAA.Web/src/app/public/cohorts/` (new: list and detail, with specs);
+  `GHCAA.Web/src/app/admin/cohorts/` (new, with spec);
+  `GHCAA.Web/src/app/core/services/cohort.service.ts` (new); `app.constants.ts`; the web routes and `nav.service.ts`;
+  `GHCAA.Mobile/lib/screens/member/cohorts_screen.dart` (new);
+  `GHCAA.Mobile/lib/features/cohorts/cohort_service.dart` (new); `app_router.dart`;
+  `GHCAA.Mobile/test/cohorts_screen_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the API.
+- Steps:
+  1. Web service and public list (year, title, member count) and detail (story, reunions).
+     -> check: specs.
+  2. Web admin editor with cover image staged upload (upload on Save only). -> check: spec.
+  3. Mobile list and detail. -> check: widget test on a phone viewport.
+- Contract: none new.
+- Tests: `cohort-list.spec.ts` (new) :: `lists cohorts by year`; `admin-cohorts.spec.ts` (new) ::
+  `saves cohort with cover on save`; `GHCAA.Mobile/test/cohorts_screen_test.dart` ::
+  `lists cohorts`, `opens cohort detail`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/public/cohorts src/app/admin/cohorts`;
+  `cd GHCAA.Mobile; flutter test test/cohorts_screen_test.dart --exclude-tags golden`.
+- Done when: tests pass; browser and phone checks done; 37.4 closes.
+- Stop and ask if: the owner wants cohorts visible to members only.
+
+<a id="s101"></a>
+**S101 · 37.5 (backend) · L · migration 17**
+- Goal: In Memoriam entries and condolences exist with moderation, and linking a member to an entry
+  deactivates the member.
+- Before you start: no card dependency. Read spec 003 Story 3 (In Memoriam).
+- Read (only these): spec 003 `spec.md` Story 3; `Member` (status and directory visibility);
+  `SubmissionStatus`; one configuration file; the latest PgSql migration and its `.Designer.cs`.
+- Change (only these files): `GHCAA.Domain/Models/MemorialEntry.cs` (new);
+  `GHCAA.Domain/Models/Condolence.cs` (new); their configurations (new); `ApplicationDbContext.cs`;
+  `GHCAA.Infrastructure/Data/Migrations/PgSql/<timestamp>_AddMemorialEntries.cs` (new) and its
+  `.Designer.cs` (new); the snapshot; `GHCAA.Application/Interfaces/IMemorialService.cs` (new);
+  `GHCAA.Infrastructure/Services/MemorialService.cs` (new);
+  `GHCAA.API/Controllers/MemorialController.cs` (new); `DependencyInjection.cs`;
+  `GHCAA.Tests/Services/MemorialServiceTests.cs` (new); ledger row 17;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: member delete code.
+- Steps:
+  1. `MemorialEntry` (`Id`, `MemberId?`, `FullName`, `PassingYear?`, `DateOfBirth?`,
+     `DateOfDeath`, `PhotoPath?`, `Tribute`, `IsPublished`, `SubmittedByMemberId?`, `Status`,
+     `CreatedAt`) and `Condolence` (`Id`, `MemorialEntryId`, `MemberId`, `Message`, `PostedAt`,
+     `IsApproved`); migration by hand. -> check: no pending model changes.
+  2. Members submit entries as Pending; admins approve and publish. Tribute and messages sanitized.
+     -> check: tests.
+  3. Approving an entry with `MemberId` deactivates that member and hides them from the directory in
+     the same transaction. -> check: test shows both changes or neither.
+  4. Condolences need approval before they show. Routes: public list and detail; member submit and
+     condole; admin approve. Run `authz_catalog.py --write`. -> check: public sees only published
+     entries and approved condolences.
+- Contract: new routes; record them and run the contract check.
+- Tests: `MemorialServiceTests.cs` :: `Approve_LinkedMember_DeactivatesAndHides`,
+  `Approve_FailsMidway_RollsBackBoth`, `PublicList_OnlyPublished`, `Condolence_HiddenUntilApproved`,
+  `Submit_TributeSanitized`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Memorial"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; ledger row 17 marked built.
+- Stop and ask if: deactivation should also end roles, dues or election rights (owner decision).
+
+<a id="s102"></a>
+**S102 · 37.5 (clients) · M**
+- Goal: In Memoriam pages on web and mobile, a submit form for members and an admin moderation page.
+- Before you start: after S101.
+- Read (only these): `MemorialController`; spec 003 Story 3 acceptance lines; the staged upload
+  pattern on an existing web admin page.
+- Change (only these files): `GHCAA.Web/src/app/public/in-memoriam/` (new, with spec);
+  `GHCAA.Web/src/app/admin/memorial/` (new, with spec);
+  `GHCAA.Web/src/app/core/services/memorial.service.ts` (new); `app.constants.ts`; web routes and `nav.service.ts`;
+  `GHCAA.Mobile/lib/screens/member/in_memoriam_screen.dart` (new);
+  `GHCAA.Mobile/lib/features/memorial/memorial_service.dart` (new); `app_router.dart`;
+  `GHCAA.Mobile/test/in_memoriam_screen_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the API.
+- Steps:
+  1. Public list and entry page with approved condolences; members post a condolence. -> check: spec.
+  2. Member submit form with staged photo upload. -> check: spec.
+  3. Admin page: approve entries and condolences; link a member with a warning that the member will
+     be deactivated. -> check: spec.
+  4. Mobile list, entry and condolence. -> check: widget test.
+- Contract: none new.
+- Tests: `in-memoriam.spec.ts` (new) :: `shows approved condolences only`; `admin-memorial.spec.ts` (new) ::
+  `warns before linking member`; `GHCAA.Mobile/test/in_memoriam_screen_test.dart` ::
+  `lists entries`, `posts condolence`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/public/in-memoriam src/app/admin/memorial`;
+  `cd GHCAA.Mobile; flutter test test/in_memoriam_screen_test.dart --exclude-tags golden`.
+- Done when: tests pass; browser and phone checks done; 37.5 closes.
+- Stop and ask if: the owner wants condolences without moderation.
+
+<a id="s103"></a>
+**S103 · 37.10 · L**
+- Goal: a yearly impact report built from the ledger, scholarships, campaigns and membership, shown on
+  web and mobile and downloadable as a PDF.
+- Before you start: after S100. Read spec 003 Story 2 (impact report).
+- Read (only these): spec 003 `spec.md` Story 2; `IFinancialLedgerService.GetSummaryAsync`;
+  `ScholarshipAward`; `CampaignPledge`; `MembershipHistory`; `IDCardService.GenerateIDCardPdfAsync`
+  (QuestPDF pattern); the SiteContent keys.
+- Change (only these files): `GHCAA.Application/DTOs/ImpactReportDto.cs` (new);
+  `GHCAA.Application/Interfaces/IImpactReportService.cs` (new);
+  `GHCAA.Infrastructure/Services/ImpactReportService.cs` (new); `ImpactReportController.cs` (new) in
+  `GHCAA.API/Controllers/`; `DependencyInjection.cs`;
+  `GHCAA.Tests/Services/ImpactReportServiceTests.cs` (new); `GHCAA.Web/src/app/public/impact-report/` (new, with spec); `app.constants.ts`; web routes;
+  `GHCAA.Mobile/lib/screens/member/impact_report_screen.dart` (new);
+  `GHCAA.Mobile/lib/features/impact_report/impact_report_service.dart` (new); `app_router.dart`;
+  `GHCAA.Mobile/test/impact_report_screen_test.dart` (new); `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`.
+- Do not touch: the ledger service logic; the Seed json (foreword and cover are site content added by
+  an admin).
+- Steps:
+  1. `GetImpactReportAsync(int year, CancellationToken cancellationToken = default)` returns income
+     and spend by category, scholarships awarded, campaign totals, new members and new cohorts, or
+     null for a year with no data. -> check: tests.
+  2. PDF with QuestPDF; foreword and cover from SiteContent when present. -> check: test gets a
+     non-empty PDF.
+  3. Routes `GET api/impact-report/{year}` and `.../pdf`, public. Run `authz_catalog.py --write`.
+     -> check: unknown year gives 404.
+  4. Web page with year picker and download. -> check: spec.
+  5. Mobile screen with year picker; the PDF opens through `Printing` after an authenticated
+     download, the S87 pattern. -> check: widget test on a phone viewport.
+- Contract: two new routes; record them and run the contract check.
+- Tests: `ImpactReportServiceTests.cs` :: `Report_SumsLedgerByCategory`, `Report_EmptyYear_ReturnsNull`,
+  `Pdf_GeneratesBytes`; `impact-report.spec.ts` (new) :: `downloads pdf for year`;
+  `GHCAA.Mobile/test/impact_report_screen_test.dart` :: `shows totals for year`, `shows empty year`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ImpactReport"`;
+  `cd GHCAA.Web; npm run test:unit -- src/app/public/impact-report`;
+  `cd GHCAA.Mobile; flutter test test/impact_report_screen_test.dart --exclude-tags golden`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass; code-reviewer pass clean; 37.10 closes.
+- Stop and ask if: any figure would show an individual donor or member amount (the owner decides
+  what is public).
+
+<a id="s104"></a>
+**S104 · 62.56 (a) · M**
+- Goal: the profile pack has a section map and a check that every key is unique across sections.
+- Before you start: after S79 (`ProfilePackFiles` exists). Spec 025 tasks T001 to T004.
+- Read (only these): `docs/specs/025-*/spec.md` and `tasks.md` (T001 to T004); `ProfilePackFiles`;
+  `GHCAA.Infrastructure/Data/Seed/profiles/default` and `profiles/ghc`.
+- Change (only these files): the files T001 to T004 name; `docs/specs/025-*/tasks.md` (tick the
+  tasks); `docs/TODO.md`.
+- Do not touch: seed data values.
+- Steps:
+  1. Build T001 to T004 in order, each with the check the task gives. -> check: each task's test
+     passes.
+- Contract: as the tasks say (none expected).
+- Tests: the test files T001 to T004 name, by path.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ProfilePack"`.
+- Done when: T001 to T004 are ticked; 62.56 part a is noted on the tracker.
+- Stop and ask if: a task names a file S79 did not create.
+
+<a id="s105"></a>
+**S105 · 62.56 (b) · M**
+- Goal: an admin can export the profile pack.
+- Before you start: after S104. Spec 025 tasks T005 to T008 and the export part of T022.
+- Read (only these): spec 025 `tasks.md` (T005 to T008, T022); `ProfilePackFiles`.
+- Change (only these files): the files those tasks name; `tasks.md`; `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`.
+- Do not touch: import code (S106).
+- Steps:
+  1. Build T005 to T008, then the web export button from T022. -> check: each task's test passes.
+  2. Run `authz_catalog.py --write` for any new route. -> check: route listed.
+- Contract: the export route; record it and run the contract check.
+- Tests: the test files the tasks name, by path.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ProfilePack"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tasks ticked; code-reviewer pass clean; part b noted.
+- Stop and ask if: export would include secrets or connection strings (it must not).
+
+<a id="s106"></a>
+**S106 · 62.56 (c, d) · L**
+- Goal: an admin uploads a pack, maps its sections and sees a preview before anything changes.
+- Before you start: after S105. Spec 025 tasks T009 to T014 and T022 to T025.
+- Read (only these): spec 025 `tasks.md` (T009 to T014, T022 to T025).
+- Change (only these files): the files those tasks name; `tasks.md`; `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`.
+- Do not touch: apply and transaction code (S107).
+- Steps:
+  1. Build T009 to T014 (upload, validation, mapping, preview) and T022 to T025 (web). -> check:
+     each task's test passes; preview writes nothing to the database.
+- Contract: upload and preview routes; record them and run the contract check.
+- Tests: the test files the tasks name, by path.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ProfilePack"`;
+  `cd GHCAA.Web; npm run test:unit -- <the spec paths the tasks name>`; `python scripts/ci-local.py --only contract`.
+- Done when: tasks ticked; code-reviewer pass clean; parts c and d noted.
+- Stop and ask if: an uploaded file could overwrite data outside the pack's sections.
+
+<a id="s107"></a>
+**S107 · 62.56 (e, f) · M**
+- Goal: import applies in merge or replace mode inside one transaction, with tests and docs.
+- Before you start: after S106. Spec 025 tasks T015 to T021 and T026 to T032.
+- Read (only these): spec 025 `tasks.md` (T015 to T021, T026 to T032).
+- Change (only these files): the files those tasks name; `tasks.md`; `docs/TODO.md`.
+- Do not touch: export and preview code, unless a task names it.
+- Steps:
+  1. Build T015 to T021 (modes, transaction) and T026 to T032 (tests, docs). -> check: a failed
+     import leaves the database unchanged.
+- Contract: as the tasks say; record any route change.
+- Tests: the test files the tasks name, by path.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ProfilePack"`.
+- Done when: all spec 025 tasks ticked; code-reviewer pass clean; 62.56 closes.
+- Stop and ask if: replace mode would delete rows other tables point to.
 
 <a id="s108"></a>
-**S108 · 60.3, 6.2, 8.5, 8.7, 37.9 · S** One owner question round, each with a recommended default:
-60.3 read both clients and close as a naming difference if they hit the same routes; 6.2 fold into
-84.83 (mentor and referral) or drop; 8.5 drop unless a measured slowness exists; 8.7 drop with 8.5;
-37.9 keep at P4 for after 37.4. Record each answer; build cards are added only for a "build" answer.
+**S108 · 60.3, 6.2, 8.5, 8.7, 37.9 · S**
+- Goal: one owner question round closes or keeps five small items.
+- Before you start: no card dependency.
+- Read (only these): the five tracker entries.
+- Change (only these files): `docs/TODO.md`.
+- Do not touch: code.
+- Steps:
+  1. Ask the owner, with these defaults: 60.3 close as a naming difference (web uses
+     `api/messaging`, mobile `api/chat`, both on `MessagingController`; forum routes match); 6.2 fold
+     into 84.83 or drop; 8.5 drop unless a measured slowness exists; 8.7 drop with 8.5; 37.9 keep at
+     P4 for after 37.4. -> check: each item has an answer.
+  2. Record each answer on its entry. -> check: tracker check passes.
+- Contract: none.
+- Tests: none (tracker only).
+- Run: `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+- Done when: five items have recorded answers; a build card is added only for a "build" answer.
+- Stop and ask if: an answer needs code; write a new card instead of building it here.
 
 <a id="s109"></a>
-**S109 · 37.11 · S** Refresh the WP37 baselines from a full run and update `FEATURES.md`,
-`PROJECT_MAP.md`, `SRS.md` and `ARCHITECTURE.md`. Close 37.11 when every other WP37 item is DONE or
-WONTDO; if gate items remain (G-DEV, G-BN), set it PARTIAL naming them.
+**S109 · 37.11 · S**
+- Goal: WP37 baselines and the main docs match the code after the WP37 items.
+- Before you start: after S103.
+- Read (only these): the WP37 tracker block; `docs/FEATURES.md`, `docs/PROJECT_MAP.md`,
+  `docs/SRS.md`, `docs/ARCHITECTURE.md`.
+- Change (only these files): those four docs; the WP37 baseline files the tracker names;
+  `docs/TODO.md`.
+- Do not touch: code; `docs/book/`.
+- Steps:
+  1. Run `python scripts/ci-local.py` and refresh the baselines from it. -> check: the run is green.
+  2. Update the four docs for cohorts, memorial and the impact report. -> check: each new route and
+     page appears once.
+  3. Close 37.11 if every other WP37 item is DONE or WONTDO; otherwise set it PARTIAL naming the gate
+     items (G-DEV, G-BN). -> check: tracker check passes.
+- Contract: none.
+- Tests: none new.
+- Run: `python scripts/ci-local.py`; `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+- Done when: docs match the code and 37.11 has its status.
+- Stop and ask if: ci-local fails for a reason outside WP37.
 
 <a id="s131"></a>
-**S131 · 8.9 · M** On a Flutter release that deprecates `material.dart`, add `material_ui` and `cupertino_ui` to
-`GHCAA.Mobile/pubspec.yaml` and swap `package:flutter/material.dart` for `material_ui` in about 140
-lib, test and integration_test files, plus the two localization delegates in `lib/main.dart`. Check
-the golden images, then `flutter analyze` with no infos and `flutter test --exclude-tags golden`.
-Raise the `flutter-version` pin in all three workflows under `.github/workflows/` in the
-same change. Close 8.9 when the pinned CI analyze job passes on the new version.
+**S131 · 8.9 · M**
+- Goal: mobile moves from `package:flutter/material.dart` to `material_ui` and `cupertino_ui` when a
+  Flutter release deprecates it, with CI pinned to that release.
+- Before you start: only once the pinned Flutter release deprecates `package:flutter/material.dart`. Today's pin is
+  the one in the CI workflows.
+- Read (only these): the Flutter release notes for the new version; `GHCAA.Mobile/pubspec.yaml`;
+  `GHCAA.Mobile/lib/main.dart` (the delegates); the `flutter-version` lines in
+  `.github/workflows/ghcaa-ci-preprod.yml`, `ghcaa-ci-standard.yml` and `mobile_deployment.yml`.
+- Change (only these files): `pubspec.yaml`; the 142 files that import `package:flutter/material.dart` (104 in `lib`,
+  33 in `test`, 5 in `integration_test`); `main.dart`; the three workflow files (seven pin lines);
+  golden images only if they change; `docs/TODO.md`.
+- Do not touch: app logic.
+- Steps:
+  1. Add `material_ui` and `cupertino_ui`; swap the imports with one scripted replace. -> check:
+     `grep -rln "package:flutter/material.dart" GHCAA.Mobile` prints nothing.
+  2. Swap the two localization delegates in `main.dart`. -> check: `flutter analyze` with no infos.
+  3. Run golden tests; review each changed image before accepting it. -> check: changes are only
+     rendering noise.
+  4. Raise all seven `flutter-version` pins. -> check: grep shows one version in all three files.
+- Contract: none.
+- Tests: the existing suite; `@Tags(['golden'])` tests run separately.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test --exclude-tags golden; flutter test --tags golden`.
+- Done when: the pinned CI analyze job passes on the new version; 8.9 closes.
+- Stop and ask if: a golden changes layout, not only pixels; a package in pubspec does not support the
+  new Flutter.
 
 ### Phase I. Public site, admin and member experience gaps
 
@@ -2597,149 +4448,1190 @@ Added 2026-11-17 from the public and admin site reviews. Design: `docs/specs/029
 dependencies, so their rows sit in phases B, F and G of section 3 and only the cards are kept
 together here. S111 runs before S14 (84.81, dues and event reminders) so reminders use the same
 mail check: dues reminders always send and event reminders follow the member's preference. The
-owner answered D1 to D8 of spec 029 on 2026-11-17. Short form; rewrite into the eleven-part form
-before running.
+owner answered D1 to D8 of spec 029 on 2026-11-17.
+
+Names in these cards were checked against the code on 2026-11-20. What the spec and the older
+cards assumed that the code does not have, or already has:
+
+- The communication routes live at `api/admin/comm` (`CommunicationController`, admin only), not
+  `api/communication` as the spec 029 plan said. Email sends in `CommunicationService` never read
+  the `Notify*` flags; only in-app notifications in `NotificationService` do.
+- `MemberService_Profile.cs` saves four flags (lines 260 to 263) and leaves out
+  `NotifyRelevantUpdates`. There are no mail kind constants; `Constants.TemplateCodes` holds the six
+  template codes.
+- `FinancialService` sets a notification link to `/finance/history`, which is no web route.
+- `EventRegistrationDto` (`GHCAA.Application/DTOs/EventDto.cs`) has no `TicketCode`.
+  `CheckInByTicketCodeAsync` already refuses any registration that is not Approved, so a cancelled
+  pass (S12 adds `Cancelled`) is refused already and needs only a test.
+- `GET api/admin/stats` returns an anonymous object from `GetDashboardStatsAsync`.
+- The web app has no server rendering or prerender setup, and the public site has no `/news/:id`
+  page; the API has `GET api/news/{id:int}`.
+- Articles are `NewsPost` rows. `NewsPost.MembersOnly` exists, defaults to false, and the create
+  path sets `dto.MembersOnly ?? false`, so an approved member article is public today. The planned
+  `IsPublic` column would duplicate `MembersOnly`; S123 uses `MembersOnly`.
+- `GET api/news` already filters by `articleCategory`, and categories are the `ArticleCategory`
+  enum, so a spotlight is a new enum value.
+- The fees route `GET api/financials/fees/applicable` returns one amount for one category and
+  type; there is no anonymous list of fees.
+- There is no general approval mechanism. `IElectionApprovalService` is election only and
+  `PendingApprovalsController` only counts queues, so S127 needs an owner answer first.
+- 31 web templates build their own `data-table` (27 admin, two member pages, four shared
+  components under `common/`). There is no `canDeactivate` guard.
+- The Android manifest has only the launcher intent filter. The mobile router has `/news/:id`,
+  `/events/:id` and `/jobs/:id`.
 
 <a id="s110"></a>
-**S110 · 100.1, 100.2 · S** Point the home page news and jobs previews at public routes, add a Join
-button to the public header, and set the canonical link and JSON-LD in `GHCAA.Web/src/index.html`
-at run time. The `author` meta tag stays (owner, 2026-11-17). Guard spec for `/portal` links in public templates;
-white-label guard covers `index.html`. Browser check at phone and desktop width.
+**S110 · 100.1, 100.2 · S**
+- Goal: no public page links into the sign-in wall, the public header has a Join button for
+  visitors, and `index.html` names no fixed host.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Web/src/app/public/landing/sections/news-preview/news-preview.html`;
+  `GHCAA.Web/src/app/public/landing/sections/jobs-preview/jobs-preview.html`;
+  `GHCAA.Web/src/app/layouts/public-layout/public-layout.html` and `public-layout.ts`;
+  `GHCAA.Web/src/app/app.routes.ts` (the `/news`, `/jobs` and `/register` routes);
+  `GHCAA.Web/src/index.html`; `GHCAA.Web/src/app/core/strategies/branding-title.strategy.ts`;
+  `GHCAA.Web/tests/e2e/generic-profile-acceptance.spec.ts`.
+- Change (only these files): `news-preview.html`; `jobs-preview.html`; `public-layout.html`;
+  `public-layout.ts`; `GHCAA.Web/src/app/layouts/public-layout/public-layout.spec.ts` (new);
+  `GHCAA.Web/src/app/public/public-links.guard.spec.ts` (new);
+  `GHCAA.Web/src/index.html`; `GHCAA.Web/src/app/core/services/page-meta.service.ts` (new);
+  `GHCAA.Web/src/app/core/services/page-meta.service.spec.ts` (new); `docs/TODO.md`.
+- Do not touch: the `author` meta tag in `index.html` (owner, 2026-11-17); the portal routes;
+  `BrandingTitleStrategy`; the college name, which belongs to Work Package 62.
+- Steps:
+  1. Point the news preview at `/news` and the jobs preview at `/jobs`. Hide the jobs link when
+     `enableJobHub` is off, as the route guard does. -> check: neither template holds `/portal`.
+  2. Add a Join link to `/register` in the public header, shown only when no one is signed in,
+     using the shared button classes. -> check: spec for both states.
+  3. Remove the fixed canonical link and the JSON-LD block from `index.html`. Add
+     `PageMetaService`, called on navigation from the public layout, that writes the canonical link
+     from the current address and the JSON-LD from the OrgConfig name and logo. -> check:
+     `grep -n "onrender" GHCAA.Web/src/index.html` prints nothing; the author tag is still there.
+  4. Add a guard spec that reads every `.html` under `app/public/` and `layouts/public-layout/`
+     and fails on a `/portal` link other than `/login`. -> check: the spec fails if step 1 is
+     undone.
+  5. Browser check at phone and desktop width, signed out and signed in. -> check: screenshots
+     show the Join button and both preview links open public pages.
+- Contract: no API change.
+- Tests: `public-links.guard.spec.ts` :: `public templates hold no portal link`;
+  `public-layout.spec.ts` :: `shows Join when signed out`, `hides Join when signed in`;
+  `page-meta.service.spec.ts` :: `canonical follows the current route`,
+  `JSON-LD uses the OrgConfig name and logo`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/public src/app/layouts/public-layout src/app/core/services/page-meta.service.spec.ts`.
+- Done when: the specs pass, the browser check is recorded, and 100.1 and 100.2 close with the
+  spec names as evidence.
+- Stop and ask if: the e2e white-label test fails on `index.html` for a reason other than the
+  host; the OrgConfig logo has no absolute address to put in JSON-LD.
 
 <a id="s111"></a>
-**S111 · 100.3 (API) · M** First record whether the send path reads the `Notify*` flags. Save
-`NotifyRelevantUpdates`; add one mail preference check used by every batch and reminder send; add
-the signed unsubscribe route and its undo. Four kinds always send (owner, 2026-11-17): account and
-security mail, payment receipts, election notices the rules require, and membership status mail
-(approval, rejection, expiry, dues owed). Tests for each kind, for a changed token and for the
-rate limit. Registry updated.
+**S111 · 100.3 (API) · M**
+- Goal: all five mail flags save, every batch and reminder email asks one check before it goes,
+  and a member can unsubscribe from one kind of mail from a signed link without signing in.
+- Before you start: no card dependency. S14 (84.81) waits for this card.
+- Read (only these): `GHCAA.Domain/Models/Member.cs` (the five `Notify*` flags);
+  `GHCAA.Infrastructure/Services/MemberService_Profile.cs`;
+  `GHCAA.Infrastructure/Services/CommunicationService.cs` (`SendBatchEmailAsync`,
+  `SendTypeEmailAsync`, `SendCustomEmailAsync`, `SendEmailByCodeAsync`, `GetEmailFooterAsync`);
+  `GHCAA.Infrastructure/Services/NotificationService.cs` (how it maps a kind to a flag);
+  `GHCAA.Infrastructure/Services/AuthenticatorService.cs` (the data protection protector);
+  `GHCAA.API/Extensions/RateLimitingExtensions.cs`; `GHCAA.Domain/Constants.cs`
+  (`TemplateCodes`, `RateLimitPolicies`, `ErrorCodes`).
+- Change (only these files): `MemberService_Profile.cs`; `GHCAA.Domain/Constants.cs`;
+  `GHCAA.Application/Interfaces/IMailPreferenceService.cs` (new);
+  `GHCAA.Infrastructure/Services/MailPreferenceService.cs` (new); `CommunicationService.cs`;
+  `GHCAA.API/Controllers/UnsubscribeController.cs` (new); `RateLimitingExtensions.cs`;
+  `GHCAA.Infrastructure/DependencyInjection.cs`;
+  `GHCAA.Tests/Services/MailPreferenceServiceTests.cs` (new);
+  `GHCAA.Tests/Controllers/UnsubscribeControllerTests.cs` (new);
+  `GHCAA.Tests/Services/MemberServiceTests.cs`; `GHCAA.Tests/Services/CommunicationServiceTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`;
+  `docs/specs/029-public-admin-member-experience-gaps/plan.md`.
+- Do not touch: `NotificationService` gating; the OTP and password reset send paths except to mark
+  them always sent; the email templates in the database.
+- Steps:
+  1. Record on 100.3 that email sends do not read the flags today. -> check: the note names
+     `CommunicationService`.
+  2. Save `NotifyRelevantUpdates` with the other four. -> check: a profile save round trips all
+     five.
+  3. Add `Constants.MailKinds` with one value per flag and the four always-sent kinds of D8
+     (account and security, payment receipt, required election notice, membership status), and a
+     set of the always-sent ones. -> check: build passes.
+  4. Add `IMailPreferenceService.MayReceiveAsync(memberId, kind)`: true for an always-sent kind
+     without reading flags, else the matching flag. It is the only reader of the flags for email.
+     -> check: unit tests per kind.
+  5. Make the batch, type and custom sends skip a member the check refuses and return the skipped
+     count. -> check: an opted-out member gets no mail; an OTP still goes with every flag off.
+  6. Add the unsubscribe token: a protector with a new purpose constant, holding member id, kind and
+     issue time. `GET api/unsubscribe?token=` turns the kind off and `POST api/unsubscribe/undo`
+     turns it back on; both anonymous, on a new `Unsubscribe` rate-limit policy. A changed or
+     unknown token returns 400 with an error code; a reused token is harmless. -> check: controller
+     tests.
+  7. Add the link to the footer of non-always-sent mail only. -> check: an OTP mail has no link.
+  8. Fix the route name in the spec 029 plan to `api/admin/comm`. -> check: the plan matches the
+     controller.
+- Contract: `GET api/unsubscribe`, `POST api/unsubscribe/undo` (new, anonymous); the three send
+  routes report a skipped count. Record both in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `MailPreferenceServiceTests.cs` :: `MayReceive_FlagOff_ReturnsFalse`,
+  `MayReceive_AlwaysSentKind_IgnoresFlags`; `CommunicationServiceTests.cs` ::
+  `SendBatch_SkipsOptedOutMember`, `SendOtp_SentWithEveryFlagOff`; `MemberServiceTests.cs` ::
+  `UpdateProfile_SavesAllFiveNotifyFlags`; `UnsubscribeControllerTests.cs` ::
+  `Unsubscribe_ValidToken_TurnsKindOff`, `Unsubscribe_ChangedToken_Returns400`,
+  `Unsubscribe_ReusedToken_StaysOff`, `Undo_TurnsKindBackOn`, `Unsubscribe_HasRateLimitPolicy`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MailPreference|FullyQualifiedName~Unsubscribe|FullyQualifiedName~CommunicationService|FullyQualifiedName~MemberServiceTests"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: the tests pass, the routes are in the registry, and 100.3 carries the API part as
+  built with the client part open for S112.
+- Stop and ask if: a send path in `CommunicationService` has no member id to check; the owner's
+  four always-sent kinds do not map onto the existing template codes.
 
 <a id="s112"></a>
-**S112 · 100.3 (clients) · M** "Email preferences" on the web member profile, the same five toggles
-on mobile profile edit, and the public unsubscribe page. Specs and a widget test. Closes 100.3.
+**S112 · 100.3 (clients) · M**
+- Goal: a member can see and change all five mail flags on web and mobile, and the unsubscribe link
+  opens a page that confirms and offers undo.
+- Before you start: S111 done.
+- Read (only these): `GHCAA.Web/src/app/member/profile/profile.ts` and `profile.html`;
+  `GHCAA.Web/src/app/common/notify-toggle/notify-toggle.component.ts`;
+  `GHCAA.Web/src/app/core/services/profile.service.ts`; `GHCAA.Web/src/app/app.routes.ts`;
+  `GHCAA.Mobile/lib/screens/member/profile_edit_screen.dart`;
+  `GHCAA.Mobile/test/profile_edit_screen_test.dart`.
+- Change (only these files): `profile.ts`; `profile.html`; `GHCAA.Web/src/app/member/profile/profile.spec.ts`;
+  `app.routes.ts`; `GHCAA.Web/src/app/public/unsubscribe/unsubscribe.ts` (new);
+  `GHCAA.Web/src/app/public/unsubscribe/unsubscribe.html` (new);
+  `GHCAA.Web/src/app/public/unsubscribe/unsubscribe.spec.ts` (new);
+  `GHCAA.Web/src/app/core/constants/app.constants.ts` (`API_ENDPOINTS`); `profile_edit_screen.dart`;
+  `profile_edit_screen_test.dart`; `docs/TODO.md`.
+- Do not touch: the API; `notify-toggle` behaviour for its other callers.
+- Steps:
+  1. Add an "Email preferences" section to the web profile with five `<app-notify-toggle>`
+     controls, saved with the profile. -> check: spec saves all five.
+  2. Add `/unsubscribe` as a public route: it calls the S111 route with the token from the query,
+     shows the result, and offers Undo. A bad token shows the error message from the server.
+     -> check: spec for success, undo and bad token.
+  3. Add the five switches to mobile profile edit, saved with the profile. -> check: widget test
+     toggles one and sees it in the saved body.
+- Contract: no API change.
+- Tests: `profile.spec.ts` :: `saves all five email preferences`; `unsubscribe.spec.ts` ::
+  `confirms unsubscribe`, `undo turns the kind back on`, `shows the server error for a bad token`;
+  `profile_edit_screen_test.dart` :: `email preference switch is saved`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/profile src/app/public/unsubscribe`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/profile_edit_screen_test.dart --exclude-tags golden`.
+- Done when: the specs and widget test pass, a browser check in light and dark is recorded, and
+  100.3 closes.
+- Stop and ask if: the profile save body on either client cannot carry the flags without an API
+  change.
 
 <a id="s113"></a>
-**S113 · 100.4 · L** Preview route with recipient and opted-out counts; batch and recipient rows
-with one migration (ledger row 2a in section 7); hosted worker; status
-route. Admin confirm dialog and progress. Tests: failed recipient, retry without a duplicate.
-`code-reviewer` on the migration. Split into API and web sessions if the card runs long.
+**S113 · 100.4 · L**
+- Goal: an admin sees how many will get a batch email and how many opted out before sending, the
+  send runs in the background, and a retry never mails the same member twice.
+- Before you start: S111 done. The mobile admin has no batch send screen (checked 2026-11-20);
+  record that on 100.4. Split into an API session and a web session if the card runs long.
+- Read (only these): `GHCAA.API/Controllers/CommunicationController.cs`;
+  `CommunicationService.cs` (`SendBatchEmailAsync`); `IMailPreferenceService.cs`;
+  `GHCAA.API/Services/DataRetentionSweep.cs` (hosted service pattern);
+  `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`;
+  `GHCAA.Web/src/app/admin/comm/admin-comm.ts` and `admin-comm.html`;
+  `GHCAA.Web/src/app/core/services/admin-comm.service.ts`.
+- Change (only these files): `GHCAA.Domain/Models/MailBatch.cs` (new);
+  `GHCAA.Domain/Models/MailBatchRecipient.cs` (new); `ApplicationDbContext.cs`; the migration
+  `AddMailBatches` with its `.Designer.cs` and the model snapshot (ledger row 2a);
+  `CommunicationService.cs`; `CommunicationController.cs`;
+  `GHCAA.API/Services/MailBatchWorker.cs` (new); `GHCAA.API/Program.cs` (register the worker next
+  to `DataRetentionSweep`);
+  `GHCAA.Tests/Services/MailBatchWorkerTests.cs` (new);
+  `GHCAA.Tests/Services/CommunicationServiceTests.cs`;
+  `GHCAA.Tests/Controllers/CommunicationControllerTests.cs`; `admin-comm.ts`; `admin-comm.html`;
+  `GHCAA.Web/src/app/admin/comm/admin-comm.spec.ts`; `admin-comm.service.ts`;
+  `GHCAA.Web/src/app/core/services/admin-comm.service.spec.ts`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: the single-member send routes; scheduled sending (left out by 100.4).
+- Steps:
+  1. Add `POST api/admin/comm/send-batch/preview` returning recipient and opted-out counts from
+     the same query the send uses. -> check: test for both counts.
+  2. Add the batch row (subject, body, created by, status, counts) and one recipient row per
+     member with a unique index on batch and member, in one migration with its Designer file.
+     -> check: `dotnet ef migrations list` shows it; the snapshot is not truncated.
+  3. Make `send-batch` write the rows and return 202 with the batch id. The worker sends pending
+     recipient rows, marks each sent or failed, and skips sent rows on a retry or a restart.
+     -> check: tests for a failed recipient, a retry, and a restart mid-batch.
+  4. Add `GET api/admin/comm/batches/{id}` for status and counts. Make the send response text say
+     the mail is queued only now that it is. -> check: controller test.
+  5. Web: the send button opens a confirm dialog with the counts, then shows progress from the
+     status route. Modal content sits in `.modal-body` and `.modal-footer`. -> check: spec; no
+     mail call before confirm.
+  6. Run `code-reviewer` on the migration. -> check: findings fixed or recorded.
+- Contract: preview and status routes (new); `send-batch` returns 202 with a batch id. Record in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `CommunicationServiceTests.cs` :: `PreviewBatch_ReturnsRecipientAndOptedOutCounts`;
+  `MailBatchWorkerTests.cs` :: `Worker_FailedRecipient_OthersStillSent`,
+  `Worker_Retry_SendsNoDuplicate`, `Worker_RestartMidBatch_ResumesPending`;
+  `CommunicationControllerTests.cs` :: `SendBatch_Returns202WithBatchId`,
+  `GetBatch_ReturnsCounts`; `admin-comm.spec.ts` :: `shows counts before sending`,
+  `shows progress after confirm`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MailBatch|FullyQualifiedName~Communication"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/comm src/app/core/services/admin-comm.service.spec.ts`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass on SQLite, the migration applies on PostgreSQL, the browser check is
+  recorded, and 100.4 closes.
+- Stop and ask if: the worker cannot run in the Render plan the owner uses (one instance, may
+  sleep); the send-type or send-custom routes also need queuing (not in this card).
 
 <a id="s114"></a>
-**S114 · 100.6 (API, web), 100.7, 100.8 · M** Three site content keys by a migration data step
-(ledger row 14a); `/privacy`, `/terms`, `/faq` on web with footer and consent links. Owner,
-2026-11-17, second answer: the pages ship with drafted standard text that an admin can edit, and
-this part is built ahead of the row's place in section 3. Skip link and `aria-expanded` in the three web layouts. Membership fees section
-on the home page from the anonymous fees route. The mobile links are S130, and 100.6 closes there.
-Built 2026-11-17: the 100.6 web and API part (migration, `PolicyContentSeeder`, `public/policy-page`,
-footer and consent links). 100.7 and 100.8 are still open in this card.
+**S114 · 100.7, 100.8 · M**
+- Goal: each web layout has a skip link and menu toggles that report their state, and the home page
+  shows what membership costs.
+- Before you start: S110 done. The 100.6 web and API part was built on 2026-11-17 (migration 14a,
+  `PolicyContentSeeder`, `public/policy-page`); its mobile part is S130. Migration 14a is written
+  but has never run on PostgreSQL; this card runs it and changes no migration file.
+- Read (only these): the three layouts in `GHCAA.Web/src/app/layouts/` (`.html` and `.ts`);
+  `GHCAA.Web/src/app/layouts/admin-layout/admin-layout.spec.ts`;
+  `GHCAA.Web/src/app/public/landing/sections/membership/` (all files);
+  `GHCAA.Web/src/app/core/services/financial.service.ts`;
+  `GHCAA.API/Controllers/FinancialsController.cs` (`fees/applicable`);
+  `GHCAA.Mobile/lib/screens/auth/register_screen.dart` (first step).
+- Change (only these files): the three layout `.html` and `.ts` files;
+  `admin-layout.spec.ts`; `GHCAA.Web/src/app/layouts/portal-layout/portal-layout.spec.ts` (new);
+  `GHCAA.Web/src/app/layouts/public-layout/public-layout.spec.ts`; the `membership` section files
+  and its spec `membership.spec.ts` (new if missing); `financial.service.ts`; `docs/TODO.md`;
+  ledger row 14a in section 7.
+- Do not touch: the migration 14a files and `PolicyContentSeeder`; the fees API; mobile code (record what its first step shows on 100.8 instead).
+- Steps:
+  1. Add a skip link as the first focusable element of each layout, targeting the main content
+     with `tabindex="-1"`. -> check: spec shows the first Tab lands on it and Enter moves focus.
+  2. Add `aria-expanded` and `aria-controls` to each menu toggle. -> check: spec reads the value
+     before and after opening.
+  3. Replace the fixed fee text in the membership section with a list from the anonymous fees
+     route, one call per membership type in OrgConfig, labels from OrgConfig; hide the section when
+     none returns a fee. -> check: spec for a list and for none.
+  4. Read the first mobile registration step and record on 100.8 whether it shows fees. -> check:
+     the note names the screen.
+  5. Run migration 14a on a fresh local PostgreSQL database, then rerun it (rule 5). -> check: the
+     three policy rows exist once and the identity sequence is past the highest id; record the
+     run on 100.6 and mark ledger row 14a.
+- Contract: no API change.
+- Tests: `admin-layout.spec.ts`, `portal-layout.spec.ts`, `public-layout.spec.ts` ::
+  `first tab lands on the skip link`, `menu toggle reports aria-expanded`; `membership.spec.ts` ::
+  `lists live fees`, `hides with no fees`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/layouts src/app/public/landing/sections/membership`.
+- Done when: specs pass, a browser check at phone and desktop width is recorded, the 14a run is
+  recorded, and 100.7 and 100.8 close.
+- Stop and ask if: the membership types in OrgConfig do not match the fee configuration keys, so
+  one call per type cannot be built without a new anonymous list route; migration 14a fails or
+  duplicates rows on PostgreSQL (do not edit it here).
 
 <a id="s115"></a>
-**S115 · 100.5 · L** Owner, 2026-11-17: prerender the public routes at build time. Titles and Open
-Graph tags per route, a sitemap from published content that leaves out members-only news, and a
-share action in the portal and the app. A post published after the last build has no preview until
-the next build; record that on 100.5 and in the deploy notes.
+**S115 · 100.5 · L**
+- Goal: a shared public news, event or job link shows a title and image in a link preview, the
+  sitemap lists published public content, and the portal and app can share the public address.
+- Before you start: S110 done. Owner, 2026-11-17 (D1): prerender at build time. The repo has no
+  server rendering setup; this card adds `@angular/ssr` prerendering for public routes only. Split
+  into a prerender session and a share session if the card runs long.
+- Read (only these): `GHCAA.Web/angular.json`; `GHCAA.Web/package.json`; `app.routes.ts`;
+  `GHCAA.Web/src/app/common/news/news.ts`; `GHCAA.Web/public/sitemap.xml`;
+  `GHCAA.API/Controllers/NewsController.cs` (`GET api/news`, `GET api/news/{id:int}`);
+  `page-meta.service.ts` (from S110); `GHCAA.Mobile/lib/screens/member/news_details_screen.dart`.
+- Change (only these files): `angular.json`; `package.json` and `package-lock.json`;
+  `GHCAA.Web/src/app/app.config.server.ts` (new); `GHCAA.Web/src/app/app.routes.server.ts` (new);
+  `GHCAA.Web/scripts/prerender-routes.mjs` (new, writes the route list and the sitemap from the
+  API); `app.routes.ts`; `GHCAA.Web/src/app/public/news-detail/news-detail.ts` (new) with its
+  `.html` and `news-detail.spec.ts` (new); `page-meta.service.ts` and its spec;
+  `GHCAA.Web/public/sitemap.xml` (removed, now generated);
+  `GHCAA.Web/src/app/common/share-button/share-button.component.ts` (new) and
+  `share-button.component.spec.ts` (new); `common/news/news.html`; `common/events/events.html`;
+  `common/jobs/jobs.html`; `news_details_screen.dart`; `GHCAA.Mobile/lib/screens/member/event_details_screen.dart`;
+  `GHCAA.Mobile/lib/screens/member/job_details_screen.dart`;
+  `GHCAA.Mobile/test/share_action_test.dart` (new); `GHCAA.Tests/Controllers/NewsControllerTests.cs`;
+  the deploy notes in `docs/`; `docs/TODO.md`.
+- Do not touch: portal and admin routes (not prerendered); the API host.
+- Steps:
+  1. Add `@angular/ssr` in prerender-only mode for the static public routes. -> check:
+     `npm run build` writes HTML for `/`, `/news` and `/about` with their titles.
+  2. Add the public `/news/:id` page and a prerender list built from `GET api/news` at build time,
+     with the API address from the build environment. -> check: the build writes one HTML file per
+     public post.
+  3. Extend `PageMetaService` with description and Open Graph tags per route. -> check: the
+     prerendered HTML holds `og:title` and `og:image`.
+  4. Generate the sitemap in the same script from the public lists. -> check: a members-only post
+     is absent; a backend test pins that `GET api/news` signed out leaves it out.
+  5. Add a share button (`navigator.share`, copy link as fallback) on news, events and jobs, and
+     the same action on the three mobile detail screens with `share_plus`, always the public
+     address. -> check: spec and widget test.
+  6. Record on 100.5 and in the deploy notes that a post published after the last build has no
+     preview until the next build. Paste one news link in a preview checker. -> check: the result
+     is on 100.5.
+- Contract: no route change; the build now needs the API address.
+- Tests: `NewsControllerTests.cs` :: `GetNews_SignedOut_LeavesOutMembersOnly`;
+  `news-detail.spec.ts` :: `sets title and og tags from the post`; `share-button.component.spec.ts`
+  :: `uses navigator.share`, `copies the link when share is missing`; `share_action_test.dart` ::
+  `share uses the public address`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run build; npm run test:unit -- src/app/public/news-detail src/app/common/share-button src/app/core/services/page-meta.service.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/share_action_test.dart --exclude-tags golden`;
+  `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~NewsController"`.
+- Done when: the build prerenders the public routes, the preview checker result is recorded, the
+  tests pass, and 100.5 closes.
+- Stop and ask if: the Render build cannot reach the API at build time; prerendering breaks a
+  browser-only call in a public component that cannot be guarded with `isPlatformBrowser`.
 
 <a id="s116"></a>
-**S116 · 100.9 · M** Notification link constant; bell in the portal and admin layouts;
-`/portal/notifications` with mark read and mark all read; mobile maps the link to its notification
-screen. Sending push stays with 84.61.
+**S116 · 100.9 · M**
+- Goal: every notification link points at a page that exists, the web portal and admin have a bell
+  and a notifications page, and a mobile tap opens the right screen.
+- Before you start: no card dependency. Sending push stays with 84.61.
+- Read (only these): `GHCAA.API/Controllers/NotificationController.cs`;
+  `GHCAA.API/Controllers/CommunicationController.cs` (the `/portal/notifications` link);
+  `GHCAA.Infrastructure/Services/FinancialService.cs` (the `/portal/payments` and
+  `/finance/history` links); `MemberService_Approval.cs` (`/portal/dashboard`);
+  `GHCAA.Web/src/app/core/services/alert.service.ts`; `member/dashboard/dashboard.ts`;
+  portal and admin layouts; `GHCAA.Mobile/lib/screens/member/notification_screen.dart`.
+- Change (only these files): `GHCAA.Domain/Constants.cs` (`NotificationLinks`);
+  `CommunicationController.cs`; `FinancialService.cs`; `MemberService_Approval.cs`;
+  `GHCAA.Tests/Services/NotificationServiceTests.cs`;
+  `GHCAA.Web/src/app/common/notification-bell/notification-bell.component.ts` (new) and
+  `notification-bell.component.spec.ts` (new); `GHCAA.Web/src/app/member/notifications/notifications.ts` (new)
+  with `.html` and `notifications.spec.ts` (new); `app.routes.ts`; `alert.service.ts` and
+  `alert.service.spec.ts`; the portal and admin layout `.html` files; `dashboard.ts`;
+  `notification_screen.dart`; `GHCAA.Mobile/test/notification_link_test.dart` (new);
+  `docs/TODO.md`.
+- Do not touch: `core/services/notification.service.ts` (toasts); the other services that pass a
+  link (they keep passing strings until they need a new page).
+- Steps:
+  1. Add `Constants.NotificationLinks` with the four links in use and fix `/finance/history` to the
+     payments page. -> check: `grep -rn "\"/finance/history\"" GHCAA.Infrastructure` prints nothing.
+  2. Add the bell with the unread count from `AlertService`, in the portal and admin layouts.
+     -> check: spec; count matches the list.
+  3. Add `/portal/notifications` with mark read and mark all read through `AlertService`.
+     -> check: spec.
+  4. On mobile, map each link constant to its screen on tap after marking read; an unknown link
+     stays on the list. -> check: widget test.
+  5. Browser check in light and dark themes. -> check: screenshots recorded.
+- Contract: no route change; link values are now constants.
+- Tests: `NotificationServiceTests.cs` :: `PaymentNotification_UsesPaymentsLink`;
+  `notification-bell.component.spec.ts` :: `shows the unread count`; `notifications.spec.ts` ::
+  `marks one read`, `marks all read`; `notification_link_test.dart` :: `tap opens the mapped screen`,
+  `unknown link stays on the list`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~NotificationService"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/common/notification-bell src/app/member/notifications src/app/core/services/alert.service.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/notification_link_test.dart --exclude-tags golden`.
+- Done when: tests pass, the browser check is recorded, and 100.9 closes.
+- Stop and ask if: an admin has no member record, so `api/notifications` returns nothing for them
+  and the admin bell has no data source.
 
 <a id="s117"></a>
-**S117 · 100.10 · L** After S13 (84.80, registration cancellation on clients). First record whether the member registration DTO returns `TicketCode`. QR on
-the pass in the portal and the app; admin web check-in page; attendance list route with CSV on web
-and a list on mobile; check-in refuses a cancelled registration. Event walkthrough gains a check-in
-step and a refusal probe, README table updated.
+**S117 · 100.10 · L**
+- Goal: a member's pass shows a QR code, admins can check in from the web and see an attendance
+  list with CSV, and the event walkthrough proves check-in and its refusal.
+- Before you start: S13 (84.80 clients) done, so `Cancelled` exists. Record on 100.10 that
+  `EventRegistrationDto` lacks `TicketCode` and that check-in already refuses any non-Approved
+  registration (checked 2026-11-20).
+- Read (only these): `GHCAA.Application/DTOs/EventDto.cs` (`EventRegistrationDto`, `QrCheckInDto`);
+  `GHCAA.Infrastructure/Services/EventService.cs` (`GetRegistrationsByMemberAsync`,
+  `CheckInByTicketCodeAsync`); `GHCAA.API/Controllers/EventsController.cs`;
+  `GHCAA.Web/src/app/common/events/events.html` (the pass); `GHCAA.Web/src/app/admin/events/`;
+  `GHCAA.Mobile/lib/screens/admin/gatekeeper_screen.dart`;
+  `GHCAA.Mobile/lib/screens/member/event_details_screen.dart`;
+  `GHCAA.Web/tests/e2e/event-walkthrough/` (README, `event.walkthrough.ts`, `scenario.json`).
+- Change (only these files): `EventDto.cs` (`TicketCode` on the member's own registration DTO only,
+  and `AttendanceRowDto`); `EventService.cs`; `IEventService.cs`; `EventsController.cs`;
+  `GHCAA.Tests/Services/EventServiceTests.cs`; `GHCAA.Tests/Controllers/EventsControllerTests.cs`;
+  `events.html` and `events.ts`; `common/events/events.spec.ts`;
+  `GHCAA.Web/src/app/admin/events/admin-event-checkin.ts` (new) with `.html` and
+  `admin-event-checkin.spec.ts` (new); `app.routes.ts`; `core/services/events.service.ts`;
+  `event_details_screen.dart`; `GHCAA.Mobile/lib/screens/admin/attendance_screen.dart` (new);
+  `GHCAA.Mobile/lib/core/router/app_router.dart`; `GHCAA.Mobile/test/attendance_screen_test.dart` (new);
+  the three event walkthrough files; `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: `scenario.json` data other than the new step; `AlumniEvent`'s query filter (admin
+  reads use `IgnoreQueryFilters()`).
+- Steps:
+  1. Return `TicketCode` from `my-registrations` only; admin lists do not change. -> check: test
+     that another member's code is never returned.
+  2. Add `GET api/events/admin/{id}/attendance` with name, status and checked-in time.
+     -> check: test with a checked-in and an unchecked registration.
+  3. Add tests that a second scan and a cancelled pass are refused. -> check: both pass with no
+     service change.
+  4. Web pass: a QR code of the ticket code, replacing the CSS bars. Mobile pass: the same with
+     `qr_flutter`. -> check: spec and widget test.
+  5. Admin web check-in page: code entry (camera scan only if a package is already present), and
+     the attendance list with CSV through `app-export-buttons`. -> check: spec.
+  6. Mobile admin attendance list next to the gatekeeper screen. -> check: widget test.
+  7. Event walkthrough: a check-in step and a second-scan refusal probe; README "What the run
+     covers" table updated. -> check: the walkthrough runs locally.
+- Contract: `GET api/events/admin/{id}/attendance` (new); `TicketCode` on `my-registrations`.
+  Record both in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `EventServiceTests.cs` :: `GetMyRegistrations_ReturnsOwnTicketCode`,
+  `CheckIn_SecondScan_Refused`, `CheckIn_CancelledRegistration_Refused`;
+  `EventsControllerTests.cs` :: `Attendance_ReturnsCheckedInTimes`, `Attendance_NonAdmin_Forbidden`;
+  `admin-event-checkin.spec.ts` :: `checks in by code`, `exports attendance CSV`;
+  `attendance_screen_test.dart` :: `lists checked-in members`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~EventService|FullyQualifiedName~EventsController"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/events src/app/common/events`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/attendance_screen_test.dart --exclude-tags golden`.
+- Done when: tests pass, the walkthrough step passes, and 100.10 closes.
+- Stop and ask if: the web needs a QR package that is not in `package.json` (name the package and
+  its size first); the walkthrough cannot reach the admin check-in route locally.
 
 <a id="s118"></a>
-**S118 · 100.11 · M** `AdminStatsDto` that keeps the existing field names (the mobile admin
-dashboard reads the same route) and adds monthly members, monthly dues, pending approvals by kind
-and upcoming events. Web charts with theme tokens; mobile tiles; the status badge reads the health
-endpoint or goes. Contract test pins the old names.
+**S118 · 100.11 · M**
+- Goal: the admin stats route returns a typed DTO with the old fields plus monthly trends and
+  pending counts, the web dashboard draws them, and the status badge reflects real health.
+- Before you start: no card dependency. Mobile reads the same route, so old field names stay.
+- Read (only these): `GHCAA.API/Controllers/AdminController.cs` (`stats`);
+  `GHCAA.Infrastructure/Services/MemberService_Search.cs` (`GetDashboardStatsAsync`);
+  `GHCAA.Application/Interfaces/IMemberService.cs`; `GHCAA.API/Controllers/PendingApprovalsController.cs`
+  (`admin/summary`); `GHCAA.Web/src/app/admin/dashboard/admin-dashboard.ts` and `.html`;
+  `GHCAA.Web/src/app/core/services/admin.service.ts`;
+  `GHCAA.Mobile/lib/features/admin/admin_service.dart`;
+  `GHCAA.Mobile/lib/screens/admin/admin_dashboard_screen.dart`.
+- Change (only these files): `GHCAA.Application/DTOs/AdminStatsDto.cs` (new); `IMemberService.cs`;
+  `MemberService_Search.cs`; `AdminController.cs`; `GHCAA.Tests/Services/MemberServiceTests.cs`;
+  `GHCAA.Tests/Controllers/AdminControllerTests.cs`; `admin-dashboard.ts`; `admin-dashboard.html`;
+  `GHCAA.Web/src/app/admin/dashboard/admin-dashboard.spec.ts`; `admin.service.ts`;
+  `admin_service.dart`; `admin_dashboard_screen.dart`;
+  `GHCAA.Mobile/test/admin_dashboard_tiles_test.dart` (new); `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`.
+- Do not touch: the pending summary route; any chart package not already in `package.json`.
+- Steps:
+  1. Add `AdminStatsDto` with `TotalMembers`, `Applied`, `Active`, `Inactive`, `Balance`,
+     `LastUpdated` unchanged, plus new members per month and dues per month for the last 12 months,
+     pending approvals by kind and upcoming events. Grouped queries must run on SQLite and
+     PostgreSQL. -> check: contract test pins the old names in the JSON.
+  2. A month with no data returns zero, not a gap. -> check: test.
+  3. Web: simple bar charts drawn with theme tokens (no new package), a "needs attention" list
+     linking to each queue, and the badge reading `/health`, red on failure. -> check: spec for
+     both badge states.
+  4. Mobile: the new figures as plain tiles. -> check: widget test.
+- Contract: `GET api/admin/stats` gains fields; old fields unchanged. Update its registry row.
+- Tests: `AdminControllerTests.cs` :: `Stats_KeepsOldFieldNames`; `MemberServiceTests.cs` ::
+  `DashboardStats_EmptyMonth_ReturnsZero`; `admin-dashboard.spec.ts` ::
+  `badge turns red when health fails`, `lists items needing attention`;
+  `admin_dashboard_tiles_test.dart` :: `shows the new figures`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~AdminController|FullyQualifiedName~MemberServiceTests"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/admin/dashboard`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/admin_dashboard_tiles_test.dart --exclude-tags golden`.
+- Done when: tests pass, the browser check in light and dark is recorded, and 100.11 closes.
+- Stop and ask if: dues per month cannot be told apart from other income in the ledger without a
+  new rule; the owner wants a chart package.
 
 <a id="s119"></a>
-**S119 · 100.12 · L** After S18 (88.5, editable import grid): decide whether that grid serves as
-the shared table. Build the table in `src/app/common/` with sort, paging, selection and CSV. Move
-the members and payments admin lists and the three portal tables. Guard spec on the count of
-hand-built tables; the rest of the admin lists move a few per later session and 100.12 stays
-PARTIAL until the count is zero.
+**S119 · 100.12 · L**
+- Goal: one shared table component with sort, paging, selection and CSV, used by the admin members
+  list and the member payments and giving tables, with a guard that stops new hand-built tables.
+- Before you start: S18 (88.5, editable import grid) done. Decide on 100.12 whether that grid can
+  serve as the shared table and record why.
+- Read (only these): the 88.5 grid component; `GHCAA.Web/src/app/common/pagination/`;
+  `GHCAA.Web/src/app/common/export-buttons/`; `GHCAA.Web/src/app/admin/members/admin-members.html`
+  and `.ts`; `GHCAA.Web/src/app/member/payments/payments.html` and `.ts`;
+  `GHCAA.Web/src/app/member/giving/giving.html` and `.ts`.
+- Change (only these files): `GHCAA.Web/src/app/common/data-table/data-table.component.ts` (new)
+  with its `.html`, `.scss` and `data-table.component.spec.ts` (new); `admin-members.html` and
+  `.ts`; `payments.html` and `.ts`; `giving.html` and `.ts`;
+  `GHCAA.Web/src/app/common/data-table/hand-built-tables.guard.spec.ts` (new); `docs/TODO.md`.
+- Do not touch: the other admin lists (later sessions); API list routes (a route without paging is
+  recorded as its own item).
+- Steps:
+  1. Build the component on the 88.5 grid if it fits, else on its own, with theme tokens.
+     -> check: specs for sort, paging, select-all on the current page and export.
+  2. Move the admin members list. -> check: its existing spec still passes.
+  3. Move the member payments and giving tables. -> check: their specs pass.
+  4. Add the guard spec that counts templates holding `data-table` outside the component and fails
+     when the count rises above the number after step 3. -> check: adding one fails it.
+  5. Browser check. -> check: screenshots at phone and desktop width.
+- Contract: no API change.
+- Tests: `data-table.component.spec.ts` :: `sorts by a column`, `pages`, `selects all on the page`,
+  `exports CSV`; `hand-built-tables.guard.spec.ts` :: `hand-built table count does not rise`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/common/data-table src/app/admin/members src/app/member/payments src/app/member/giving`.
+- Done when: the specs pass and 100.12 is PARTIAL with the remaining count recorded; it closes when
+  the count is zero.
+- Stop and ask if: the admin payments list the tracker names does not exist yet (84.92 builds it);
+  the 88.5 grid fits only with changes to the import page.
 
 <a id="s120"></a>
-**S120 · 100.13 · M** `canDeactivate` guard and dirty-form contract on web, applied to the admin
-editors, the member profile and registration; back confirm on mobile profile edit and admin
-editors. Specs and a widget test.
+**S120 · 100.13 · M**
+- Goal: leaving a changed form asks first, on web and mobile.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Web/src/app/core/guards/auth.guard.ts` (guard style);
+  `app.routes.ts`; `GHCAA.Web/src/app/member/profile/profile.ts`;
+  `GHCAA.Web/src/app/public/register/register.ts`; `GHCAA.Web/src/app/admin/news/admin-news.ts`;
+  `GHCAA.Web/src/app/admin/events/admin-events.ts`; `GHCAA.Web/src/app/admin/site-content/site-content.ts`;
+  `GHCAA.Web/src/app/core/services/confirm-dialog.service.ts`;
+  `GHCAA.Mobile/lib/screens/member/profile_edit_screen.dart`.
+- Change (only these files): `GHCAA.Web/src/app/core/guards/unsaved-changes.guard.ts` (new) and
+  `unsaved-changes.guard.spec.ts` (new); `GHCAA.Web/src/app/common/directives/dirty-form.ts` (new,
+  the `HasUnsavedChanges` contract); `app.routes.ts`; `profile.ts`; `register.ts`;
+  `admin-news.ts`; `admin-events.ts`; `site-content.ts`; `profile_edit_screen.dart`;
+  `GHCAA.Mobile/test/profile_edit_screen_test.dart`; `docs/TODO.md`.
+- Do not touch: other admin editors (each moves with its own later change); the browser's own
+  unload prompt.
+- Steps:
+  1. Add the contract (`hasUnsavedChanges(): boolean`) and a `canDeactivate` guard that asks
+     through `ConfirmDialogService`. -> check: spec for changed, untouched and saved forms.
+  2. Apply it to the profile, registration and the three admin editors named above. -> check:
+     each route has the guard.
+  3. Mobile: `PopScope` on profile edit with a confirm when the form changed. -> check: widget
+     test.
+- Contract: no API change.
+- Tests: `unsaved-changes.guard.spec.ts` :: `asks on a changed form`, `passes an untouched form`,
+  `passes a saved form`; `profile_edit_screen_test.dart` :: `back asks when changed`,
+  `back leaves when unchanged`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/core/guards`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/profile_edit_screen_test.dart --exclude-tags golden`.
+- Done when: tests pass and 100.13 closes with the list of covered forms; the mobile admin editors
+  are recorded as left for later.
+- Stop and ask if: a named editor is a dialog, not a route, so the guard cannot cover it.
 
 <a id="s121"></a>
-**S121 · 100.14 · S** After S88 (96.3, shared header and search): the admin header search returns
-members, payments and events through existing search routes, limited by role.
+**S121 · 100.14 · S**
+- Goal: the admin header search also finds members, events and payments, within the admin's role.
+- Before you start: S88 (96.3, shared header and search) done. The search routes today:
+  `GET api/admin/members?searchQuery=` and `GET api/events/admin/all`. There is no payment search
+  route; if S11 (84.92) has not added one, record the gap on 100.14 and leave payments out.
+- Read (only these): `GHCAA.Web/src/app/layouts/admin-layout/admin-layout.html` and `.ts` (the
+  `app-search-bar`); `GHCAA.Web/src/app/common/search-bar/search-bar.component.ts`;
+  `GHCAA.Web/src/app/core/services/admin.service.ts`; `core/services/events.service.ts`.
+- Change (only these files): `admin-layout.html`; `admin-layout.ts`; `admin-layout.spec.ts`;
+  `docs/TODO.md`.
+- Do not touch: the API; `search-bar.component.ts` behaviour for other callers.
+- Steps:
+  1. After the menu matches, show member and event results from the two routes, debounced, at most
+     five each, and only for a role that can open those pages. -> check: spec with a mocked API.
+  2. Selecting a member opens that member. -> check: spec with a membership number.
+- Contract: no API change.
+- Tests: `admin-layout.spec.ts` :: `finds a member by membership number`,
+  `hides member results without the role`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/layouts/admin-layout`.
+- Done when: specs pass and 100.14 closes, or stays PARTIAL with the payment route gap recorded.
+- Stop and ask if: S88 moved the search into a different component than the one named here.
 
-<a id="s122"></a>
-**S122 · owner decisions · S** Done 2026-11-17. The owner answered all five; the answers are on the
+S122 (owner decisions) was done 2026-11-17; see the progress log. The owner answered all five; the answers are on the
 closed decision item of Work Package 100 and the build cards are S123 to S129. No card for an
 installable web app: the answer was no.
 
 <a id="s123"></a>
-**S123 · 100.16 · L** After S115 (100.5, sitemap and previews). `IsPublic` on the article, off by
-default, with one migration (ledger row 18); anonymous list and read routes for approved public
-articles; public articles pages on web, in the sitemap; the switch on the portal and mobile article
-forms and on the admin moderation screen. Tests: members-only, pending and rejected articles are
-refused signed out. `code-reviewer` on the migration. Split API and clients if the card runs long.
+**S123 · 100.16 · L**
+- Goal: an article is members only unless its author or an admin marks it public, and visitors can
+  read public approved articles.
+- Before you start: S115 done (public `/news/:id` page and sitemap). Articles are `NewsPost` rows
+  and `MembersOnly` already exists, defaulting to false, so approved member articles are public
+  today. Ask the owner two things: (1) use the existing `MembersOnly` flag instead of a new
+  `IsPublic` column (default: yes; ledger row 18 then becomes a data step only); (2) whether
+  existing approved member articles become members only (default: yes, by a data migration that
+  sets `MembersOnly` on rows created through the submit route, if they can be told apart).
+- Read (only these): `GHCAA.Domain/Models/NewsPost.cs`; `GHCAA.Application/DTOs/NewsDto.cs`;
+  `GHCAA.Infrastructure/Services/NewsService.cs` (create, update, `GetActiveNewsAsync`);
+  `GHCAA.API/Controllers/NewsController.cs` (`submit`, `GET`, `GET {id}`);
+  `GHCAA.Web/src/app/member/articles/articles.ts` and `.html`;
+  `GHCAA.Web/src/app/admin/article-approval/article-approval.ts` and `.html`;
+  `GHCAA.Mobile/lib/screens/member/submit_article_screen.dart`.
+- Change (only these files): `NewsService.cs`; `NewsController.cs` (only if the submit route sets
+  the default); a data migration with its `.Designer.cs` if the owner says yes to (2) (ledger
+  row 18); `GHCAA.Tests/Services/NewsServiceTests.cs`;
+  `GHCAA.Tests/Controllers/NewsControllerTests.cs`; `articles.ts`; `articles.html`;
+  `GHCAA.Web/src/app/member/articles/articles.spec.ts` (new if missing); `article-approval.ts`;
+  `article-approval.html`; `GHCAA.Web/src/app/admin/article-approval/article-approval.spec.ts` (new
+  if missing); `submit_article_screen.dart`; `GHCAA.Mobile/test/submit_article_public_test.dart` (new);
+  the section 7 ledger row; `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: admin news posts (their `MembersOnly` stays as set); the member routes.
+- Steps:
+  1. Member submit defaults `MembersOnly` to true when the body leaves it out. -> check: test.
+  2. The anonymous `GET api/news` and `GET api/news/{id}` return approved public articles only;
+     members-only, pending and rejected are refused signed out. -> check: tests (most hold today;
+     add the missing ones).
+  3. Web: a "Show to visitors" switch on the author's article form with a line saying who can read
+     it, and the same switch plus a public filter on the admin approval screen. -> check: specs.
+  4. Mobile: the switch on the submit form. -> check: widget test.
+  5. Data step per the owner's answer, then `code-reviewer` on it. -> check: rollback restores by
+     content, not by id range.
+- Contract: no new route; the submit default changes. Record it in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `NewsServiceTests.cs` :: `SubmitArticle_DefaultsToMembersOnly`;
+  `NewsControllerTests.cs` :: `GetById_SignedOut_MembersOnly_Returns404`,
+  `GetById_SignedOut_Pending_Returns404`, `GetById_SignedOut_PublicApproved_Returns200`;
+  `articles.spec.ts` :: `saves the visitor switch`; `article-approval.spec.ts` ::
+  `filters public articles`; `submit_article_public_test.dart` :: `visitor switch is sent`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~News"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/articles src/app/admin/article-approval`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/submit_article_public_test.dart --exclude-tags golden`.
+- Done when: tests pass, the public page shows a public article signed out, and 100.16 closes.
+- Stop and ask if: the owner wants a separate `IsPublic` column after all; member articles cannot be
+  told apart from admin news for the data step.
 
 <a id="s124"></a>
-**S124 · 100.17 · M** After S110 (100.1, public news links). First read how news categories are
-held. Add "Spotlight" the same way; category filter on the public news route; a home page section
-with the latest three, hidden when empty; the label and filter in the portal and the app.
+**S124 · 100.17 · M**
+- Goal: an admin can save a news post as a spotlight, the home page shows the latest three when any
+  exist, and the portal and app show the label.
+- Before you start: S110 done. Categories are the `ArticleCategory` enum (`Event`, `Magazine`,
+  `Regular`) and `GET api/news` already filters by `articleCategory`; record that on 100.17.
+- Read (only these): `GHCAA.Domain/Enums.cs` (`ArticleCategory`); how `ArticleCategory` is stored
+  in `ApplicationDbContext.cs`; `GHCAA.Web/src/app/core/constants/app.constants.ts`
+  (`ARTICLE_CATEGORIES`); `GHCAA.Web/src/app/admin/news/admin-news.ts`;
+  `GHCAA.Web/src/app/public/landing/` (section list); `GHCAA.Mobile/lib/screens/member/news_screen.dart`.
+- Change (only these files): `Enums.cs` (append `Spotlight`); `app.constants.ts`;
+  `GHCAA.Web/src/app/public/landing/sections/spotlights-preview/spotlights-preview.ts` (new) with
+  its `.html` and `spotlights-preview.spec.ts` (new); the landing page that lists the sections;
+  `common/news/news.html`; `news_screen.dart`; `GHCAA.Mobile/test/news_category_label_test.dart` (new);
+  `GHCAA.Tests/Services/NewsServiceTests.cs`; `docs/TODO.md`.
+- Do not touch: the order of existing enum values (append only); the news API shape.
+- Steps:
+  1. Append `Spotlight` to `ArticleCategory` and to `ARTICLE_CATEGORIES`. -> check: a test saves
+     and filters a spotlight; existing values keep their numbers.
+  2. Home page section with the latest three spotlights signed out, each linking to `/news/:id`,
+     absent when none. -> check: spec for both.
+  3. Label and filter in the portal news list and the mobile news screen. -> check: spec and
+     widget test.
+- Contract: one new enum value on the existing news routes. Record it in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `NewsServiceTests.cs` :: `GetActiveNews_FiltersSpotlight`; `spotlights-preview.spec.ts`
+  :: `shows the latest three`, `absent with none`; `news_category_label_test.dart` ::
+  `shows the spotlight label`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~NewsService"`;
+  `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/public/landing src/app/common/news`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/news_category_label_test.dart --exclude-tags golden`.
+- Done when: tests pass, the browser check is recorded, and 100.17 closes.
+- Stop and ask if: the enum is stored as text and a value list elsewhere (a lookup table or a check
+  constraint) must change too.
 
 <a id="s125"></a>
-**S125 · 100.18 (API) · L** After S112 (100.3, the signed token) and S113 (100.4, the batch worker).
-Subscriber table with consent times, one migration (ledger row 19); sign-up, confirm and
-unsubscribe routes, anonymous and rate limited; the sign-up answer does not reveal a known address;
-newsletter subscribers as a batch audience, confirmed only, a shared address mailed once; unconfirmed
-addresses deleted after the OrgConfig number of days. `code-reviewer` and `security-reviewer`.
+**S125 · 100.18 (API) · L**
+- Goal: a visitor can sign up for the newsletter with double opt-in and unsubscribe, and an admin
+  batch can go to confirmed subscribers only.
+- Before you start: S112 (signed token) and S113 (batch rows and worker) done.
+- Read (only these): `MailPreferenceService.cs` and `UnsubscribeController.cs` (S111);
+  `MailBatch.cs`, `MailBatchRecipient.cs` and `MailBatchWorker.cs` (S113);
+  `GHCAA.API/Services/DataRetentionSweep.cs`; `RateLimitingExtensions.cs`;
+  `GHCAA.Domain/Constants.cs` (`ConfigKeys`); the OrgConfig settings model.
+- Change (only these files): `GHCAA.Domain/Models/NewsletterSubscriber.cs` (new);
+  `ApplicationDbContext.cs`; the migration `AddNewsletterSubscribers` with its `.Designer.cs` and
+  snapshot (ledger row 19); `GHCAA.Application/Interfaces/INewsletterService.cs` (new);
+  `GHCAA.Infrastructure/Services/NewsletterService.cs` (new);
+  `GHCAA.API/Controllers/NewsletterController.cs` (new); `CommunicationService.cs` (audience);
+  `MailBatchWorker.cs`; `DataRetentionSweep.cs` (cleanup); `Constants.cs`; the OrgConfig model
+  and DTO for the cleanup days; `RateLimitingExtensions.cs`;
+  `GHCAA.Tests/Services/NewsletterServiceTests.cs` (new);
+  `GHCAA.Tests/Controllers/NewsletterControllerTests.cs` (new); `docs/API_CONTRACT_REGISTRY.md`;
+  `docs/TODO.md`.
+- Do not touch: member mail preferences; `Seed/*.json`.
+- Steps:
+  1. Subscriber row: email, state (pending, confirmed, unsubscribed), time and source of each
+     consent step, unique email. One migration with its Designer file. -> check: migration lists.
+  2. `POST api/newsletter/subscribe` (anonymous, rate limited) sends a confirm mail and gives the
+     same answer for a known address. `GET api/newsletter/confirm?token=` and
+     `GET api/newsletter/unsubscribe?token=` use a protector with its own purpose. -> check:
+     tests.
+  3. Add subscribers as a batch audience, confirmed only, with an address that is also a member
+     mailed once. -> check: test.
+  4. Cleanup of pending addresses after the OrgConfig number of days (default 14) in the retention
+     sweep. -> check: test.
+  5. `code-reviewer` on the migration and `security-reviewer` on the routes. -> check: findings
+     fixed or recorded.
+- Contract: three anonymous newsletter routes (new); the batch preview counts subscribers. Record
+  in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `NewsletterServiceTests.cs` :: `Unconfirmed_GetsNoNewsletter`, `Confirmed_GetsNewsletter`,
+  `Unsubscribed_GetsNoNewsletter`, `SharedAddress_MailedOnce`, `Cleanup_DeletesOldPending`;
+  `NewsletterControllerTests.cs` :: `Subscribe_KnownAddress_SameAnswer`,
+  `Confirm_ChangedToken_Returns400`, `Subscribe_HasRateLimitPolicy`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Newsletter"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass on SQLite, the migration applies on PostgreSQL, both reviews are done, and
+  100.18 carries the API part as built.
+- Stop and ask if: the confirm mail needs a new template row (that is data, owner's call); the
+  OrgConfig settings have no place for the cleanup days.
 
 <a id="s126"></a>
-**S126 · 100.18 (web) · M** Footer sign-up field, confirm and unsubscribe pages, admin subscriber
-list with CSV and delete, and the audience on the batch screen with its count. The privacy page
-names the list. No portal or mobile change. Closes 100.18.
+**S126 · 100.18 (web) · M**
+- Goal: visitors sign up from the footer and land on confirm and unsubscribe pages; admins see the
+  list and can send to it.
+- Before you start: S125 done.
+- Read (only these): `GHCAA.Web/src/app/common/footer/footer.ts` and `footer.html`;
+  `admin-comm.ts` and `admin-comm.html`; `app.routes.ts`;
+  `GHCAA.Web/src/app/core/constants/app.constants.ts` (`API_ENDPOINTS`); the privacy page text key in site content.
+- Change (only these files): `footer.ts`; `footer.html`; `GHCAA.Web/src/app/common/footer/footer.spec.ts` (new);
+  `GHCAA.Web/src/app/public/newsletter/newsletter-confirm.ts` (new) with `.html`
+  and `newsletter-confirm.spec.ts` (new); `GHCAA.Web/src/app/admin/newsletter/admin-newsletter.ts` (new)
+  with `.html` and `admin-newsletter.spec.ts` (new); `app.routes.ts`; `app.constants.ts` (`API_ENDPOINTS`);
+  `admin-comm.ts`; `admin-comm.html`; `admin-comm.spec.ts`; `GHCAA.Web/src/app/core/services/nav.service.ts` (`ADMIN_NAV_SECTIONS`);
+  `docs/TODO.md`.
+- Do not touch: portal and mobile (members get mail by their own preferences); the site content
+  rows (the admin edits the privacy text; record the needed sentence on 100.18).
+- Steps:
+  1. Footer email field with the same message for any address. -> check: spec.
+  2. Confirm and unsubscribe pages reading the token from the query. -> check: spec for success
+     and a bad token.
+  3. Admin subscriber list with state, CSV through `app-export-buttons` and delete one. -> check:
+     spec.
+  4. "Newsletter subscribers" audience on the batch screen, counted in the preview. -> check: spec.
+- Contract: no API change.
+- Tests: `footer.spec.ts` :: `shows the same message after sign-up`; `newsletter-confirm.spec.ts`
+  :: `confirms`, `shows the error for a bad token`; `admin-newsletter.spec.ts` :: `lists and deletes`,
+  `exports CSV`; `admin-comm.spec.ts` :: `counts subscribers in the preview`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/common/footer src/app/public/newsletter src/app/admin/newsletter src/app/admin/comm`.
+- Done when: specs pass, the browser check is recorded, and 100.18 closes once the privacy text
+  names the list.
+- Stop and ask if: the admin nav needs a new permission for the subscriber list.
 
 <a id="s127"></a>
-**S127 · 100.19 (API) · L** After S11 (84.92, payment review on clients). First read which approval
-mechanism can hold a refund and record it on 100.19. Refund record with one migration (ledger row
-14b); amount limited to the remainder; the recorder cannot approve; only an approved refund changes
-the payment status and report totals; audit rows. No gateway call. Stop and ask if no existing
-approval mechanism fits; default, wait for S73 (92.2, approval policies).
+**S127 · 100.19 (API) · L**
+- Goal: an admin records a refund against a payment, a second person approves it, and only an
+  approved refund changes the payment and the reports.
+- Before you start: S11 (84.92) done. There is no general approval mechanism in the code
+  (`IElectionApprovalService` is election only; `PendingApprovalsController` only counts queues),
+  so record that on 100.19 and ask the owner: (a) a refund-only approve and reject route with the
+  recorder barred, counted in the pending summary (default), or (b) wait for S73 (92.2, approval
+  policies).
+- Read (only these): `GHCAA.Domain/Models/PaymentHistory.cs`; `GHCAA.Domain/Enums.cs`
+  (`PaymentStatus.Refunded`, `FinancialCategory.Refund`); `GHCAA.Infrastructure/Services/FinancialService.cs`;
+  `GHCAA.API/Controllers/FinancialsController.cs`; `PendingApprovalsController.cs`; the audit
+  writer used by `FinancialService`; the dues report query.
+- Change (only these files): `GHCAA.Domain/Models/Refund.cs` (new); `ApplicationDbContext.cs`;
+  the migration `AddRefunds` with its `.Designer.cs` and snapshot (ledger row 14b);
+  `GHCAA.Application/DTOs/RefundDto.cs` (new); `IFinancialService.cs`; `FinancialService.cs`;
+  `FinancialsController.cs`; `PendingApprovalsController.cs`; the dues report query file;
+  `GHCAA.Tests/Services/RefundTests.cs` (new); `GHCAA.Tests/Controllers/FinancialsControllerTests.cs`;
+  `docs/API_CONTRACT_REGISTRY.md`; `docs/TODO.md`.
+- Do not touch: payment gateways (no gateway call); `Seed/*.json`.
+- Steps:
+  1. Refund row: payment, amount, reason, date returned, recorded by, approved by, state
+     (requested, approved, rejected). One migration with its Designer file. -> check: migration
+     lists.
+  2. `POST api/financials/payments/{id}/refunds` refuses an amount over what is left. -> check:
+     test.
+  3. Approve and reject routes per the owner's answer; the recorder cannot approve. -> check:
+     test.
+  4. Only an approved refund sets `Refunded` (full) or reduces the net (part) and shows in the dues
+     report. Each step writes an audit row. -> check: tests.
+  5. `code-reviewer` on the migration. -> check: findings fixed or recorded.
+- Contract: refund record, approve and reject routes (new). Record in
+  `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `RefundTests.cs` :: `FullRefund_SetsRefunded`, `PartRefund_NetsAmount`,
+  `AmountOverRemainder_Refused`, `SelfApproval_Refused`, `Rejected_LeavesPaymentUnchanged`,
+  `EachStep_WritesAudit`, `DuesReport_NetsApprovedRefund`.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~Refund|FullyQualifiedName~FinancialsController"`;
+  `python scripts/ci-local.py --only contract`.
+- Done when: tests pass on SQLite, the migration applies on PostgreSQL, and 100.19 carries the API
+  part as built.
+- Stop and ask if: the owner picks (b); the treasurer role does not exist as a role or permission.
 
 <a id="s128"></a>
-**S128 · 100.19 (clients) · M** "Record refund" on the admin payment detail, the request in the
-treasurer's approval queue, refunds and net totals in the reports; the refund in the member's
-payment history on the portal and the app; approve or reject on mobile admin if its approval list
-exists. Closes 100.19.
+**S128 · 100.19 (clients) · M**
+- Goal: admins record and approve refunds on web, members see refunds in their history on web and
+  mobile, and mobile admin can approve from its approval queue.
+- Before you start: S127 done.
+- Read (only these): the admin payment review page S11 built; `GHCAA.Web/src/app/member/payments/payments.html`
+  and `.ts`; `GHCAA.Web/src/app/core/services/financial.service.ts`;
+  `GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart`;
+  `GHCAA.Mobile/lib/screens/admin/approval_queue_screen.dart`.
+- Change (only these files): the admin payment review page files; its spec; `payments.html`;
+  `payments.ts`; `GHCAA.Web/src/app/member/payments/payments.spec.ts`; `financial.service.ts`;
+  `financial.service.spec.ts`; `financial_portal_screen.dart`; `approval_queue_screen.dart`;
+  `GHCAA.Mobile/test/refund_display_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the API.
+- Steps:
+  1. "Record refund" on the admin payment detail, with amount and reason. -> check: spec.
+  2. The request shows in the approval queue with approve and reject; the recorder sees it without
+     the buttons. -> check: spec.
+  3. Member payment history on web and mobile shows the refund amount and date. -> check: spec and
+     widget test.
+  4. Mobile approval queue lists refund requests with approve and reject. -> check: widget test.
+- Contract: no API change.
+- Tests: admin payment page spec :: `records a refund`, `recorder cannot approve`;
+  `payments.spec.ts` :: `shows a refund`; `refund_display_test.dart` :: `history shows the refund`,
+  `queue approves a refund`.
+- Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/member/payments src/app/core/services/financial.service.spec.ts`;
+  `cd GHCAA.Mobile; flutter analyze; flutter test test/refund_display_test.dart --exclude-tags golden`.
+- Done when: tests pass, the browser check is recorded, and 100.19 closes.
+- Stop and ask if: S11 put the payment review somewhere this card does not name.
 
 <a id="s129"></a>
-**S129 · 100.20 · M** After S115 (100.5, public addresses that are shared). `autoVerify` web link
-filter with the host from the build environment; router mapping for news, event and job addresses;
-`/.well-known/assetlinks.json` under `GHCAA.Web/public/`. Stop and ask for the SHA-256 fingerprint
-of the release signing key; it is never guessed. The phone check is the owner's. Record the steps
-to repeat for the production domain.
+**S129 · 100.20 · M**
+- Goal: a tapped public news, event or job link opens the app on Android, and an unknown path opens
+  the browser.
+- Before you start: S115 done. Ask the owner for the SHA-256 fingerprint of the release signing key
+  and the package name; never guess either.
+- Read (only these): `GHCAA.Mobile/android/app/src/main/AndroidManifest.xml`;
+  `GHCAA.Mobile/android/app/build.gradle` (or `.kts`); `GHCAA.Mobile/lib/core/router/app_router.dart`;
+  `GHCAA.Mobile/test/router_test.dart`.
+- Change (only these files): `AndroidManifest.xml`; the Gradle build file (host placeholder from the
+  build environment); `app_router.dart`; `router_test.dart`;
+  `GHCAA.Web/public/.well-known/assetlinks.json` (new); `docs/TODO.md`.
+- Do not touch: iOS; the launcher intent filter.
+- Steps:
+  1. Add an `autoVerify` intent filter for `/news`, `/events` and `/jobs` paths with the host from a
+     manifest placeholder set by the build. -> check: the merged manifest holds the preprod host.
+  2. Map those paths to `/news/:id`, `/events/:id`, `/jobs/:id`; send any other path to the
+     browser. -> check: router test.
+  3. Write `assetlinks.json` with the owner's package name and fingerprint. -> check: served at
+     `/.well-known/assetlinks.json` locally.
+  4. Owner checks on a phone with the preprod build and `adb shell pm get-app-links`. Record the
+     steps to repeat for the production domain on 100.20. -> check: the note is there.
+- Contract: no API change.
+- Tests: `router_test.dart` :: `news link opens the post`, `unknown path goes to the browser`.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/router_test.dart --exclude-tags golden`.
+- Done when: the router test passes, the owner's phone check is recorded, and 100.20 closes for
+  preprod.
+- Stop and ask if: the web server does not serve dot-folders from `public/` (check before writing);
+  the owner has no release keystore yet.
 
 <a id="s130"></a>
-**S130 · 100.6 (mobile) · S** After S86 (84.69, site content on mobile) and S114. The registration
-consent line and the drawer open the privacy, terms and FAQ content. Widget test. Closes 100.6.
+**S130 · 100.6 (mobile) · S**
+- Goal: the mobile registration consent line and the drawer open the privacy, terms and FAQ
+  content.
+- Before you start: S86 (84.69, site content on mobile) and S114 done.
+- Read (only these): `GHCAA.Mobile/lib/screens/auth/register_screen.dart` (consent line near line
+  552); `GHCAA.Mobile/lib/core/widgets/app_drawer.dart`; the site content screen S86 added;
+  `app_router.dart`.
+- Change (only these files): `register_screen.dart`; `app_drawer.dart`;
+  `GHCAA.Mobile/test/policy_links_test.dart` (new); `docs/TODO.md`.
+- Do not touch: the S86 screen beyond passing it a key; the consent rule on step advance.
+- Steps:
+  1. Make "privacy" and "terms" in the consent line tappable, opening the S86 screen for the
+     matching key. -> check: widget test.
+  2. Add Privacy, Terms and FAQ to the drawer. -> check: widget test.
+  3. An empty page shows "Not published yet". -> check: widget test.
+- Contract: no API change.
+- Tests: `policy_links_test.dart` :: `consent line opens privacy`, `drawer opens FAQ`,
+  `empty page shows not published`.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/policy_links_test.dart --exclude-tags golden`.
+- Done when: tests pass and 100.6 closes, with the association's review of the text still noted.
+- Stop and ask if: S86 did not add a screen that takes a content key.
 
 ### Track H. Book, on the owner's word
 
-<a id="h00"></a>
-H00 keeps the list of book facts changed by feature sessions. It starts with: 92.5 role matrix
-(§8.4, the role matrix, and its figure), 73.5 matrix claim (§3.9 and §12.2), every repository count.
-Work Package 100 (added 2026-11-17) changes the tracker counts quoted in chapter 11.
+The book changes only here, and only when the owner names the card. Each card ends with
+`python docs/book/build/build.py --pdf --strict` clean, apart from the placeholders the card says
+stay open. Read `docs/book/README.md` (house style, IEEE rules, A4 figure rules) before the first
+chapter edit of a sitting; `.claude/rules/book.md` holds the same rules in short.
 
-<a id="h01"></a><a id="h02"></a><a id="h03"></a><a id="h04"></a><a id="h05"></a><a id="h06"></a><a id="h07"></a><a id="h08"></a><a id="h09"></a>
-H01 78.10 (coverage summary, static analysis, latency, ASVS walkthrough, each with its command and
-date). H02 63.8 and 84.35 (re-take every count `wbs.py` quotes). H03 84.96 (owner restates the DC-15
-claim) and 64.8. H04 64.9 and 67.3 (diagrams). H05 to H07 67.2 placeholders chapter by chapter, and
-67.4. Chapters 9, 10, 12 and 13 have had prose since 16 November 2026 (67.10), so H05 to H07 fill
-their numbers and figures and do not write them from headings. H08 67.7 prose joins and 67.5 page
-tightening, to the 80 to 90 pages the owner set on 16 November. H09 63.34, 63.18 (only if asked), 74.3. Each H
-card ends with `python docs/book/build/build.py --pdf --strict` clean.
+Names in these cards were checked against the tree on 2026-11-21. What the older text got wrong or
+left out:
+
+- The ASVS walkthrough is §8.11, OWASP ASVS conformance and residual risks, not §8.13 as 78.10 says.
+- The traceability matrix is the matrix table in §3.6, prioritisation and traceability. §3.9 is the Spec
+  Kit section; 73.5's "§3.9 claim" is the claim that the matrix is generated, now in §3.6.
+- The strict build on 2026-11-21 (`build.py --strict --no-folios`) reported six count drifts:
+  384 commits quoted in chapters 4, 7 and 11 against 408 in the tree, and 99 work packages quoted
+  in chapters 4 and 11 against 100. It also listed 45 open placeholders (chapter 7: 6, 9: 16,
+  10: 5, 11: 1, 12: 14, 13: 3) and 15 uncited references: 19, 20, 22, 31, 38, 39, 40, 42, 43,
+  44, 59, 60, 62, 63 and 68.
+- Chapters 7 and 9 to 13 hold no diagram. The outline lists 24 figures for chapter 11, 8 for
+  chapter 7, and 20, 10, 10 and 2 artefacts for chapters 9, 10, 12 and 13. All of them would not
+  fit the 80 to 90 pages the owner set on 2026-11-16, so H04 asks which to draw first.
+- No tool in the repo measures latency, complexity, coupling or maintainability index. Backend
+  coverage files exist under the test project's TestResults folder (Cobertura, from
+  `coverlet.collector`); the web client has `npm run test:coverage`.
+- `docs/RECOVERY_RUNBOOK.md` states that no database backup or restore is documented, which is what
+  chapter 10 says.
+
+**The H00 list.** Book facts changed by feature sessions. A card that changes a number or claim the
+book quotes adds one line here (rule 13 in section 2, the book rule) and leaves the book alone.
+
+- 92.5: the role matrix in §8.4, the authorisation model, with its role figure and role table, follows
+  the role changes S75 makes.
+- 73.5: once S82 lands, the claim that the traceability matrix is generated can be restored in §3.6,
+  the matrix table, and closed from evidence in §12.2, functional evaluation.
+- Meetings (spec 026): the book does not mention meetings; S41 adds them, so chapters 3, 6 and 7
+  each need one line where the modules are listed.
+- 99.8 (gate G-TOOLS): whatever the owner removes, the book must not name a removed tool.
+- Work Package 100 (added 2026-11-17) changes the tracker counts quoted in chapter 11; H02 takes them.
+- Every repository count the book quotes; H02 takes them.
+
+<a id="h00"></a>
+**H00 · book facts list · S**
+- Goal: every line of the H00 list above is true in the book, or is moved to the card that owns it.
+- Before you start: the owner names this card. The sessions that added a line are closed; check with
+  `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`.
+- Read (only these): the H00 list above; for each line, the section it names in
+  `docs/book/03-requirements.md`, `docs/book/06-architecture.md`, `docs/book/07-implementation.md`,
+  `docs/book/08-security.md` or `docs/book/12-results.md`; the closing tracker entry in
+  `docs/TODO.md` or `docs/TODO_ARCHIVE.md`.
+- Change (only these files): the chapter files named by the list lines; `docs/DOCUMENTATION_BOOK_OUTLINE.md`
+  (only when a section or artefact changes); `docs/TODO.md`; `docs/MASTER_EXECUTION_PLAN.md`.
+- Do not touch: repository counts (H02); placeholders (H05 to H07); the DC-15 paragraph (H03).
+- Steps:
+  1. For each line, find the closing evidence in the tracker. A line whose session is still open
+     stays on the list. -> check: each line is marked "ready" or "waits on Snn" in a note.
+  2. Edit the book for each ready line, quoting only what the evidence shows. -> check: the
+     sentence names the same roles, routes or modules as the closing entry.
+  3. Remove the lines done from the H00 list. -> check: the list holds only waiting lines.
+  4. Build. -> check: `build.py --pdf --strict` shows no new finding beyond the count drifts and
+     placeholders listed above.
+- Contract: none.
+- Tests: none; the strict build and `python docs/book/build/prose.py refs` are the checks.
+- Run: `python docs/book/build/prose.py refs </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: the list holds only lines whose session is open, and each book edit names its tracker
+  item in a tracker note.
+- Stop and ask if: a line's evidence conflicts with what the chapter argues (default: leave the
+  chapter, note the conflict on the item, ask).
+
+<a id="h01"></a>
+**H01 · 78.10 · M**
+- Goal: one measurement record holds coverage, static analysis, latency and the ASVS walkthrough,
+  each with its command, date and result, so H05 to H07 can quote it.
+- Before you start: no card dependency. `dotnet --version` and `python --version` work; free space on
+  C: is over 5 GB.
+- Read (only these): `docs/book/04-methodology.md` §4.5.3, the performance evaluation (the latency
+  method); `docs/book/08-security.md` §8.11 and its ASVS mapping table;
+  `docs/book/09-verification.md` lines with `*[To be measured`; `GHCAA.Web/vitest.config.ts`;
+  `GHCAA.Tests/GHCAA.Tests.csproj`; `docs/RENDER_DEPLOYMENT.md` (the preprod host).
+- Change (only these files): `docs/book/measurements.md` (new); `scripts/measure_latency.py` (new);
+  `scripts/test_measure_latency.py` (new); `docs/TODO.md`.
+- Do not touch: chapter files (H05 to H07 quote the record); project files and package lists (a
+  static analysis tool runs outside the repo).
+- Steps:
+  1. Coverage: run `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --collect:"XPlat Code Coverage" -o GHCAA.Tests/bin/alt-out`
+     and `cd GHCAA.Web; npm run test:coverage`. Record line and branch coverage per layer.
+     -> check: the record has both numbers, the command and the date.
+  2. Static analysis: ask the owner for the tool (default below). Run it outside the repo against
+     the four backend projects; record cyclomatic complexity per method (distribution and top ten),
+     class coupling, and maintainability index per project. A metric the tool does not give is
+     written "not measured" with the reason. -> check: each chapter 9 "To be measured" line has a
+     value or a reason.
+  3. Write `scripts/measure_latency.py`: GET each listed public endpoint N times in sequence, print
+     the 95th percentile per endpoint. Endpoints, N and host are arguments; no secrets. -> check:
+     `python -m unittest scripts/test_measure_latency.py` passes.
+  4. Run it against preprod with the endpoints named by §4.5.3 (directory and event listings). Wake
+     the host first and drop the first request. -> check: the record has p95 per endpoint, N, host
+     tier and date.
+  5. ASVS: walk each ASVS 4.0.3 control in the §8.11 mapping table and mark met, not met or
+     not applicable, with the file or test that shows it. -> check: counts by chapter add up to the rows in that table.
+  6. Note on 78.10 what each figure is and where it lives. -> check: tracker entry names the record.
+- Contract: none.
+- Tests: `scripts/test_measure_latency.py` :: `test_p95_of_known_list`, `test_single_sample`,
+  `test_empty_list_raises`, `test_rejects_non_http_host`.
+- Run: `python -m unittest scripts/test_measure_latency.py </dev/null`; then the commands in steps 1 to 4.
+- Done when: the record holds all four sets with commands and dates, and 78.10 is DONE with the
+  record as evidence. Test totals stay a test result, not a claim about real use.
+- Stop and ask if: the static analysis tool needs a package added to a project (default: run
+  `Microsoft.CodeAnalysis.Metrics` from a scratch copy outside the repo, or `lizard` from a scratch
+  virtual environment); preprod is down or the host tier changed (default: record what was
+  measured and say the run is partial).
+
+<a id="h02"></a>
+**H02 · 63.8, 84.35 · S**
+- Goal: every repository count the book quotes matches the tree on one stated date, and the strict
+  build reports no count drift.
+- Before you start: H01 closed (test totals come from the same day's runs). Run
+  `python docs/book/build/build.py --strict --no-folios </dev/null` and note the drift lines.
+- Read (only these): `docs/book/README.md` under "Keeping the numbers true"; `docs/PROJECT_MAP.md`
+  (the count commands); the output of `python docs/book/build/wbs.py --markdown </dev/null`; the
+  Chapter 11 block of `docs/DOCUMENTATION_BOOK_OUTLINE.md`.
+- Change (only these files): `docs/book/04-methodology.md`; `docs/book/06-architecture.md`;
+  `docs/book/07-implementation.md`; `docs/book/11-project-management.md`; `docs/book/README.md`;
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md`; `docs/book/build/wbs.py` (only the component-to-area map);
+  `docs/TODO.md`.
+- Do not touch: chapter 5's analysis-time count of seventy-two `DbSet` properties (a figure for that
+  stage); placeholders.
+- Steps:
+  1. Run `python docs/book/build/wbs.py --check </dev/null`; map any unmapped area. -> check: exit 0.
+  2. Re-take each README count with its command (`DbSet`, configurations, enumerations, endpoint
+     attributes, controllers, interfaces, services, migrations, `styles.scss` lines) and the test
+     totals from `python scripts/ci-local.py`. -> check: the README paragraph carries the new
+     figures and today's date.
+  3. Run `wbs.py --markdown` once and copy its figures into chapter 11 and the outline's Chapter 11
+     block (work packages, tasks, reactive share, commit-days, critical path, line counts, effort).
+     -> check: chapter 11 and the outline quote the same run date.
+  4. Fix the commit and work package counts in chapters 4, 7 and 11, and chapter 6's set from step 2.
+     -> check: the strict build lists no "repository counts" line.
+- Contract: none.
+- Tests: `python -m unittest discover -s docs/book/build -p test_wbs.py` stays green.
+- Run: `python docs/book/build/wbs.py --check </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: no count drift; 84.35 DONE with the build line as evidence; 63.8 stays TODO with a note
+  of today's re-take, since it is re-taken again just before submission.
+- Stop and ask if: a count moves enough to change an argument in the text (default: change the
+  number only and ask about the sentence).
+
+<a id="h03"></a>
+**H03 · 84.96, 64.8 · S**
+- Goal: chapter 3's DC-15 paragraph agrees with §8.8 and §12.6, and §4.7 carries the 1 to 5 impact
+  scale and RE = P × C in the §4.7 risk table.
+- Before you start: no card dependency. `grep -n "does nothing else" docs/book/03-requirements.md`
+  shows the paragraph.
+- Read (only these): `docs/book/03-requirements.md` (the DC-15 row and the Authority-class paragraph
+  after it); `docs/book/08-security.md` §8.8, governance integrity; `docs/book/12-results.md` §12.6,
+  where the research questions are answered; `docs/book/04-methodology.md` §4.7 and its risk table;
+  `docs/book/11-project-management.md` §11.9, the project risk register (RE = P × C already used).
+- Change (only these files): `docs/book/03-requirements.md`; `docs/book/04-methodology.md`;
+  `docs/TODO.md`.
+- Do not touch: the DC-15 table row itself, which already says the conduct of a ballot rests with
+  the Election Commission; §11.9.
+- Steps:
+  1. Ask the owner how the "does nothing else" claim is restated (84.96 says the owner decides).
+     Offer the default: the platform runs the ballot mechanics the Commission directs; authority
+     over conduct and result stays with the Commission. -> check: the answer is noted on 84.96.
+  2. Rewrite only that paragraph to the answer. -> check: the paragraph and §8.8 name the same
+     boundary; `prose.py refs` reports no broken reference.
+  3. Add an impact column on the 1 to 5 scale and an RE column to the §4.7 risk table, using the 1 to 5
+     values and the method of §11.9. -> check: each row's RE equals P × C.
+  4. Build. -> check: strict build clean of new findings.
+- Contract: none.
+- Tests: none; strict build and `prose.py refs`.
+- Run: `python docs/book/build/prose.py refs </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: 84.96 DONE with the owner's wording date; 64.8 DONE with the §4.7 risk table as evidence.
+- Stop and ask if: a §4.7 risk has no probability in §11.9 to reuse (default: ask for it; do
+  not invent one).
+
+<a id="h04"></a>
+**H04 · 64.9, 67.3 · M**
+- Goal: the figure list for chapters 7 and 9 to 13 is cut to what fits the page target, and the
+  chapter 11 figures that survive the cut are drawn and print at 7pt or larger.
+- Before you start: no card dependency. `python docs/book/build/build.py --audit </dev/null` runs.
+- Read (only these): the figure lists for chapters 7 and 9 to 13 in
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md` and its page budget block; `docs/book/README.md` (A4 figure
+  rules and the fix order for a diagram that will not print); `docs/book/11-project-management.md`;
+  the output of `python docs/book/build/wbs.py --markdown </dev/null`.
+- Change (only these files): `docs/book/11-project-management.md`;
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md`; `docs/TODO.md`.
+- Do not touch: chapters 7, 9, 10, 12 and 13 (their figures are drawn in H05 to H07 from the list
+  this card fixes); diagrams in chapters 1 to 6 and 8.
+- Steps:
+  1. Count the figures and tables listed for chapters 7 and 9 to 13 and measure current pages with
+     `python docs/book/build/pages.py </dev/null`. Ask the owner which to keep, with the default
+     below. -> check: the outline lists only the kept artefacts and names the reason for each cut.
+  2. Draw each kept chapter 11 diagram as mermaid, left to right, one-line box labels, from the
+     `wbs.py` output. -> check: `build.py --audit` reports none of them as too small.
+  3. Name every new figure in the body text and run `python docs/book/build/renumber.py --apply`.
+     -> check: strict build reports no figure the body never names.
+- Contract: none.
+- Tests: none; `build.py --audit` and the strict build.
+- Run: `python docs/book/build/build.py --audit </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: 64.9 DONE; 67.3 PARTIAL with the chapters still to draw named (H05 to H07), or DONE if
+  the owner cut every other figure.
+- Stop and ask if: always at step 1. Default: keep the seventeen per-component diagrams (owner,
+  2026-09-27) and the critical-path graph, and set the rest as tables or drop them; then any
+  diagram that will not print after the README fix order (default: set it as a table).
+
+<a id="h05"></a>
+**H05 · 67.2 (chapters 7, 10) · M**
+- Goal: chapters 7 and 10 hold no open placeholder and carry the figures H04 kept for them.
+- Before you start: H01 and H04 closed. `grep -c '\*\[' docs/book/07-implementation.md docs/book/10-deployment.md`
+  prints 6 and 5.
+- Read (only these): `docs/book/07-implementation.md` (the dependency table);
+  `docs/book/10-deployment.md`; `docs/book/measurements.md`; `docs/RECOVERY_RUNBOOK.md`;
+  `docs/RENDER_DEPLOYMENT.md`; the chapter 7 and 10 lists in `docs/DOCUMENTATION_BOOK_OUTLINE.md`.
+- Change (only these files): `docs/book/07-implementation.md`; `docs/book/10-deployment.md`;
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md` (only if a figure is cut); `docs/TODO.md`.
+- Do not touch: the backup statement in chapter 10 unless the owner gives the Neon plan's terms;
+  library versions in the dependency table (they come from the project files).
+- Steps:
+  1. Ask the owner, in one question set, for the six "alternative considered" answers in the dependency table
+     and the chapter 10 facts: production host, Neon backup terms with the date checked, monthly
+     costs, maintenance hours. Default for a missing answer: "none recorded". -> check: each answer
+     is noted on 67.2 with its date.
+  2. Replace each placeholder with the answer or the H01 figure. -> check: the grep prints 0 for both.
+  3. Draw the kept figures for both chapters and run `renumber.py --apply`. -> check: `build.py --audit`
+     passes for them.
+  4. Build. -> check: strict build shows no placeholder in these files.
+- Contract: none.
+- Tests: none; strict build.
+- Run: `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: both chapters have no placeholder; 67.2 stays PARTIAL with chapters 9, 11, 12 and 13 left.
+- Stop and ask if: the owner's backup answer contradicts the runbook (default: the runbook is
+  updated in a separate tracker item and the book quotes the owner's checked fact with its date).
+
+<a id="h06"></a>
+**H06 · 67.2 (chapter 9) · M**
+- Goal: chapter 9's placeholders that do not need participants are filled from tests and the H01
+  record, and its kept figures are drawn.
+- Before you start: H05 closed. `grep -c '\*\[' docs/book/09-verification.md` prints 16.
+- Read (only these): `docs/book/09-verification.md`; `docs/book/measurements.md`;
+  `docs/book/05-system-analysis.md` §5.5, the rules catalogue; test names found by
+  `grep -rn "Category(\"FR-" GHCAA.Tests --include=*.cs`; `docs/book/instruments/README.md`.
+- Change (only these files): `docs/book/09-verification.md`; `docs/DOCUMENTATION_BOOK_OUTLINE.md`
+  (only if a figure is cut); `docs/TODO.md`.
+- Do not touch: the usability and expert review placeholders (method detail and participants);
+  they wait on gate G-EVAL (78.9) and stay open.
+- Steps:
+  1. Fill the boundary tests, decision table, state-transition counts and constitutional-rule
+     counts from test files, naming each test by file and name. -> check: every named test exists.
+  2. Fill metrics and coverage from the H01 record. -> check: each value matches the record.
+  3. For the exploratory charters, ask the owner whether to reconstruct a list from the tracker
+     (default: say they were not recorded as charters, plainly). -> check: the paragraph says which.
+  4. Draw the kept figures and run `renumber.py --apply`. -> check: `build.py --audit` passes.
+- Contract: none.
+- Tests: none; strict build.
+- Run: `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: only the G-EVAL placeholders remain in chapter 9, each naming the gate; 67.2 stays PARTIAL.
+- Stop and ask if: a counted figure needs a script that does not exist (default: count by `grep`
+  and record the command in the record).
+
+<a id="h07"></a>
+**H07 · 67.2 (chapters 11 to 13), 67.4, 67.10 · M**
+- Goal: chapters 11 to 13 hold no placeholder except those waiting on G-EVAL, every reference in
+  `docs/book/99-references.md` is cited or removed with a reason, and 67.10's numbers pass is done.
+- Before you start: H06 closed. The strict build lists 15 uncited references.
+- Read (only these): `docs/book/11-project-management.md` (the hours-per-function-point placeholder);
+  `docs/book/12-results.md`; `docs/book/13-conclusion.md`; `docs/book/measurements.md`;
+  `docs/book/99-references.md`; the chapter 12 and 13 lists in `docs/DOCUMENTATION_BOOK_OUTLINE.md`;
+  the open items in `docs/TODO.md` (for §13's ranked list).
+- Change (only these files): `docs/book/11-project-management.md`; `docs/book/12-results.md`;
+  `docs/book/13-conclusion.md`; `docs/book/99-references.md`; `docs/DOCUMENTATION_BOOK_OUTLINE.md`;
+  `docs/TODO.md`.
+- Do not touch: chapter 2's literature text; references cited elsewhere.
+- Steps:
+  1. Ask the owner for the hours-per-function-point source and the ranked open items for §13
+     (default: no rate; the paragraph says the cost is not converted, and the list is the five P1
+     items with the oldest dates). -> check: answers noted on 67.2.
+  2. Fill §12.2 to §12.8 from H01, H02 and the H00 traceability line; answer each research question
+     in §12.6 from those results only. -> check: no result in chapter 12 lacks a source in the
+     record or an earlier chapter.
+  3. Fill chapter 13's costs and list. -> check: grep prints no placeholder outside G-EVAL ones.
+  4. For each uncited reference, cite it where its chapter uses it, or remove it and write the
+     reason on 67.4. -> check: the strict build lists no uncited reference.
+  5. Draw the kept chapter 12 and 13 figures; `renumber.py --apply`. -> check: `build.py --audit` passes.
+- Contract: none.
+- Tests: none; strict build and `prose.py refs`.
+- Run: `python docs/book/build/prose.py refs </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: 67.4 DONE; 67.10 DONE; 67.2 DONE if no G-EVAL placeholder is left, else PARTIAL
+  naming the gate.
+- Stop and ask if: a research question cannot be answered from the evidence (default: say so in
+  §12.6 and in the threats to validity, §12.9).
+
+<a id="h08"></a>
+**H08 · 67.7, 67.5 · M**
+- Goal: the prose reads as one text at each merged heading, and the book prints in 80 to 90 pages
+  from chapter 1 to the references.
+- Before you start: H07 closed. `python docs/book/build/pages.py </dev/null` gives the page count.
+- Read (only these): the 24 merged headings named in 67.7; the page budget block of
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md`; the output of `python docs/book/build/prose.py prose NN`
+  for each chapter.
+- Change (only these files): `docs/book/01-introduction.md` to `docs/book/13-conclusion.md`;
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md`; `docs/TODO.md`.
+- Do not touch: figures and tables (cut only with the owner's yes); numbers taken in H01 and H02.
+- Steps:
+  1. At each merged heading, join the two parts into one passage. -> check: no paragraph repeats
+     its neighbour; `prose.py refs` clean.
+  2. Tighten chapter by chapter, worst over budget first. -> check: `pages.py` after each chapter.
+  3. List each cut by name and ask the owner before making it (owner rule, 2026-09-27). -> check:
+     each cut is noted on 67.5 with the answer.
+- Contract: none.
+- Tests: none; `pages.py` and the strict build.
+- Run: `python docs/book/build/pages.py </dev/null`; `python docs/book/build/build.py --pdf --strict </dev/null`.
+- Done when: 80 to 90 pages; 67.7 and 67.5 DONE.
+- Stop and ask if: 90 pages cannot be reached without a cut (default: present the cut list and wait).
+
+<a id="h09"></a>
+**H09 · 63.34, 63.18, 74.3 · S**
+- Goal: every chapter fits its page budget or the budget is changed with a reason; 63.18 is decided;
+  wbs markers are backfilled only where real dates differ from commit dates.
+- Before you start: H08 closed.
+- Read (only these): the page budget block of `docs/DOCUMENTATION_BOOK_OUTLINE.md`; the output of
+  `python docs/book/build/pages.py </dev/null`; the U1 to U5 rows of chapter 11;
+  `docs/book/build/wbs.py` (how a `wbs:` marker is read).
+- Change (only these files): `docs/DOCUMENTATION_BOOK_OUTLINE.md`; `docs/TODO.md`;
+  `docs/book/11-project-management.md` (only if step 3 moves a figure).
+- Do not touch: `docs/book/build/build.py` and its print templates (63.18 needs a PDF library; only
+  if the owner asks).
+- Steps:
+  1. Compare pages per chapter to budget; change any budget that no longer fits, with the reason.
+     -> check: `pages.py` shows no chapter over budget.
+  2. Ask the owner about 63.18 (default: leave it open; it is worth doing only if a supervisor
+     asks). -> check: answer noted on 63.18.
+  3. Add `wbs:` markers for U1 to U5 areas whose real dates differ from commit dates, then re-run
+     `wbs.py --markdown`; refresh chapter 11 and the outline's Chapter 11 block if a figure moved.
+     -> check: `wbs.py --check` exit 0.
+- Contract: none.
+- Tests: `python -m unittest discover -s docs/book/build -p test_wbs.py`.
+- Run: `python docs/book/build/wbs.py --check </dev/null`; `python docs/book/build/build.py --pdf --strict --no-placeholders </dev/null`.
+- Done when: 63.34 and 74.3 DONE; 63.18 per the owner; the strict build passes with
+  `--no-placeholders` unless a G-EVAL placeholder is still open.
+- Stop and ask if: a backfilled date moves the critical path (default: record it and ask before
+  changing chapter 11's argument).
 
 ## 5. Owner gate cards
 
@@ -2792,17 +5684,17 @@ One at a time, in this order. Each takes a timestamp later than the row above.
 | 6 | `ElectionF2` | S24 | |
 | 7 | `AddMeetings` | S34 | |
 | 8 | `AddMemberLocation` | S43 | |
-| 9 | `AddCommitteePositionsAndTerms` | S45 | |
+| 9 | `AddEndReasonsAndElectionKind` | S45 | |
 | 10 | `AddUserContactEmail` | S62 | |
 | 11 | `AddMentorOptIn` | S65 | |
 | 12 | `AddEventFeedback` | S67 | |
 | 13 | `SeedForumCategories` | S69 | |
 | 14 | approvals table, only if chosen in S72 | S73 | |
-| 14a | `SeedPolicySiteContent` (three site content keys, data step) | S114 | Written 2026-11-17 with `PolicyContentSeeder` for databases built without migrations; not yet run on PostgreSQL |
+| 14a | `SeedPolicySiteContent` (three site content keys, data step) | S114 (run only) | Written 2026-11-17 for 100.6 with `PolicyContentSeeder` for databases built without migrations; S114 runs it on PostgreSQL |
 | 14b | `AddRefunds` | S127 | |
 | 15 | `AddSavedReports` | S95 | |
-| 16, 17 | cohorts and reunions; memorial | S99, S101 | |
-| 18 | `AddArticleIsPublic` | S123 | |
+| 16, 17 | AddBatchCohortsAndReunions; AddMemorialEntries | S99, S101 | |
+| 18 | data step on `NewsPost.MembersOnly`, only if the owner says yes (no new column) | S123 | |
 | 19 | `AddNewsletterSubscribers` | S125 | |
 
 ## 8. Plan review, 2026-11-13
@@ -3082,6 +5974,11 @@ brief asks for it.
 | 2026-11-17 | 100.15 (closed), 100.16 to 100.20 (added) | Owner answered D1 to D8 of spec 029 in the question dialog; answers written on 100.3, 100.5, 100.6 and 100.15; five build items opened; Work Package 100 rows moved into phases B, F and G by dependency on the owner's word; ledger rows 2a, 14a, 14b, 18, 19 added; `backlog_inventory.py --check` clean | `docs/TODO.md`, `docs/MASTER_EXECUTION_PLAN.md`, `docs/specs/029-public-admin-member-experience-gaps/` |
 | 2026-11-17 | 100.6 (web and API built, item open) | Privacy, terms and FAQ pages built ahead of S114 on the owner's word: migration 14a and a startup seeder that runs only while the policy group is empty, `/privacy`, `/terms` and `/faq` on one page component, footer and consent links. Drafted text is not legal advice; admins edit or hide it in Site Content. Backend and web specs pass; mobile part stays in S130 | `GHCAA.Infrastructure/Data/`, `GHCAA.Web/src/app/public/policy-page/`, `docs/API_CONTRACT_REGISTRY.md`, this file, `docs/TODO.md`, spec 029 tasks |
 | 2026-11-17 | 8.9 (added) | Preprod CI mobile analyze failed on 144 `material.dart` deprecation infos from a newer stable Flutter. All seven Flutter setup steps now pin the local Flutter version; the import migration is S131 in phase G | `.github/workflows/`, `docs/TODO.md`, this file |
+| 2026-11-20 | 99.10 (phase E) | Phase E cards S45 to S51 in the eleven-part form, names checked against the code. Migration 9 renamed `AddEndReasonsAndElectionKind`. `backlog_inventory.py --check`: 0 problems; `test_backlog_inventory.py`: 34 of 34 OK | this file, `docs/TODO.md` |
+| 2026-11-20 | 99.10 (phase F) | Phase F cards S52 to S83 in the eleven-part form, names checked against the code; S70, S71, S74 and S75 are their own cards. Old card errors fixed: S52 points at spec 002, S58 reuses `MembershipHistory`, S59 and S61 ask the owner first, S69 reuses the pin and lock fields, S79 drops two files with no reader. `backlog_inventory.py --check`: 0 problems; `test_backlog_inventory.py`: 34 of 34 OK | this file, `docs/TODO.md` |
+| 2026-11-20 | 99.10 (phase G) | Phase G cards S84 to S97, S99 to S109 and S131 in the eleven-part form, names checked against the code; S97 is its own card. Old card errors fixed: S84 adds the missing `Constants.Uploads` and a per-user limiter, S86 renders plain text on mobile, S90 reuses the `AppliedDate` already sent, S93 reads `FileStorageOptions`, S103 gains its mobile screen, S104 drops part g (already done). Migration ledger rows 16 and 17 named. Card notes on nine tracker entries. `backlog_inventory.py --check`: 0 problems; `test_backlog_inventory.py`: 34 of 34 OK | this file, `docs/TODO.md` |
+| 2026-11-20 | 99.10 (phase I) | Phase I cards S110 to S130 in the eleven-part form, names checked against the code; S122 stays a done note. Old card errors fixed: S111 and S113 use the real `api/admin/comm` routes and put unsubscribe at `api/unsubscribe`, S113 drops the mobile batch screen that does not exist, S117 keeps the existing Approved-only check-in rule, S118 types the anonymous stats object, S121 records the missing payment search route, S123 uses the existing `NewsPost.MembersOnly` flag instead of a new column (ledger row 18 changed), S124 extends the `ArticleCategory` enum. Spec 029 plan and tasks corrected to match. Check 0 problems; 34 of 34 script tests OK. No code change |
+| 2026-11-21 | 99.10 (track H, closed) | Track H cards H00 to H09 in the eleven-part form, names checked against the book and tree. The H00 list moved into the track intro. Old text corrected: the ASVS walkthrough is §8.11 (78.10 said §8.13); the traceability claim sits in §3.6 (73.5 said §3.9). H01 gets a measurement record and a latency script; H04 asks the owner which figures fit 80 to 90 pages before any is drawn. Refreshing the chapter 11 tracker figures moved to H02, since the book changes only in track H. Check 0 problems; 34 of 34 script tests OK. No code or book change | this file, `docs/TODO.md` |
 
 <!-- backlog-check: on -->
 

@@ -5,6 +5,9 @@
 > The phase C cards (S20 to S33) were checked against the code on 2026-11-15. A card wins where a
 > name here differs; these names are not in the code: `MembershipRules`, `CheckConflictAsync`,
 > `ElectionApprovalKind`, `SetKey`, `DestroyKey`, `ER29_PrintsTheAuditChainHead`.
+> Committee positions were built on 2026-10-21 as the `EcPosition` table (migration
+> `AddEcPositions`), so N1 below adds only end reasons and the election kind, in migration
+> `AddEndReasonsAndElectionKind` (card S45, 2026-11-20).
 
 Written 2026-10-09 on Opus. It covers every open WP37 item that code can close, split into six
 sessions (S1 to S6). Each session runs on Sonnet from a cleared context and should need no
@@ -569,7 +572,7 @@ These go into 37.14g and are fixed in F1. 37.12x did not fail when its spec ran 
 | 37.16e, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
 | 37.12x | One full web run in F1. If it passes, close as not reproducible. If it fails, fix the test-order leak. |
 | 37.12y | Voters are told through the existing notification service on the channels they allow, and the board shows the new closing time. Email does not leave preprod (Render blocks SMTP); check `EmailLogs` there. |
-| Schema | One migration for every new election-rule column and table (F2). The second round adds two more: positions and terms (N1) and election content (F11). Migrations land one at a time, in the order under Sessions. |
+| Schema | One migration for every new election-rule column and table (F2). The second round adds two more: end reasons and election kind (N1) and election content (F11). Migrations land one at a time, in the order under Sessions. |
 | 37.12n | The F7 mapping comes first. The owner approves it before any form code. ER-02 and ER-28 are filled in F2 because the recount rules need them. |
 | 37.4, 37.5, 37.9, 37.10 | Mobile gets the member views only. Admin moderation and curation stay on the web. |
 | 37.7 | The same keys on web and mobile. Bengali strings are drafted in the session and listed as unreviewed until a Bengali speaker signs them off. Admin stays English on both clients. |
@@ -579,7 +582,7 @@ Second round, the open election items outside WP37 and the GHC cleanup:
 
 | Item | Decision |
 |---|---|
-| 95.2, 37.1h-1 | Committee positions are rows in a `CommitteePosition` table per organisation, not an enum. Each organisation sets its own number and names of positions. The GHC profile seeds today's 15 under the same ids, so existing rows map one to one; the default profile seeds a short generic set. `ECMember.Position` and `ElectionSeat.Position` become foreign keys. 37.1h-1 closes through 95.2. |
+| 95.2, 37.1h-1 | Committee positions are rows per organisation, not an enum. Built 2026-10-21 as the `EcPosition` table (migration `AddEcPositions`), ids 1 to 15 equal to the old enum values; `ECMember.Position` and `ElectionSeat.Position` are foreign keys. 37.1h-1 closes through 95.2. |
 | 95.4, 95.5, 95.12 | Declare never ends a current holder. A by-election takes vacant seats only and refuses a held one. A term ends in two ways: by date, when a daily job ends it with reason TermEnded once the period's `ECPeriod.EndDate` has passed, or early, when an admin ends it with a reason at any time. Whether the job runs, and the default term length used for a new period's end date, are organisation settings. The end reasons are rows per organisation like the positions; TermEnded and Died are system rows the code relies on and cannot be removed. One general election and one by-election can be live in the same period. |
 | 84.42, 84.16 | Mobile keeps its create-election call. 84.42 finishes with the device check. 84.16 closes by recording in spec 011 that the web runs every admin step and mobile creates a draft, votes and views. An official's own steps (accept, declare a conflict, confirm a key copy) are on both clients; every step that changes the election's state is web only. |
 | 42.1 to 42.5 | Built as F11: the handbook pages and the form wording become admin-editable content, seeded from the profile, and the public pages read from it. The GHC wording moves into `profiles/ghc/` in F11, so 82.59 in N9 only checks nothing is left. |
@@ -603,7 +606,7 @@ Only kind 2 adds work. The review report names the kind next to each finding.
 ### What makes it faster
 
 1. One migration for the election rules (F2), so the PostgreSQL dry run of the chain and the
-   migration review happen once. N1 (positions and terms) and F11 (election content) add one each.
+   migration review happen once. N1 (end reasons and election kind) and F11 (election content) add one each.
 2. Backend first for every new rule (F2 to F4), then web and mobile as two sessions in separate
    worktrees at the same time (F5, F6). The clients do not touch the same files.
 3. Small fixes with no schema change go first in one session (F1).
@@ -625,7 +628,7 @@ Only kind 2 adds work. The review report names the kind next to each finding.
 | F6 | Mobile screens for F2 to F4 | Sonnet | none | M | F4, runs with F5 |
 | F7 | 37.13e protocol, 37.13f hosting facts, 37.12t and 37.12n inventory for approval, 84.31, 84.16 | Sonnet | none | M | none |
 | F8 | 37.12v reference server on PostgreSQL in Docker | Sonnet | none | S | Docker on |
-| N1 | 95.2 committee positions (closes 37.1h-1), schema for 95.4, 95.5 and 95.12 | Opus for the schema, Sonnet for services | `AddCommitteePositionsAndTerms` | L | F4 |
+| N1 | 95.2 end reasons and election kind (closes 37.1h-1), schema for 95.4, 95.5 and 95.12 | Opus for the schema, Sonnet for services | `AddEndReasonsAndElectionKind` | L | F4 |
 | F10 | 95.4 vacant seats, 95.5 by-election, 95.12 term ending | Sonnet | none | M | N1 |
 | F11 | 42.1 to 42.5 admin-editable election content | Sonnet | `AddElectionContent` | M | F7 table approved, N1 merged |
 | F9 | Election close-out: tracker, outline figures, `wbs.py`, full verify, memory | Sonnet | none | S | F1 to F8, F10, F11 |
@@ -640,7 +643,7 @@ Only kind 2 adds work. The review report names the kind next to each finding.
 | N10 | 84.36 for the rest of the app | Sonnet | none | S | F1 |
 | N8 | 37.11 gate: full suites, non-empty database run of every N migration, docs list | Sonnet | none | S | N0 to N7, N9 to N11 |
 
-N1 moved forward because F10 needs its positions, end reasons and election kind. N2, N5, N7 and
+N1 moved forward because F10 needs its end reasons and election kind. N2, N5, N7 and
 N10 do not depend on the election track and can start any time a session is free.
 
 Migrations land in this order: F2, N1, F11, then N4, N5 and N7 in whichever order they run. A
@@ -648,8 +651,7 @@ session that adds a migration starts only after the previous one is merged, take
 timestamp, and builds from that model snapshot. Two migration sessions never run at the same
 time, even in separate worktrees, because both would rewrite `ApplicationDbContextModelSnapshot`.
 
-N1 waits for F4 because `ElectionService.cs` still uses the `ECPosition` enum and F3 and F4 edit
-the same file. N0 changes no code, so it goes first: 62.31 is P0 and should not wait behind N1
+N1 waits for F4 because N1 and F3 and F4 all edit `ElectionService.cs`. N0 changes no code, so it goes first: 62.31 is P0 and should not wait behind N1
 and F11. F2 waits for 34.D17, 34.D18 and 34.D19, the three startup repairs on the same
 migration chain, to be confirmed on preprod.
 
@@ -849,18 +851,13 @@ from 37.14t already has the columns these need. `code-reviewer` checks 37.16j an
 
 Each follows its tracker item as written, with these additions:
 
-- N1 (95.2, closes 37.1h-1): `CommitteePosition` table (organisation, key, label, sort order,
-  seats, active). The GHC profile seeds today's 15 under the enum's ids; the default profile seeds
-  a short generic set. `ECMember.Position` and `ElectionSeat.Position` become foreign keys, and
-  `ECPosition` (`GHCAA.Domain/Enums.cs:8`), the list in `lookup.service.ts` and `ParsePosition`
-  (`AdminElectionsController.cs:182`) go. Admin can add, rename, reorder and retire positions;
-  both clients read the list from the API. The same migration does three things for F10:
-  - an end-reason table built the same way, seeded with today's five `VacancyReason` values
-    under the same ids; `ECMember.EndReason` becomes a foreign key and the enum goes (38 uses
-    today);
+- N1 (95.2, closes 37.1h-1): positions are already the `EcPosition` table (see the status note at
+  the top). Migration `AddEndReasonsAndElectionKind` does three things for F10:
+  - an `EcEndReason` table built like `EcPosition`, seeded with today's five `VacancyReason`
+    values under the same ids; `ECMember.EndReason` becomes a foreign key and the enum goes;
   - `Election.Kind`, default General;
   - rebuilds `IX_Elections_ECPeriodId_Live` on period and kind, and updates the matching SQL
-    and clash query in `MigrationBootstrapper.cs:85`.
+    and clash query in `MigrationBootstrapper.cs`.
 
   The term-job setting and default term length are org config fields, added to the DTO, the
   defaults and `golden.json` together. PostgreSQL dry run on a non-empty copy and
