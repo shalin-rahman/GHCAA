@@ -51,7 +51,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 WHERE p2."Name" = CASE o."Role" WHEN 0 THEN 'Returning Officer' WHEN 1 THEN 'Assistant Returning Officer'
                     WHEN 2 THEN 'Polling Officer' WHEN 3 THEN 'Scrutineer' END);
 
-            SELECT setval(pg_get_serial_sequence('"Roles"', 'Id'), GREATEST((SELECT MAX("Id") FROM "Roles"), 1));
+            DO $sv$ BEGIN PERFORM setval(pg_get_serial_sequence('"Roles"', 'Id'), GREATEST((SELECT MAX("Id") FROM "Roles"), 1)); END $sv$;
             INSERT INTO "Roles" ("Name")
             SELECT 'ElectionOfficial'
             WHERE EXISTS (SELECT 1 FROM "ElectionAppointments")

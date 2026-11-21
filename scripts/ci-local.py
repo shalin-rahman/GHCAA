@@ -14,6 +14,7 @@ Format errors that only ask for CRLF are Windows noise and are reported as a not
 """
 import argparse
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -36,6 +37,7 @@ STEPS = [
     ("backend", "vulnerable-packages", "dotnet list package --vulnerable --include-transitive", ROOT, False),
     ("backend", "tests-release", "dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration Release", ROOT, False),
     ("contract", "api-build-release", "dotnet build GHCAA.API/GHCAA.API.csproj -c Release", ROOT, True),
+    ("contract", "tool-restore", "dotnet tool restore", API, True),
     ("contract", "swagger-generate",
      f'dotnet tool run swagger tofile --output "{SWAGGER_OUT}" bin/Release/net9/GHCAA.API.dll v1', API, True),
     ("contract", "swagger-diff",
@@ -55,6 +57,11 @@ def run(step):
     group, name, cmd, cwd, _ = step
     log = os.path.join(LOGS, f"{group}-{name}.log")
     env = None
+    if name == "tool-restore":
+        # A manifest above the repo can hide the repo's own, and restore then passes without swagger (84.101).
+        print("      tool manifests, nearest first:", flush=True)
+        for path in find_tool_manifests(cwd) or ["(none)"]:
+            print(f"        {path}", flush=True)
     if name == "swagger-generate":
         # A file left by an earlier run would let swagger-diff pass after a failed generate.
         if os.path.exists(SWAGGER_OUT):
@@ -72,7 +79,50 @@ def run(step):
         code = 1
     if name == "format-verify" and code != 0:
         code = format_code_ignoring_windows_eol(text)
+    # A spec file that throws while loading has no failed test, so vitest can still exit 0 (84.100).
+    if name == "unit-tests" and code == 0 and vitest_failed_files(text) != 0:
+        code = 1
+    if name == "swagger-generate" and code != 0:
+        for line in swagger_tool_hint(text, find_tool_manifests(cwd)):
+            print(f"      {line}", flush=True)
     return code, time.time() - start, log
+
+
+def find_tool_manifests(start, stop=None):
+    """Every dotnet-tools.json from start up to the drive root (or stop), nearest first."""
+    found = []
+    here = os.path.abspath(start)
+    while True:
+        for candidate in (os.path.join(here, ".config", "dotnet-tools.json"),
+                          os.path.join(here, "dotnet-tools.json")):
+            if os.path.isfile(candidate):
+                found.append(candidate)
+        parent = os.path.dirname(here)
+        if parent == here or (stop and os.path.normcase(here) == os.path.normcase(os.path.abspath(stop))):
+            return found
+        here = parent
+
+
+def swagger_tool_hint(output, manifests):
+    """Lines that name the manifest in use when swagger-generate failed because the tool is missing."""
+    if not re.search(r"(?i)cannot find a (tool|manifest)|tool restore", output):
+        return []
+    if not manifests:
+        return ["note: no dotnet-tools.json found; GHCAA.API/.config/dotnet-tools.json is missing"]
+    lines = [f"note: swagger tool not found; restore used {manifests[0]}"]
+    if not os.path.normcase(manifests[0]).startswith(os.path.normcase(ROOT) + os.sep):
+        lines.append(f"note: {manifests[0]} is outside the repo and hides the repo's manifest; rename it and run again")
+    return lines
+
+
+def vitest_failed_files(output):
+    """Failed file count from vitest's "Test Files" summary line, or -1 when the line is missing."""
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", output)
+    line = next((l for l in plain.splitlines() if l.strip().startswith("Test Files")), None)
+    if line is None:
+        return -1
+    match = re.search(r"(\d+) failed", line)
+    return int(match.group(1)) if match else 0
 
 
 def format_code_ignoring_windows_eol(text):

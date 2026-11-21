@@ -40,8 +40,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
             // The rows carry explicit Ids, so the identity sequence has to move past them or the
             // next admin-created lookup collides with 5001.
             migrationBuilder.Sql("""
-                SELECT setval(pg_get_serial_sequence('"Lookups"', 'Id'),
-                    GREATEST((SELECT MAX("Id") FROM "Lookups"), 1));
+                DO $sv$ BEGIN PERFORM setval(pg_get_serial_sequence('"Lookups"', 'Id'),
+                    GREATEST((SELECT MAX("Id") FROM "Lookups"), 1)); END $sv$;
                 """);
         }
 

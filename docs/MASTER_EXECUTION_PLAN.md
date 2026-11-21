@@ -20,7 +20,7 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-21. **Open:** 145 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-21. **Open:** 144 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
 - **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
   19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
@@ -33,7 +33,7 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S01 (84.100). Then run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S03 (37.16j). Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **In the working tree, not committed (owner owns Git):** the 37.14t print-record work, its
   migration `20261112120000_AddElectionFormPrints`, the 37.16j concurrency token, the ER-17 phase
@@ -121,8 +121,8 @@ summary text and link in sync with that card. Run top to bottom.
 | # | Items | Summary | Size | Layers | Mig | After |
 |---|---|---|---|---|---|---|
 | **A** | **CI health and the rest of session 2b** | | | | | |
-| S01 | 84.100 | [Fix web test isolation and CI failure detection](#s01) | M | web tests, ci-local | | |
-| S02 | 84.101, 84.99 | [Find tool manifests and repair migration SQL](#s02) | S | ci-local, migrations SQL | | S01 |
+| S01 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
+| S02 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S03 | 37.16j | [Verify print revocation and audit atomicity](#s03) | S | backend | | |
 | S04 | 37.16k | [Rate-limit print verification and reuse print records](#s04) | M | backend | | S03 |
 | S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
@@ -298,83 +298,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
-
-<a id="s01"></a>
-**S01 · 84.100 · M**
-- Goal: `npm run test:unit` loads all 129 spec files, and `ci-local.py` fails the web layer when any
-  spec file fails to load, even with every test passing.
-- Before you start: no card needed. In `GHCAA.Web` run `npm run test:unit > vt.log 2>&1`; the log
-  shows 36 failed files with "reading 'config'" and no failed test. Delete `vt.log` at the end.
-- Read (only these): `GHCAA.Web/vitest.config.ts`, `GHCAA.Web/src/test-setup.ts`, and in
-  `scripts/ci-local.py` the `STEPS` list, `run(step)` and `main()`.
-- Change (only these files): the one spec that leaks, or `GHCAA.Web/vitest.config.ts`;
-  `scripts/ci-local.py`; `scripts/test_ci_local.py` (new).
-- Do not touch: application code under `GHCAA.Web/src/app` outside spec files; the `test:unit`
-  script in `package.json`; the other web steps (`type-check`, `build`, `audit`).
-- Steps:
-  1. List the 36 failing files from the log. -> check: the count is 36.
-  2. Run the full file list in halves (`npx vitest run <files>`), then halve the failing half, until
-     one spec makes the files after it fail. Look in it for `vi.stubGlobal`, a `vi.mock` of a module
-     that holds `config`, or `window` or `environment` replaced and not restored. -> check: the full
-     run passes with that one spec left out.
-  3. Fix the cause in that spec (restore in `afterEach`). Only if three or more specs leak, set
-     `unstubGlobals: true` and `restoreMocks: true` in `vitest.config.ts` instead. -> check:
-     `npm run test:unit` shows 129 passed files, twice in a row.
-  4. In `ci-local.py` add `vitest_failed_files(output)`: it reads the "Test Files" line and returns
-     the failed count, or -1 when the line is missing. The `unit-tests` web step captures its output
-     and fails when the result is not 0, whatever the exit code. -> check: step 5.
-  5. Add a temporary spec that throws inside `describe`, run `python scripts/ci-local.py --only web`,
-     see it fail, delete the spec. -> check: `git status --short` shows no leftover spec.
-- Contract: none.
-- Tests: `scripts/test_ci_local.py` :: `test_failed_files_counted` (a "Test Files  2 failed | 127
-  passed" line gives 2); `test_all_passed_gives_zero`; `test_missing_line_gives_minus_one`. Load
-  `ci-local.py` with `importlib.util.spec_from_file_location`, since the name has a hyphen.
-- Run: `python -m unittest scripts/test_ci_local.py </dev/null`; then
-  `python scripts/ci-local.py --only web`.
-- Done when: 129 of 129 files pass twice in a row; the temporary spec made the web layer fail;
-  84.100 DONE with both counts.
-- Stop and ask if: the leak is in `src/test-setup.ts` or in application code, not in a spec. Default:
-  fix it in the setup file and say so in the tracker.
-
-<a id="s02"></a>
-**S02 · 84.101, 84.99 · S**
-- Goal: the contract step names the tool manifest it used, and five old migrations no longer hold a
-  bare `SELECT setval`, so the idempotent script applies twice.
-- Before you start: S01 closed (it creates `scripts/test_ci_local.py`). Run
-  `grep -c "SELECT setval" GHCAA.Infrastructure/Data/Migrations/PgSql/20261021100000_AddEcPositions.cs`;
-  a count above 0 means 84.99 is still open.
-- Read (only these): in `scripts/ci-local.py` the contract steps `api-build-release`,
-  `swagger-generate`, `swagger-diff`; the five migration files in step 3.
-- Change (only these files): `scripts/ci-local.py`; `scripts/test_ci_local.py` (new if S01 did not
-  make it); `20260927121346_ElectionBallotSecrecy.cs`, `20260930020138_ElectionAppointments.cs`,
-  `20261021100000_AddEcPositions.cs`, `20261105120000_SeedJobCategoryLookups.cs`,
-  `20261105200808_AddPollDiscussion.cs`.
-- Do not touch: the `.Designer.cs` files, `PgSqlApplicationDbContextModelSnapshot.cs`, any other
-  migration, and the file `C:\Users\dotnet-tools.json` (the owner renames it).
-- Steps:
-  1. 84.101: add `find_tool_manifests(start)` to `ci-local.py`. It walks from `start` up to the
-     drive root and returns every `dotnet-tools.json` and `.config/dotnet-tools.json` it finds,
-     nearest first. -> check: the unit tests below.
-  2. Before `dotnet tool restore`, print the list. When restore succeeds and the swagger tool is
-     still missing, print which manifest was used and that a stray one higher up hides the repo's.
-     -> check: `python scripts/ci-local.py --only contract` prints the list.
-  3. 84.99: in each of the five migrations, change every bare `SELECT setval(...)` inside
-     `migrationBuilder.Sql` to `DO $sv$ BEGIN PERFORM setval(...); END $sv$;`. Keep the arguments
-     as they are. `PERFORM` alone is wrong: it is PL/pgSQL only and fails in the plain `Migrate()`
-     run. -> check: `grep -n "SELECT setval" <file>` gives nothing for each file.
-  4. On an empty local PostgreSQL database: `dotnet ef migrations script --idempotent -o <scratch file>`,
-     with the scratch file outside the repo. Apply it twice with `psql`, then start the API once
-     against a second empty database. Delete the scratch file. -> check: both applies end without error and the API starts.
-- Contract: none.
-- Tests: `scripts/test_ci_local.py` :: `test_finds_stray_manifest_above_repo` (a temp tree with a
-  manifest two levels up is listed); `test_nearest_first`; `test_none_found_gives_empty_list`.
-- Run: `python -m unittest scripts/test_ci_local.py </dev/null`; then
-  `python scripts/ci-local.py --only contract`.
-- Done when: the contract layer passes on this machine or names the stray manifest; the idempotent
-  script applies twice; `Migrate()` builds an empty database; 84.101 and 84.99 DONE. The tracker
-  notes the owner step (rename `C:\Users\dotnet-tools.json`).
-- Stop and ask if: a `setval` call sits outside `migrationBuilder.Sql`, or a sixth migration holds
-  one. Default: fix it the same way and name the file in the tracker.
 
 <a id="s03"></a>
 **S03 · 37.16j · S**
@@ -5979,6 +5902,9 @@ brief asks for it.
 | 2026-11-20 | 99.10 (phase G) | Phase G cards S84 to S97, S99 to S109 and S131 in the eleven-part form, names checked against the code; S97 is its own card. Old card errors fixed: S84 adds the missing `Constants.Uploads` and a per-user limiter, S86 renders plain text on mobile, S90 reuses the `AppliedDate` already sent, S93 reads `FileStorageOptions`, S103 gains its mobile screen, S104 drops part g (already done). Migration ledger rows 16 and 17 named. Card notes on nine tracker entries. `backlog_inventory.py --check`: 0 problems; `test_backlog_inventory.py`: 34 of 34 OK | this file, `docs/TODO.md` |
 | 2026-11-20 | 99.10 (phase I) | Phase I cards S110 to S130 in the eleven-part form, names checked against the code; S122 stays a done note. Old card errors fixed: S111 and S113 use the real `api/admin/comm` routes and put unsubscribe at `api/unsubscribe`, S113 drops the mobile batch screen that does not exist, S117 keeps the existing Approved-only check-in rule, S118 types the anonymous stats object, S121 records the missing payment search route, S123 uses the existing `NewsPost.MembersOnly` flag instead of a new column (ledger row 18 changed), S124 extends the `ArticleCategory` enum. Spec 029 plan and tasks corrected to match. Check 0 problems; 34 of 34 script tests OK. No code change |
 | 2026-11-21 | 99.10 (track H, closed) | Track H cards H00 to H09 in the eleven-part form, names checked against the book and tree. The H00 list moved into the track intro. Old text corrected: the ASVS walkthrough is §8.11 (78.10 said §8.13); the traceability claim sits in §3.6 (73.5 said §3.9). H01 gets a measurement record and a latency script; H04 asks the owner which figures fit 80 to 90 pages before any is drawn. Refreshing the chapter 11 tracker figures moved to H02, since the book changes only in track H. Check 0 problems; 34 of 34 script tests OK. No code or book change | this file, `docs/TODO.md` |
+| 2026-11-21 | 99.10 (card review) | All 139 cards read against the section 3 rows, the ledger and the tree. S14 waits for S111 and migration 2a and asks the mail preference check for event reminders; After column and card dependencies agree for S02, S14, S15, H05 and S51; seven item labels synced; S114 drops 100.6 and runs migration 14a on PostgreSQL; S81's coverage file renamed out of a gitignore pattern; 100.6 set PARTIAL | this file, `docs/TODO.md` |
+| 2026-11-21 | 84.100 (S01) | The load failure did not come back: `npm run test:unit` gave 130 of 130 files and 1149 of 1149 tests, twice, so no spec needed a fix. The ci-local `unit-tests` step now fails on a failed or missing "Test Files" count, even when the exit code is 0. A temporary throwing spec made `ci-local.py --only web` fail; after it was deleted the layer passed 4 of 4. `test_ci_local.py`: 6 of 6 OK. One reviewer finding (the tests overwrote the real step log) fixed | `scripts/ci-local.py`, `scripts/test_ci_local.py` (new), `docs/TODO.md`, this file |
+| 2026-11-21 | 84.101, 84.99 (S02) | ci-local runs `dotnet tool restore` in `GHCAA.API`, lists the tool manifests nearest first, and names a stray one above the repo when swagger is missing; the stray `C:\Users\dotnet-tools.json` was already gone. Six migrations (the card's five and `SeedPolicySiteContent`, on the owner's word) wrap `setval` in `DO $sv$`. The idempotent script applied twice on an empty PostgreSQL database, and `Migrate()` built a second one with all 38 migrations. `docs/api/swagger.json` regenerated on the owner's word for the 37.14t print-record routes; contract layer 4 of 4. `test_ci_local.py`: 14 of 14 OK; backend layer 7 of 7 | `scripts/ci-local.py`, `scripts/test_ci_local.py`, six PgSql migrations, `docs/api/swagger.json`, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 

@@ -5511,6 +5511,97 @@
         }
       }
     },
+    "/api/elections/print-records/{printId}/verification": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "printId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionFormPrintVerifyDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionFormPrintVerifyDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionFormPrintVerifyDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/print-records/{printId}/revoke": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "printId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionFormPrintRevokeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionFormPrintRevokeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionFormPrintRevokeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/elections/forms/{code}/blank": {
       "get": {
         "tags": [
@@ -13880,33 +13971,49 @@
         "additionalProperties": false
       },
       "CreateJobDto": {
+        "required": [
+          "companyName",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "title": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
           },
           "companyName": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
           },
           "location": {
+            "maxLength": 200,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
           "description": {
+            "maxLength": 4000,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
           "requirements": {
+            "maxLength": 4000,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
           "applicationEmail": {
+            "maxLength": 256,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
           "applicationLink": {
+            "maxLength": 500,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
@@ -14018,7 +14125,8 @@
             "type": "boolean"
           },
           "membersOnly": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14973,6 +15081,65 @@
             "nullable": true
           },
           "recountWindowEndsOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionFormPrintRevokeDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionFormPrintVerifyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "electionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "formCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "formTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "printedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "printedByRole": {
+            "type": "string",
+            "nullable": true
+          },
+          "phaseAtPrint": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "contentHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "revokedAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -18053,7 +18220,8 @@
             "type": "boolean"
           },
           "membersOnly": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "id": {
             "type": "integer",

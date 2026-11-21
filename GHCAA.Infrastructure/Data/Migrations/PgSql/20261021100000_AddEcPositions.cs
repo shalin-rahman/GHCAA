@@ -51,8 +51,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
             // The rows above carry explicit Ids, so move the identity past them or the first
             // position an admin adds collides with Id 1.
             migrationBuilder.Sql("""
-                SELECT setval(pg_get_serial_sequence('"EcPositions"', 'Id'),
-                    GREATEST((SELECT MAX("Id") FROM "EcPositions"), 1));
+                DO $sv$ BEGIN PERFORM setval(pg_get_serial_sequence('"EcPositions"', 'Id'),
+                    GREATEST((SELECT MAX("Id") FROM "EcPositions"), 1)); END $sv$;
                 """);
 
             migrationBuilder.Sql("""CREATE INDEX IF NOT EXISTS "IX_ECMembers_Position" ON "ECMembers" ("Position");""");

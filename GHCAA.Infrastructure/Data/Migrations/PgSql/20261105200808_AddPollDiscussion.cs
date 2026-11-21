@@ -54,8 +54,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 ON CONFLICT ("LookupGroup", "Value") DO NOTHING;
                 """);
             migrationBuilder.Sql("""
-                SELECT setval(pg_get_serial_sequence('"Lookups"', 'Id'),
-                    GREATEST((SELECT MAX("Id") FROM "Lookups"), 1));
+                DO $sv$ BEGIN PERFORM setval(pg_get_serial_sequence('"Lookups"', 'Id'),
+                    GREATEST((SELECT MAX("Id") FROM "Lookups"), 1)); END $sv$;
                 """);
         }
 

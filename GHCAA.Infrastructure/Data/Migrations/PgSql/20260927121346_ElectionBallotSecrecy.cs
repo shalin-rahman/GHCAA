@@ -311,7 +311,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     FROM "BallotVotesCopy" v
                     JOIN "BallotSeatMap" m ON m."NewBallotId" = v."BallotId" AND m."ElectionSeatId" = v."ElectionSeatId"
                     JOIN "Elections" e ON e."Id" = m."ElectionId";
-                SELECT setval(pg_get_serial_sequence('"Ballots"', 'Id'), COALESCE((SELECT MAX("Id") FROM "Ballots"), 0) + 1, false);
+                DO $sv$ BEGIN PERFORM setval(pg_get_serial_sequence('"Ballots"', 'Id'), COALESCE((SELECT MAX("Id") FROM "Ballots"), 0) + 1, false); END $sv$;
                 DROP TABLE "BallotSeatMap";
                 DROP TABLE "BallotVotesCopy";
                 DROP TABLE "BallotsCopy";

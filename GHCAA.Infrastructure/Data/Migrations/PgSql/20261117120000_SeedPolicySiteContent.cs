@@ -132,8 +132,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
         // nextval is in the GREATEST so the sequence only moves forward, even after rows were deleted.
         public const string AdvanceSequenceSql = """
-            SELECT setval(s, GREATEST(COALESCE((SELECT MAX("Id") FROM "SiteContents"), 1), nextval(s)))
-            FROM pg_get_serial_sequence('"SiteContents"', 'Id') AS s;
+            DO $sv$ BEGIN PERFORM setval(s, GREATEST(COALESCE((SELECT MAX("Id") FROM "SiteContents"), 1), nextval(s)))
+            FROM pg_get_serial_sequence('"SiteContents"', 'Id') AS s; END $sv$;
             """;
 
         private static string Quote(string s) => s.Replace("'", "''");
