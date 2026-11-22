@@ -914,6 +914,92 @@ public sealed class ElectionDocumentServiceTests : TestBase
         }
     }
 
+    // 37.16j. SQLite cannot run two writers at once, so this one runs on PostgreSQL. Set
+    // GHCAA_TEST_PG to a server connection string; the test makes its own database and drops it.
+    [Test]
+    [Category("NFR-R5")]
+    public async Task RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry()
+    {
+        var server = Environment.GetEnvironmentVariable("GHCAA_TEST_PG");
+        if (string.IsNullOrWhiteSpace(server))
+            Assert.Ignore("GHCAA_TEST_PG is not set.");
+        var conn = new Npgsql.NpgsqlConnectionStringBuilder(server) { Database = "ghcaa_test_revoke_" + Guid.NewGuid().ToString("N")[..12] }.ConnectionString;
+        ApplicationDbContext Open() => new(new DbContextOptionsBuilder<ApplicationDbContext>().UseNpgsql(conn).Options);
+
+        await using (var setup = Open())
+            await setup.Database.EnsureCreatedAsync();
+        try
+        {
+            Guid printId;
+            int electionId, first, second;
+            await using (var setup = Open())
+            {
+                var period = new ECPeriod { Title = "2027", StartDate = DateTime.UtcNow.AddDays(-1) };
+                setup.ECPeriods.Add(period);
+                await setup.SaveChangesAsync();
+                var election = new Election
+                {
+                    Title = "Race Election",
+                    ECPeriodId = period.Id,
+                    Phase = ElectionPhase.Nomination,
+                    NominationOpensOn = DateTime.UtcNow,
+                    NominationClosesOn = DateTime.UtcNow.AddDays(1),
+                    PollingOpensOn = DateTime.UtcNow.AddDays(2),
+                    PollingClosesOn = DateTime.UtcNow.AddDays(3)
+                };
+                var users = new[] { "a", "b" }.Select(x => new User { Username = x + Guid.NewGuid().ToString("N"), PasswordHash = "x", CreatedAt = DateTime.UtcNow, IsActive = true }).ToArray();
+                setup.Elections.Add(election);
+                setup.Users.AddRange(users);
+                await setup.SaveChangesAsync();
+                var print = new ElectionFormPrint
+                {
+                    Id = Guid.NewGuid(),
+                    ElectionId = election.Id,
+                    FormCode = "ER-10",
+                    ContentHash = "h",
+                    PrintedAt = DateTime.UtcNow,
+                    PrintedByRole = "Admin",
+                    PhaseAtPrint = ElectionPhase.Nomination
+                };
+                setup.ElectionFormPrints.Add(print);
+                await setup.SaveChangesAsync();
+                (printId, electionId, first, second) = (print.Id, election.Id, users[0].Id, users[1].Id);
+            }
+
+            // Both calls have read the unrevoked print before either saves.
+            using var bothRead = new Barrier(2);
+            async Task<string?> Revoke(int actor, string reason)
+            {
+                await using var ctx = Open();
+                var waited = false;
+                ctx.SavingChanges += (_, _) =>
+                {
+                    if (waited) return;
+                    waited = true;
+                    bothRead.SignalAndWait(TimeSpan.FromSeconds(30));
+                };
+                return await new ElectionDocumentService(ctx, _config.Object).RevokePrintAsync(electionId, printId, actor, reason);
+            }
+            var replies = await Task.WhenAll(Task.Run(() => Revoke(first, "First")), Task.Run(() => Revoke(second, "Second")));
+
+            replies.Should().ContainSingle(x => x == null);
+            replies.Should().ContainSingle(x => x == Constants.Elections.Replies.AlreadyRecorded);
+            await using var check = Open();
+            var row = await check.ElectionFormPrints.SingleAsync();
+            row.RevokedAt.Should().NotBeNull();
+            var winner = replies[0] == null ? first : second;
+            row.RevokedByUserId.Should().Be(winner);
+            row.RevokeReason.Should().Be(winner == first ? "First" : "Second");
+            (await check.ElectionAuditEntries.CountAsync(x => x.Action == Constants.Elections.AuditActions.FormPrintRevoked)).Should().Be(1);
+            (await new ElectionAuditWriter(check).VerifyAsync(electionId)).Ok.Should().BeTrue();
+        }
+        finally
+        {
+            await using var teardown = Open();
+            await teardown.Database.EnsureDeletedAsync();
+        }
+    }
+
     [Test]
     public async Task RevokePrint_OtherElection_ReturnsNotFound()
     {

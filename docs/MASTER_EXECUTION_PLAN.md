@@ -33,11 +33,11 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S03 (37.16j). Then run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S04 (37.16k). Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
-- **In the working tree, not committed (owner owns Git):** the 37.14t print-record work, its
-  migration `20261112120000_AddElectionFormPrints`, the 37.16j concurrency token, the ER-17 phase
-  bands and the walkthrough "Print records" section. The walkthrough has not run yet; S06 runs it.
+- **Committed by the owner before 2026-11-21:** the 37.14t print-record work, its migration
+  `20261112120000_AddElectionFormPrints`, the revoke concurrency token, the ER-17 phase bands and
+  the walkthrough "Print records" section. The walkthrough has not run yet; S06 runs it.
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
   items get gate cards (section 5) and no slot until the gate clears.
@@ -123,7 +123,7 @@ summary text and link in sync with that card. Run top to bottom.
 | **A** | **CI health and the rest of session 2b** | | | | | |
 | S01 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S02 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S03 | 37.16j | [Verify print revocation and audit atomicity](#s03) | S | backend | | |
+| S03 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S04 | 37.16k | [Rate-limit print verification and reuse print records](#s04) | M | backend | | S03 |
 | S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
 | S06 | 37.14n, 37.14t | [Run the print-record walkthrough and QR check](#s06) | S | local stack run | | S05 |
@@ -298,39 +298,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
-
-<a id="s03"></a>
-**S03 · 37.16j · S**
-- Goal: proof on PostgreSQL that two revokes of one print at the same moment leave one `RevokedAt`
-  and one audit entry, and a written decision on what happens when the audit write fails.
-- Before you start: no card needed. Local PostgreSQL is up with a database that tests may create and
-  drop. `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~RevokePrint"` passes.
-- Read (only these): `RevokePrintAsync` in `GHCAA.Infrastructure/Services/ElectionDocumentService.cs`
-  (line 228); `RevokePrint_RevokedBetweenReadAndSave_ReturnsAlreadyRecorded` in
-  `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs` (line 883); `GHCAA.Tests/LiveSyncTest.cs`
-  for how a test reaches a real database.
-- Change (only these files): `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`; `docs/TODO.md`.
-- Do not touch: `RevokePrintAsync` itself, unless the PostgreSQL run shows two rows; the concurrency
-  token on `ElectionFormPrint`.
-- Steps:
-  1. Add the test below. It reads its connection string from the environment variable
-     `GHCAA_TEST_PG` and calls `Assert.Ignore` when the variable is not set, so CI skips it.
-     -> check: without the variable the test shows as skipped.
-  2. The test builds the schema on that database, adds one election and one print, opens two
-     contexts, calls `RevokePrintAsync` from both at once, then counts. -> check: with the variable
-     set, one call returns done and the other returns already recorded.
-  3. Write the decision in the 37.16j tracker entry: the claim and the audit entry are in one
-     `SaveChanges`, so a failed audit write rolls the claim back and the caller can try again.
-     -> check: the entry names the test and the counts.
-- Contract: none.
-- Tests: `ElectionDocumentServiceTests.cs` :: `RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry`
-  (`[Category("NFR-R5")]`): one row with `RevokedAt`, one `FormPrintRevoked` audit entry.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionDocumentServiceTests"`
-  once without and once with `GHCAA_TEST_PG`; then `python scripts/ci-local.py --only backend`.
-- Done when: the PostgreSQL run shows one `RevokedAt` and one audit entry; 37.16j DONE with the
-  decision written.
-- Stop and ask if: PostgreSQL shows two revokes or two audit entries. Default: stop, set 37.16j
-  PARTIAL with the counts, and do not change the service without the owner's answer.
 
 <a id="s04"></a>
 **S04 · 37.16k · M**
@@ -5905,6 +5872,7 @@ brief asks for it.
 | 2026-11-21 | 99.10 (card review) | All 139 cards read against the section 3 rows, the ledger and the tree. S14 waits for S111 and migration 2a and asks the mail preference check for event reminders; After column and card dependencies agree for S02, S14, S15, H05 and S51; seven item labels synced; S114 drops 100.6 and runs migration 14a on PostgreSQL; S81's coverage file renamed out of a gitignore pattern; 100.6 set PARTIAL | this file, `docs/TODO.md` |
 | 2026-11-21 | 84.100 (S01) | The load failure did not come back: `npm run test:unit` gave 130 of 130 files and 1149 of 1149 tests, twice, so no spec needed a fix. The ci-local `unit-tests` step now fails on a failed or missing "Test Files" count, even when the exit code is 0. A temporary throwing spec made `ci-local.py --only web` fail; after it was deleted the layer passed 4 of 4. `test_ci_local.py`: 6 of 6 OK. One reviewer finding (the tests overwrote the real step log) fixed | `scripts/ci-local.py`, `scripts/test_ci_local.py` (new), `docs/TODO.md`, this file |
 | 2026-11-21 | 84.101, 84.99 (S02) | ci-local runs `dotnet tool restore` in `GHCAA.API`, lists the tool manifests nearest first, and names a stray one above the repo when swagger is missing; the stray `C:\Users\dotnet-tools.json` was already gone. Six migrations (the card's five and `SeedPolicySiteContent`, on the owner's word) wrap `setval` in `DO $sv$`. The idempotent script applied twice on an empty PostgreSQL database, and `Migrate()` built a second one with all 38 migrations. `docs/api/swagger.json` regenerated on the owner's word for the 37.14t print-record routes; contract layer 4 of 4. `test_ci_local.py`: 14 of 14 OK; backend layer 7 of 7 | `scripts/ci-local.py`, `scripts/test_ci_local.py`, six PgSql migrations, `docs/api/swagger.json`, `docs/TODO.md`, this file |
+| 2026-11-21 | 37.16j (S03) | `RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry` (NFR-R5) runs two revokes from two contexts that both read the print before either saves, on its own database on the server in `GHCAA_TEST_PG`. Local PostgreSQL 18: one done, one already recorded, one `RevokedAt`, one `FormPrintRevoked` entry, audit chain valid. Skipped without the variable. `ElectionDocumentServiceTests` 89 passed, 1 skipped without it; 90 of 90 with it. Decision written: a failed audit write rolls the claim back. No service change. Backend layer 7 of 7. `GHCAA.Infrastructure/DependencyInjection.cs` had picked up CRLF line endings in the working copy; it was put back to the LF bytes in HEAD | `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 
