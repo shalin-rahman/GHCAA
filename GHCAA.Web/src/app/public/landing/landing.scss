@@ -843,6 +843,15 @@
 
     .panel-header-mini {
         margin-bottom: 2.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem 2rem;
+
+        .btn {
+            flex-shrink: 0;
+        }
 
         h3 {
             font-size: 2.5rem;
@@ -855,13 +864,6 @@
             color: var(--text-dim);
             font-weight: 300;
         }
-    }
-
-    // "Join This Tier" CTA: full-width, spaced block button (was a bare
-    // inline link with no surrounding margin).
-    > .btn {
-        margin-top: 1rem;
-        width: 100%;
     }
 }
 

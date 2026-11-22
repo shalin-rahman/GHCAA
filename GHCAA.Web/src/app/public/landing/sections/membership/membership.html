@@ -20,8 +20,11 @@
 
             <div class="tier-content-panel glass-card animate-fade">
                 <div class="panel-header-mini">
-                    <h3 [style.color]="selectedTier().color">{{ selectedTier().name }}</h3>
-                    <p>{{ selectedTier().shortDesc }}</p>
+                    <div class="panel-header-text">
+                        <h3 [style.color]="selectedTier().color">{{ selectedTier().name }}</h3>
+                        <p>{{ selectedTier().shortDesc }}</p>
+                    </div>
+                    <a routerLink="/register" class="btn btn-accent btn-sm">Join This Tier</a>
                 </div>
                 <div class="criteria-summary">
                     <div class="summary-col">
@@ -41,7 +44,6 @@
                         </ul>
                     </div>
                 </div>
-                <a routerLink="/register" class="btn btn-accent btn-sm">Join This Tier</a>
             </div>
         </div>
     </div>
