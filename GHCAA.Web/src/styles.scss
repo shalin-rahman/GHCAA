@@ -775,8 +775,13 @@ app-date-input.border-red-500 input.dpi-text {
   input[type="checkbox"] {
     appearance: none !important;
     -webkit-appearance: none !important;
+    /* Inside a .form-group the text-field rule adds min-height and padding, which turns the pill into a circle. */
+    box-sizing: border-box !important;
     width: 42px !important;
     height: 24px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
     border: 1px solid var(--glass-border) !important;
     border-radius: 20px !important;
     background: var(--surface-subtle) !important;
