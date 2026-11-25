@@ -33,7 +33,9 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S05 (37.16i). Then run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S06 (37.14n, 37.14t). Owner choice 2026-11-25: skip the phone scan for now. Close
+  step 3 only, set 37.14n and 37.14t to PARTIAL with "phone scan left", and keep the card open for
+  step 4. Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Committed by the owner before 2026-11-21:** the 37.14t print-record work, its migration
   `20261112120000_AddElectionFormPrints`, the revoke concurrency token, the ER-17 phase bands and
@@ -125,7 +127,7 @@ summary text and link in sync with that card. Run top to bottom.
 | S02 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S03 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S04 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
+| S05 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S06 | 37.14n, 37.14t | [Run the print-record walkthrough and QR check](#s06) | S | local stack run | | S05 |
 | S07 | 99.3 | [Run full CI and get owner acceptance](#s07) | S | full ci-local | | S01, S02 |
 | **B** | **P1 items with no owner gate** | | | | | |
@@ -298,65 +300,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
-
-<a id="s05"></a>
-**S05 · 37.16i · M**
-- Goal: an official with Count and ManageSetup lists an election's print records on the web and
-  revokes one with a reason; mobile shows the same list read only.
-- Before you start: S04 closed. `grep -n "print-records" GHCAA.API/Controllers/ElectionsController.cs`
-  shows two routes (verification, revoke) and no list route.
-- Read (only these): the revoke action in `ElectionsController.cs` (line 494) and
-  `ElectionFormPrintRevokeDto`; `GHCAA.Web/src/app/admin/elections/admin-elections.ts`;
-  `GHCAA.Web/src/app/admin/elections/election-form-records/` (the pattern to copy);
-  `GHCAA.Web/src/app/common/confirm-dialog/`, `GHCAA.Web/src/app/common/step-up-dialog/`;
-  `GHCAA.Web/src/app/core/services/elections.service.ts`;
-  `GHCAA.Mobile/lib/screens/admin/election_form_records_sheet.dart` (the pattern to copy).
-- Change (only these files): `ElectionsController.cs`, `IElectionDocumentService` and
-  `ElectionDocumentService.cs`, `GHCAA.Application/DTOs/ElectionDtos.cs`; web
-  `admin/elections/election-print-records/` (new, component plus spec), `admin-elections.ts` and its
-  template, `elections.service.ts`, `GHCAA.Web/src/app/core/models/election.models.ts`; mobile
-  `GHCAA.Mobile/lib/screens/admin/election_print_records_sheet.dart` (new),
-  `election_management_screen.dart`, `GHCAA.Mobile/lib/features/elections/election_service.dart`,
-  `GHCAA.Mobile/test/election_print_records_sheet_test.dart` (new); `scripts/verify-election.py`;
-  `docs/API_CONTRACT_REGISTRY.md`; backend tests.
-- Do not touch: the revoke route and its rules; `election-form-records/` (form details, a different
-  thing); the public verify page.
-- Steps:
-  1. Service method `ListPrintsAsync(int electionId, CancellationToken)` returning rows newest
-     first. -> check: the service test.
-  2. Controller action `GET {id:int}/print-records` with the same attributes as the revoke action,
-     without step-up. -> check: the controller tests.
-  3. Web service method `getPrintRecords(electionId)` and `revokePrint(electionId, printId, reason)`
-     (the second only if it is missing). -> check: `npm run type-check`.
-  4. Web component: a table (form code, printed at, role, phase, revoked at, reason) in
-     `.table-wrap`, and a Revoke action that opens the confirm dialog with a reason field (at least
-     3 visible characters after trim), then step-up. Hide the action without both permissions and
-     on a revoked row. Add it as a "Print records" tab in the election's officials view.
-     -> check: the Vitest specs.
-  5. Mobile: a read-only sheet with the same columns, opened from `election_management_screen.dart`.
-     No revoke on mobile. -> check: the widget test.
-  6. Add the new spec to `WEB_SPECS` and the new test to `MOBILE_TESTS` in
-     `scripts/verify-election.py`. -> check: `python scripts/verify-election.py </dev/null`.
-  7. Browser check in light and dark with the API mocked (memory
-     `reference_browser_check_mocked_api`). -> check: both themes show the table and the dialog.
-- Contract: `GET api/elections/{id:int}/print-records`. Policy `Policies.ElectionStaff` plus
-  `RequireElectionPermission(Count | ManageSetup)`. Response: array of `{ id, formCode, printedAt,
-  printedByRole, phaseAtPrint, revokedAt, revokeReason }`. 200; 403 without the permissions; 404 for
-  an unknown election. The revoke route is unchanged (204, 409, 404; 400 on a blank reason).
-- Tests: `ElectionsControllerTests.cs` :: `ListPrints_WithPermissions_Returns200`,
-  `ListPrints_WithoutPermissions_Returns403`; `ElectionDocumentServiceTests.cs` ::
-  `ListPrints_ReturnsNewestFirst_WithRevokeFields`; web spec :: "reason under 3 characters keeps
-  Revoke disabled", "hides Revoke without both permissions", "hides Revoke on a revoked row"; mobile
-  test :: "shows the list and no revoke action".
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionsControllerTests|FullyQualifiedName~ElectionDocumentServiceTests"`;
-  in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/elections/election-print-records`;
-  in `GHCAA.Mobile`: `flutter analyze; flutter test test/election_print_records_sheet_test.dart`;
-  then `python docs/api/authz_catalog.py --write </dev/null` and ci-local for backend, web, mobile
-  and contract.
-- Done when: a revoke from the web makes `/verify/form/:id` show "Print revoked" with the date; 403
-  without permission; registry updated; 37.16i DONE.
-- Stop and ask if: the officials view has no tab strip to extend. Default: add the list as a section
-  under the form records section.
 
 <a id="s06"></a>
 **S06 · 37.14n, 37.14t · S**
@@ -5825,6 +5768,7 @@ brief asks for it.
 | 2026-11-21 | 84.101, 84.99 (S02) | ci-local runs `dotnet tool restore` in `GHCAA.API`, lists the tool manifests nearest first, and names a stray one above the repo when swagger is missing; the stray `C:\Users\dotnet-tools.json` was already gone. Six migrations (the card's five and `SeedPolicySiteContent`, on the owner's word) wrap `setval` in `DO $sv$`. The idempotent script applied twice on an empty PostgreSQL database, and `Migrate()` built a second one with all 38 migrations. `docs/api/swagger.json` regenerated on the owner's word for the 37.14t print-record routes; contract layer 4 of 4. `test_ci_local.py`: 14 of 14 OK; backend layer 7 of 7 | `scripts/ci-local.py`, `scripts/test_ci_local.py`, six PgSql migrations, `docs/api/swagger.json`, `docs/TODO.md`, this file |
 | 2026-11-21 | 37.16j (S03) | `RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry` (NFR-R5) runs two revokes from two contexts that both read the print before either saves, on its own database on the server in `GHCAA_TEST_PG`. Local PostgreSQL 18: one done, one already recorded, one `RevokedAt`, one `FormPrintRevoked` entry, audit chain valid. Skipped without the variable. `ElectionDocumentServiceTests` 89 passed, 1 skipped without it; 90 of 90 with it. Decision written: a failed audit write rolls the claim back. No service change. Backend layer 7 of 7. `GHCAA.Infrastructure/DependencyInjection.cs` had picked up CRLF line endings in the working copy; it was put back to the LF bytes in HEAD | `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`, `docs/TODO.md`, this file |
 | 2026-11-25 | 37.16k (S04) | Print verification has its own `PrintVerification` policy, its limit and window read on each request from OrgConfig through the cache (owner choice), with a fallback to the defaults if the read fails and the numbers in the partition key. A second identical filled download by the same official returns the first unrevoked record; a printer with no user id never matches. A real-pipeline test gets 429 on the third print check with a limit of 2 while the card check still answers. Reviewer findings fixed (fallback and clamp, null user, comments, the 37.14t supersede note). Targeted run 209 passed, 1 skipped; backend 7 of 7; contract 4 of 4. Known gap: two simultaneous downloads can still add two rows | `RateLimitingExtensions.cs`, `ElectionsController.cs`, `ElectionDocumentService.cs`, `OrgConfigDto.cs`, `Constants.cs`, two test files, golden OrgConfig, `election.models.ts`, registry, `CONFIG_DRIVEN_FRAMEWORK.md`, authorization catalog, `docs/TODO.md`, this file |
+| 2026-11-25 | 37.16i (S05) | `GET api/elections/{id}/print-records` lists an election's prints newest first, revoked ones included, for officials with Count and ManageSetup, no step-up. The web officials view gets a Print records table with Revoke behind a reason and the confirm dialog; the reason field sits on the page below the table, since the confirm dialog takes no input and a colspan row hides the table headers. Mobile lists the same rows read only. Tests written after the code. Filtered backend run 169 passed, 1 skipped (PostgreSQL only); web specs 57 of 57; Flutter sheet test 3 of 3; browser check with a mocked API. Not yet seen on the live stack: a revoke followed by the verify page; S06 covers it | `ElectionsController.cs`, `ElectionDocumentService.cs`, `IElectionDocumentService.cs`, `ElectionDtos.cs`, three test files, `election-print-records/`, `admin-elections.*`, `elections.service.ts`, `election.models.ts`, `app.constants.ts`, `election_print_records_sheet.dart` and its test, `election_service.dart`, `election_management_screen.dart`, `app_constants.dart`, `verify-election.py`, registry, swagger, authorization catalog, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 

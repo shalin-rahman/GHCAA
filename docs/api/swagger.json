@@ -5551,6 +5551,55 @@
         }
       }
     },
+    "/api/elections/{id}/print-records": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionFormPrintRowDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionFormPrintRowDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionFormPrintRowDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/elections/{id}/print-records/{printId}/revoke": {
       "post": {
         "tags": [
@@ -15098,6 +15147,40 @@
         },
         "additionalProperties": false
       },
+      "ElectionFormPrintRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "printedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "printedByRole": {
+            "type": "string",
+            "nullable": true
+          },
+          "phaseAtPrint": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokeReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ElectionFormPrintVerifyDto": {
         "type": "object",
         "properties": {
@@ -15338,6 +15421,18 @@
           },
           "defaultPrintMode": {
             "$ref": "#/components/schemas/ElectionPrintMode"
+          },
+          "printVerifyLimit": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "printVerifyWindowMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

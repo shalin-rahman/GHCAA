@@ -38,7 +38,7 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 415 routes. That matches the 415 `[Http*]` attributes in the folder.
+script found 416 routes. That matches the 416 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
@@ -51,7 +51,7 @@ script found 415 routes. That matches the 415 `[Http*]` attributes in the folder
 | Authenticated + step-up | 5 | Auth, ElectionAppointments, Elections |
 | MemberOnly | 6 | Gallery, Scholarships |
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
-| ElectionStaff | 4 | ElectionAppointments, Elections |
+| ElectionStaff | 5 | ElectionAppointments, Elections |
 | ElectionStaff + step-up | 30 | AdminElections, ElectionAppointments, Elections |
 | AdminOnly | 147 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, ElectionContent, Elections, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
 | AdminOnly + in-body SuperAdmin | 4 | Admin |
@@ -71,7 +71,7 @@ Where the policy was set:
 | Anonymous | 74 | 0 | 0 |
 | Authenticated | 23 | 76 | 0 |
 | MemberOnly | 7 | 0 | 0 |
-| ElectionStaff | 19 | 15 | 0 |
+| ElectionStaff | 20 | 15 | 0 |
 | AdminOnly | 97 | 61 | 0 |
 | SuperAdminOnly | 15 | 28 | 0 |
 
@@ -122,7 +122,7 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | GET | `/api/elections/{id:int}/audit/verify` | `ElectionsController.VerifyAudit` (line 108) |  |
 | GET | `/api/elections/{id:int}/board` | `ElectionsController.Board` (line 61) |  |
 | GET | `/api/elections/{id:int}/candidate-list` | `ElectionsController.CandidateList` (line 68) |  |
-| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 526) | CredentialVerification |
+| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 534) | CredentialVerification |
 | GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 253) |  |
 | GET | `/api/elections/{id:int}/opened-ballots` | `ElectionsController.OpenedBallots` (line 98) |  |
 | GET | `/api/elections/{id:int}/results` | `ElectionsController.Results` (line 87) |  |
@@ -338,6 +338,7 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 | GET | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.List` (line 18) |  |
 | GET | `/api/elections/{id:int}/audit` | `ElectionsController.Audit` (line 120) |  |
 | GET | `/api/elections/{id:int}/documents/{formCode}` | `ElectionsController.Document` (line 465) |  |
+| GET | `/api/elections/{id:int}/print-records` | `ElectionsController.ListPrints` (line 498) |  |
 | GET | `/api/elections/{id:int}/readiness` | `ElectionsController.Readiness` (line 172) |  |
 
 ### 3.11 ElectionStaff + step-up
@@ -371,7 +372,7 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 | POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 369) |  |
 | POST | `/api/elections/{id:int}/key-destroyed` | `ElectionsController.KeyDestroyed` (line 404) |  |
 | POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 152) |  |
-| POST | `/api/elections/{id:int}/print-records/{printId:guid}/revoke` | `ElectionsController.RevokePrint` (line 498) |  |
+| POST | `/api/elections/{id:int}/print-records/{printId:guid}/revoke` | `ElectionsController.RevokePrint` (line 506) |  |
 | POST | `/api/elections/{id:int}/readiness/attest` | `ElectionsController.AttestReadiness` (line 180) |  |
 | POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 199) |  |
 | POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 216) |  |
@@ -461,7 +462,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | GET | `/api/election-content/admin` | `ElectionContentController.GetAll` (line 44) |  |
 | GET | `/api/election-content/admin/{id:int}` | `ElectionContentController.GetById` (line 51) |  |
 | PUT | `/api/election-content/{id:int}` | `ElectionContentController.Update` (line 70) |  |
-| GET | `/api/elections/forms/{code}/blank` | `ElectionsController.BlankForm` (line 513) |  |
+| GET | `/api/elections/forms/{code}/blank` | `ElectionsController.BlankForm` (line 521) |  |
 | POST | `/api/events/admin` | `EventsController.CreateEvent` (line 183) |  |
 | GET | `/api/events/admin/all` | `EventsController.GetAllEventsForAdmin` (line 175) |  |
 | POST | `/api/events/admin/approve-registration` | `EventsController.ApproveRegistration` (line 239) |  |

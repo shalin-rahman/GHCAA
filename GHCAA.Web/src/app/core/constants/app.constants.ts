@@ -712,6 +712,8 @@ export const API_ENDPOINTS = {
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
         VERIFY_DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${encodeURIComponent(formCode)}/verification`,
         VERIFY_PRINT: (printId: string) => `/api/elections/print-records/${encodeURIComponent(printId)}/verification`,
+        PRINT_RECORDS: (id: number) => `/api/elections/${id}/print-records`,
+        REVOKE_PRINT: (id: number, printId: string) => `/api/elections/${id}/print-records/${encodeURIComponent(printId)}/revoke`,
         BLANK_FORM: (formCode: string) => `/api/elections/forms/${encodeURIComponent(formCode)}/blank`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
@@ -793,7 +795,18 @@ export const API_ENDPOINTS = {
         RECOUNT_REFUSED: 'Refused',
         RECOUNT_FIGURES_TITLE: 'Recount figures',
         RECOUNT_FIGURES_SAVED: 'Recount figures saved.',
-        RECOUNT_NO_RESULT: 'This position has no declared result to recount.'
+        RECOUNT_NO_RESULT: 'This position has no declared result to recount.',
+        PRINT_RECORDS_TITLE: 'Print records',
+        PRINT_RECORDS_HIDE: 'Hide print records',
+        PRINT_RECORDS_EMPTY: 'No filled forms have been printed yet.',
+        PRINT_RECORDS_LOAD_FAILED: 'Could not load the print records. Try again.',
+        PRINT_REVOKE_BUTTON: 'Revoke',
+        PRINT_REVOKE_REASON_LABEL: 'Reason for revoking',
+        PRINT_REVOKE_REASON_HINT: 'At least 3 letters or digits, spaces not counted. The QR check will show this print as revoked.',
+        PRINT_REVOKE_CONFIRM_TITLE: 'Revoke print',
+        PRINT_REVOKE_CONFIRMATION: (formCode: string) => `Revoke this ${formCode} print? Its QR code will show it as revoked. This cannot be undone.`,
+        PRINT_REVOKED: 'Print revoked.',
+        PRINT_REVOKE_REASON_MIN: 3
     },
     // Work Package 37.12b election persona routes.
     ADMIN_ELECTION_PERSONAS: {

@@ -130,6 +130,12 @@ class ElectionConstants {
   static const String recountSeatLabel = 'Position';
   static const String recountApplicantLabel = 'Applicant name';
   static const String recountApplicantMemberLabel = 'Applicant member ID';
+
+  // 37.16i. Same wording as ADMIN_ELECTIONS in app.constants.ts.
+  static const String printRecordsTitle = 'Print records';
+  static const String printRecordsEmpty = 'No filled forms have been printed yet.';
+  static const String printRecordsWebOnly = 'Revoke a print on the web portal.';
+  static const String printRecordsLoadFailed = 'Could not load the print records.';
   static const String recountGroundsLabel = 'Grounds';
   static const String recountExplanationLabel = 'Explanation';
   static const String recountReceivedAtLabel = 'Received';

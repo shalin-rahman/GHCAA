@@ -7,7 +7,7 @@ import {
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     ElectionSeatViewDto, NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
     DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
-    ElectionDocumentVerifyDto, ElectionFormPrintVerifyDto, ElectionPrintMode, PublicCandidateSeatDto
+    ElectionDocumentVerifyDto, ElectionFormPrintRowDto, ElectionFormPrintVerifyDto, ElectionPrintMode, PublicCandidateSeatDto
 } from '../models/election.models';
 
 @Injectable({ providedIn: 'root' })
@@ -247,6 +247,16 @@ export class ElectionsService {
 
     verifyPrint(printId: string): Observable<ElectionFormPrintVerifyDto> {
         return this.http.get<ElectionFormPrintVerifyDto>(API_ENDPOINTS.ELECTIONS.VERIFY_PRINT(printId), { headers: this.quietHeaders });
+    }
+
+    // 37.16i. Needs Count and ManageSetup. Newest first.
+    getPrintRecords(electionId: number): Observable<ElectionFormPrintRowDto[]> {
+        return this.http.get<ElectionFormPrintRowDto[]>(API_ENDPOINTS.ELECTIONS.PRINT_RECORDS(electionId));
+    }
+
+    // Needs step-up; the global interceptor raises the dialog and retries.
+    revokePrint(electionId: number, printId: string, reason: string): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.REVOKE_PRINT(electionId, printId), { reason });
     }
 
     getMyAppointments(): Observable<ElectionAppointmentDto[]> {

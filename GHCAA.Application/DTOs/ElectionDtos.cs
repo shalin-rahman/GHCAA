@@ -115,6 +115,9 @@ public record ElectionPrinter(int? UserId, IReadOnlyCollection<string> Roles);
 // 37.14t. What the QR code on a filled form shows. The reader compares it with the paper.
 public record ElectionFormPrintVerifyDto(Guid Id, string Reference, string ElectionTitle, string FormCode, string FormTitle,
     DateTime PrintedAt, string PrintedByRole, ElectionPhase PhaseAtPrint, string ContentHash, bool Revoked, DateTime? RevokedAt);
+// 37.16i. One row of the officials' print-record list.
+public record ElectionFormPrintRowDto(Guid Id, string FormCode, DateTime PrintedAt, string PrintedByRole, ElectionPhase PhaseAtPrint,
+    DateTime? RevokedAt, string? RevokeReason);
 public record ElectionFormPrintRevokeDto(
     [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(500, MinimumLength = 3),
         System.ComponentModel.DataAnnotations.RegularExpression(@"\s*(\S\s*){3,}", ErrorMessage = "Give a reason of at least 3 characters.")] string Reason);

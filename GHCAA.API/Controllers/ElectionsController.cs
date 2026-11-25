@@ -490,6 +490,14 @@ public sealed class ElectionsController(
     public async Task<IActionResult> VerifyPrint(Guid printId, CancellationToken ct) =>
         (await documentService.VerifyPrintAsync(printId, ct)) is { } result ? Ok(result) : NotFound();
 
+    /// <summary>37.16i: an election's print records, newest first, for the officials' revoke screen. Same permissions as RevokePrint, without step-up.</summary>
+    [HttpGet("{id:int}/print-records")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Count | ElectionPermission.ManageSetup)]
+    [ProducesResponseType<IReadOnlyList<ElectionFormPrintRowDto>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListPrints(int id, CancellationToken ct) =>
+        (await documentService.ListPrintsAsync(id, ct)) is { } rows ? Ok(rows) : NotFound();
+
     /// <summary>37.14t: marks a printed form's record revoked, so its QR code reads as revoked. Needs Count and ManageSetup (the Chief Commissioner).</summary>
     [HttpPost("{id:int}/print-records/{printId:guid}/revoke")]
     [Authorize(Policy = Policies.ElectionStaff)]

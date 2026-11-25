@@ -911,6 +911,60 @@ public sealed class ElectionDocumentServiceTests : TestBase
     }
 
     [Test]
+    [Category("FR-39")]
+    public async Task ListPrints_ReturnsNewestFirst_WithRevokeFields()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var older = (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).PrintId!.Value;
+        var newer = (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).PrintId!.Value;
+        _context.ElectionFormPrints.Single(x => x.Id == older).PrintedAt = DateTime.UtcNow.AddHours(-2);
+        await _context.SaveChangesAsync();
+        await _service.RevokePrintAsync(_election.Id, older, await AddUserAsync(), "Misprint");
+
+        var rows = await _service.ListPrintsAsync(_election.Id);
+
+        rows!.Select(x => x.Id).Should().Equal(newer, older);
+        rows[0].RevokedAt.Should().BeNull();
+        rows[1].RevokedAt.Should().NotBeNull();
+        rows[1].RevokeReason.Should().Be("Misprint");
+        rows[1].FormCode.Should().Be("ER-10");
+        (await _service.ListPrintsAsync(_election.Id + 999)).Should().BeNull();
+    }
+
+    [Test]
+    public async Task ListPrints_OnlyThisElection_EmptyWhenNonePrinted()
+    {
+        var period = new ECPeriod { Title = "2029", StartDate = DateTime.UtcNow.AddDays(-1) };
+        _context.ECPeriods.Add(period);
+        await _context.SaveChangesAsync();
+        var other = new Election
+        {
+            Title = "Other Election",
+            ECPeriodId = period.Id,
+            NominationOpensOn = DateTime.UtcNow,
+            NominationClosesOn = DateTime.UtcNow.AddDays(1),
+            PollingOpensOn = DateTime.UtcNow.AddDays(2),
+            PollingClosesOn = DateTime.UtcNow.AddDays(3)
+        };
+        _context.Elections.Add(other);
+        await _context.SaveChangesAsync();
+        _context.ElectionFormPrints.Add(new ElectionFormPrint
+        {
+            Id = Guid.NewGuid(),
+            ElectionId = other.Id,
+            FormCode = "ER-10",
+            ContentHash = "x",
+            PrintedAt = DateTime.UtcNow,
+            PrintedByRole = "Returning Officer",
+            PhaseAtPrint = ElectionPhase.Nomination
+        });
+        await _context.SaveChangesAsync();
+
+        (await _service.ListPrintsAsync(_election.Id)).Should().NotBeNull().And.BeEmpty();
+        (await _service.ListPrintsAsync(other.Id)).Should().ContainSingle();
+    }
+
+    [Test]
     public async Task RevokePrint_MarksRevokedAndAudits_OnlyOnce()
     {
         await SetPhaseAsync(ElectionPhase.Nomination);

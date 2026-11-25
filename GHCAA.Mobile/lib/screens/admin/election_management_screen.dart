@@ -16,6 +16,7 @@ import '../../features/elections/ballot_key.dart';
 import '../../features/elections/election_service.dart';
 import 'election_form_records_sheet.dart';
 import 'election_officials_sheet.dart';
+import 'election_print_records_sheet.dart';
 import 'election_rules_unlock_sheet.dart';
 
 final adminElectionsProvider =
@@ -844,6 +845,15 @@ class _ElectionCard extends StatelessWidget {
                     busy: false,
                     onPressed: () =>
                         showElectionFormRecordsSheet(context, election),
+                  ),
+                if (_can('Count') && _can('ManageSetup'))
+                  _actionButton(
+                    key: const Key('action-print-records'),
+                    label: ElectionConstants.printRecordsTitle,
+                    icon: Icons.print_outlined,
+                    busy: false,
+                    onPressed: () =>
+                        showElectionPrintRecordsSheet(context, election),
                   ),
               ],
             ),

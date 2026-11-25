@@ -1,0 +1,53 @@
+<div class="stack gap-2">
+    <h3>{{ text.PRINT_RECORDS_TITLE }}</h3>
+    <app-loading-panel *ngIf="loading()" [compact]="true" [size]="32" label="Loading print records..." />
+    <p *ngIf="!loading() && loadFailed()" class="text-muted" role="alert">{{ text.PRINT_RECORDS_LOAD_FAILED }}</p>
+    <p *ngIf="!loading() && !loadFailed() && rows().length === 0" class="text-muted">{{ text.PRINT_RECORDS_EMPTY }}</p>
+
+    <div class="table-wrap" *ngIf="rows().length > 0">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th scope="col">Form</th>
+                    <th scope="col">Printed</th>
+                    <th scope="col">Printed by</th>
+                    <th scope="col">Phase</th>
+                    <th scope="col">Revoked</th>
+                    <th scope="col">Reason</th>
+                    <th scope="col" aria-label="Actions"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let row of rows()">
+                    <tr>
+                        <td class="whitespace-nowrap">{{ row.formCode }}</td>
+                        <td>{{ utcToLocal(row.printedAt) | appDate }} {{ utcToLocal(row.printedAt) | date:'shortTime' }}</td>
+                        <td>{{ row.printedByRole }}</td>
+                        <td>{{ phaseLabels[row.phaseAtPrint] }}</td>
+                        <td>
+                            <span *ngIf="row.revokedAt; else notRevoked" class="status-badge inactive">{{ utcToLocal(row.revokedAt) | appDate }}</span>
+                            <ng-template #notRevoked><span class="text-muted">-</span></ng-template>
+                        </td>
+                        <td>{{ row.revokeReason ?? '' }}</td>
+                        <td>
+                            <button *ngIf="canRevoke(row)" class="btn btn-secondary btn-sm" data-testid="revoke-open" [attr.aria-expanded]="revokeOpenId() === row.id" (click)="openRevoke(row)">{{ text.PRINT_REVOKE_BUTTON }}</button>
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Outside the table: a colspan cell makes the global .data-table rule hide the headers. -->
+    <div class="stack gap-2" *ngIf="revokeRow() as row">
+        <div class="form-group">
+            <label [for]="'revoke-reason-' + row.id">{{ text.PRINT_REVOKE_REASON_LABEL }}: {{ row.formCode }}, printed {{ utcToLocal(row.printedAt) | appDate }} {{ utcToLocal(row.printedAt) | date:'shortTime' }}</label>
+            <textarea [id]="'revoke-reason-' + row.id" maxlength="500" [attr.aria-describedby]="'revoke-reason-hint-' + row.id" [(ngModel)]="reason"></textarea>
+            <small [id]="'revoke-reason-hint-' + row.id" class="text-muted text-xs">{{ text.PRINT_REVOKE_REASON_HINT }}</small>
+        </div>
+        <div class="flex gap-2">
+            <button class="btn btn-danger btn-sm" data-testid="revoke-submit" [disabled]="!reasonOk() || revokingId() !== null" (click)="revoke(row)">{{ revokingId() === row.id ? 'Revoking...' : text.PRINT_REVOKE_BUTTON }}</button>
+            <button class="btn btn-secondary btn-sm" (click)="revokeOpenId.set(null)">Cancel</button>
+        </div>
+    </div>
+</div>

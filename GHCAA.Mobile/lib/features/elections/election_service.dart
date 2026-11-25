@@ -923,6 +923,38 @@ class AuditCheck {
       );
 }
 
+// 37.16i. One row of GET /elections/{id}/print-records.
+class ElectionFormPrintRow {
+  final String id;
+  final String formCode;
+  final DateTime? printedAt;
+  final String printedByRole;
+  final String phaseAtPrint;
+  final DateTime? revokedAt;
+  final String? revokeReason;
+
+  const ElectionFormPrintRow({
+    required this.id,
+    required this.formCode,
+    this.printedAt,
+    required this.printedByRole,
+    required this.phaseAtPrint,
+    this.revokedAt,
+    this.revokeReason,
+  });
+
+  factory ElectionFormPrintRow.fromJson(Map<String, dynamic> json) =>
+      ElectionFormPrintRow(
+        id: json['id'] as String,
+        formCode: json['formCode'] as String? ?? '',
+        printedAt: AppUtils.parseUtc(json['printedAt'] as String?),
+        printedByRole: json['printedByRole'] as String? ?? '',
+        phaseAtPrint: json['phaseAtPrint'] as String? ?? '',
+        revokedAt: AppUtils.parseUtc(json['revokedAt'] as String?),
+        revokeReason: json['revokeReason'] as String?,
+      );
+}
+
 class AuditEntry {
   final int seq;
   final DateTime at;
@@ -1192,6 +1224,14 @@ class ElectionService {
   // Null when the chain is whole, otherwise the first broken entry number.
   Future<int?> firstBrokenAuditEntry(int id) async =>
       (await verifyAudit(id)).firstBrokenSeq;
+
+  // Needs Count and ManageSetup. Newest first. Revoking is web only.
+  Future<List<ElectionFormPrintRow>> getPrintRecords(int id) async {
+    final response = await _dio.get('/elections/$id/print-records');
+    return (response.data as List<dynamic>)
+        .map((e) => ElectionFormPrintRow.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 
   // Officials with the ViewAudit permission. Oldest entry first.
   Future<List<AuditEntry>> getAudit(int id) async {

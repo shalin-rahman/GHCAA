@@ -461,6 +461,53 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        [Category("FR-39")]
+        public async Task ListPrints_WithPermissions_Returns200()
+        {
+            var rows = new List<ElectionFormPrintRowDto>
+            {
+                new(Guid.NewGuid(), "ER-10", DateTime.UtcNow, "Chief Commissioner", ElectionPhase.Nomination, null, null),
+            };
+            _documentServiceMock.Setup(x => x.ListPrintsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(rows);
+
+            var result = await _controller.ListPrints(1, CancellationToken.None) as OkObjectResult;
+
+            Assert.That(result!.Value, Is.EqualTo(rows));
+            _documentServiceMock.Setup(x => x.ListPrintsAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync((IReadOnlyList<ElectionFormPrintRowDto>?)null);
+            Assert.That(await _controller.ListPrints(2, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        // The 403 comes from the action's filter, so the test runs that filter as MVC would.
+        [Test]
+        [Category("FR-39")]
+        public async Task ListPrints_WithoutPermissions_Returns403()
+        {
+            var filter = typeof(ElectionsController).GetMethod(nameof(ElectionsController.ListPrints))!
+                .GetCustomAttributes(typeof(GHCAA.API.Filters.RequireElectionPermissionAttribute), false)
+                .Cast<GHCAA.API.Filters.RequireElectionPermissionAttribute>().Single();
+            Assert.That(filter.Needed, Is.EqualTo(ElectionPermission.Count | ElectionPermission.ManageSetup));
+
+            var access = new Mock<IElectionAccessService>();
+            access.Setup(a => a.ElectionIdForAsync(ElectionIdLookup.Election, 1, It.IsAny<CancellationToken>())).ReturnsAsync(1);
+            access.Setup(a => a.HasAsync(1, 5, It.IsAny<IReadOnlyCollection<string>>(), filter.Needed, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            var http = new Microsoft.AspNetCore.Http.DefaultHttpContext
+            {
+                User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(
+                    [new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "5")], "TestAuth")),
+                RequestServices = new ServiceCollection().AddSingleton(access.Object).BuildServiceProvider(),
+            };
+            var context = new Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext(
+                new ActionContext(http, new Microsoft.AspNetCore.Routing.RouteData(new Microsoft.AspNetCore.Routing.RouteValueDictionary { ["id"] = "1" }),
+                    new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor()),
+                [], new Dictionary<string, object?>(), _controller);
+            var ran = false;
+            await filter.OnActionExecutionAsync(context, () => { ran = true; return Task.FromResult<Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext>(null!); });
+
+            Assert.That(ran, Is.False);
+            Assert.That((context.Result as ObjectResult)!.StatusCode, Is.EqualTo(403));
+        }
+
+        [Test]
         public async Task RevokePrint_Success_Returns204()
         {
             var id = Guid.NewGuid();

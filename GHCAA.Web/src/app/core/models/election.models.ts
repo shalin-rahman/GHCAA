@@ -505,6 +505,17 @@ export interface ElectionFormPrintVerifyDto {
     revokedAt: string | null;
 }
 
+// 37.16i. One row of the officials' print-record list.
+export interface ElectionFormPrintRowDto {
+    id: string;
+    formCode: string;
+    printedAt: string;
+    printedByRole: string;
+    phaseAtPrint: ElectionPhase;
+    revokedAt: string | null;
+    revokeReason: string | null;
+}
+
 export interface ElectionAuditEntryDto {
     seq: number;
     at: string;

@@ -25,6 +25,7 @@ import { formatPeriodRange } from '../../core/utils/date.util';
 import { ElectionOfficials } from './election-officials/election-officials';
 import { ElectionRulesUnlock } from './election-rules-unlock/election-rules-unlock';
 import { ElectionFormRecords } from './election-form-records/election-form-records';
+import { ElectionPrintRecords } from './election-print-records/election-print-records';
 import { NominationRecords } from './nomination-records/nomination-records';
 import {
     getElectionPhaseLabel, getElectionPhaseClass,
@@ -36,7 +37,7 @@ type AdminElectionsTab = 'elections' | 'nominations';
 @Component({
     selector: 'app-admin-elections',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock, ElectionFormRecords, NominationRecords],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock, ElectionFormRecords, ElectionPrintRecords, NominationRecords],
     templateUrl: './admin-elections.html'
 })
 export class AdminElections {
@@ -80,6 +81,7 @@ export class AdminElections {
     approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
     officialsOpenId = signal<number | null>(null);
     formRecordsOpenId = signal<number | null>(null);
+    printRecordsOpenId = signal<number | null>(null);
     destroyingKeyId = signal<number | null>(null);
     readonly isSuperAdmin = computed(() => this.auth.hasRole(SUPER_ADMIN_ROLE));
     // Creating an election and listing governance periods are admin-only on the server.
@@ -451,6 +453,10 @@ export class AdminElections {
 
     toggleFormRecords(election: AdminElectionDto): void {
         this.formRecordsOpenId.update(id => id === election.id ? null : election.id);
+    }
+
+    togglePrintRecords(election: AdminElectionDto): void {
+        this.printRecordsOpenId.update(id => id === election.id ? null : election.id);
     }
 
     onFormRecordsChanged(updated: AdminElectionDto): void {

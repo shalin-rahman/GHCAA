@@ -241,6 +241,17 @@ public sealed class ElectionDocumentService(
             p.PrintedAt, p.PrintedByRole, p.PhaseAtPrint, p.ContentHash, p.RevokedAt is not null, p.RevokedAt);
     }
 
+    public async Task<IReadOnlyList<ElectionFormPrintRowDto>?> ListPrintsAsync(int electionId, CancellationToken cancellationToken = default)
+    {
+        if (!await db.Elections.AnyAsync(x => x.Id == electionId, cancellationToken))
+            return null;
+        return await db.ElectionFormPrints.AsNoTracking()
+            .Where(x => x.ElectionId == electionId)
+            .OrderByDescending(x => x.PrintedAt).ThenByDescending(x => x.Id)
+            .Select(x => new ElectionFormPrintRowDto(x.Id, x.FormCode, x.PrintedAt, x.PrintedByRole, x.PhaseAtPrint, x.RevokedAt, x.RevokeReason))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<string?> RevokePrintAsync(int electionId, Guid printId, int actorUserId, string reason, CancellationToken cancellationToken = default)
     {
         var print = await db.ElectionFormPrints.SingleOrDefaultAsync(x => x.Id == printId && x.ElectionId == electionId, cancellationToken);

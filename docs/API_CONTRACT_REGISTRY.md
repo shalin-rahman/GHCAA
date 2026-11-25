@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-25 — GET /api/elections/{id}/print-records
+- Change: new route (ElectionStaff, `Count` and `ManageSetup`, no step-up) that lists an election's filled print records, newest first, as `ElectionFormPrintRowDto[]` (`id`, `formCode`, `printedAt`, `printedByRole`, `phaseAtPrint`, `revokedAt`, `revokeReason`). 404 for an unknown election, 403 without both permissions. Additive only; the revoke route does not change.
+- Reason: TODO 37.16i, plan session S05.
+- Web: `ElectionsService.getPrintRecords` and `revokePrint`; the "Print records" section on the admin elections page lists the rows and revokes one with a reason.
+- Mobile: `ElectionService.getPrintRecords` and a read-only "Print records" sheet on the election management screen. No revoke on mobile.
+
 ### 2026-11-25 — GET /api/elections/print-records/{printId}/verification, GET /api/elections/{id}/documents/{formCode}, GET/PUT /api/config
 - Change: the print verification route now has its own `PrintVerification` rate limit instead of sharing `CredentialVerification`. It answers 429 after `elections.printVerifyLimit` checks (default 60) per IP in `elections.printVerifyWindowMinutes` (default 15). Hitting it no longer uses up the ID card check at `GET /api/verify/{shortCode}`, which keeps its 30 per 15 minutes. `ElectionSettingsDto` gains `printVerifyLimit` (int, 1 to 1000) and `printVerifyWindowMinutes` (int, 1 to 1440). A filled download by the same official of unchanged content (same election, form and content hash, not revoked) now returns the existing print record and its QR code instead of adding a row; a revoked record is never reused. This replaces "two prints of the same content give two records" in the 2026-11-12 entry.
 - Reason: TODO 37.16k, plan session S04.

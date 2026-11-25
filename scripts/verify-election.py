@@ -30,6 +30,7 @@ WEB_SPECS = [
     "src/app/admin/election-personas/admin-election-personas.spec.ts",
     "src/app/admin/elections/admin-elections.spec.ts",
     "src/app/admin/elections/election-officials/election-officials.spec.ts",
+    "src/app/admin/elections/election-print-records/election-print-records.spec.ts",
     "src/app/admin/elections/election-rules-unlock/election-rules-unlock.spec.ts",
     "src/app/core/services/elections.service.spec.ts",
     "src/app/member/election/election.spec.ts",
@@ -45,6 +46,7 @@ MOBILE_TESTS = [
     "test/election_screen_test.dart",
     "test/officials_dashboard_screen_test.dart",
     "test/officials_approvals_screen_test.dart",
+    "test/election_print_records_sheet_test.dart",
 ]
 
 
@@ -88,6 +90,8 @@ def run(name, cmd, cwd, patterns):
 
 
 def main():
+    # Tool output has box-drawing characters the Windows console code page cannot print.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true", help="run the whole backend suite")
     ap.add_argument("--only", choices=["backend", "web", "mobile", "docs"])
@@ -102,10 +106,8 @@ def main():
         steps.append(("backend-tests", cmd, ROOT, [r"Passed!|Failed!|Total tests|error"]))
     if args.only in (None, "web"):
         steps.append(("web-typecheck", [tool("npx"), "tsc", "-p", "tsconfig.app.json", "--noEmit"], WEB, [r"error TS"]))
-        cmd = [tool("npx"), "ng", "test", "--watch=false"]
-        for spec in WEB_SPECS:
-            cmd += ["--include", spec]
-        steps.append(("web-specs", cmd, WEB, [r"Tests\s+\d+", r"Test Files"]))
+        # vitest, not ng test: ng test type-checks every spec in the project, not just these.
+        steps.append(("web-specs", [tool("npx"), "vitest", "run", *WEB_SPECS], WEB, [r"Tests\s+\d+", r"Test Files"]))
     if args.only in (None, "mobile"):
         steps.append(("mobile-analyze", [tool("flutter"), "analyze"], MOBILE, [r"No issues found|issues? found"]))
         steps.append(("mobile-tests", [tool("flutter"), "test", *MOBILE_TESTS], MOBILE, [r"All tests passed|Some tests failed|\+\d+"]))
