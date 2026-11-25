@@ -1,3 +1,5 @@
+using GHCAA.Application.DTOs;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
@@ -113,6 +115,20 @@ namespace GHCAA.API.Extensions
                     });
                 });
 
+                // 37.16k. Numbers from OrgConfig; they are in the key so a changed setting starts a fresh window.
+                options.AddPolicy<string>(RateLimitPolicies.PrintVerification, httpContext =>
+                {
+                    var (limit, minutes) = ReadPrintVerifySettings(httpContext);
+                    var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var key = $"{(isTestEnv ? "__test__" : ip)}|{limit}|{minutes}";
+                    return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(minutes),
+                        PermitLimit = isTestEnv ? 1000 : limit,
+                        QueueLimit = 0
+                    });
+                });
+
                 // General API Policy: (100 requests per 1 minute), applied to every request as a
                 // GlobalLimiter rather than a named policy attached via RequireRateLimiting on
                 // MapControllers(). That attachment used to sit in Program.cs as endpoint metadata,
@@ -139,6 +155,23 @@ namespace GHCAA.API.Extensions
             });
 
             return services;
+        }
+
+        // A config read that fails (database down at cache expiry) falls back to the defaults
+        // instead of failing an anonymous QR check. Stored JSON skips the DTO's Range check, hence the clamp.
+        internal static (int Limit, int Minutes) ReadPrintVerifySettings(HttpContext httpContext)
+        {
+            var defaults = new ElectionSettingsDto();
+            try
+            {
+                var settings = httpContext.RequestServices.GetRequiredService<IOrgConfigService>()
+                    .GetConfigAsync().GetAwaiter().GetResult().Elections ?? defaults;
+                return (Math.Clamp(settings.PrintVerifyLimit, 1, 1000), Math.Clamp(settings.PrintVerifyWindowMinutes, 1, 1440));
+            }
+            catch (Exception)
+            {
+                return (defaults.PrintVerifyLimit, defaults.PrintVerifyWindowMinutes);
+            }
         }
     }
 }

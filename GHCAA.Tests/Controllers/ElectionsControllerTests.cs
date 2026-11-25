@@ -3,6 +3,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -576,6 +578,53 @@ namespace GHCAA.Tests.Controllers
             Assert.That(route.Template, Is.EqualTo("latest-declared"));
         }
 
+        // 37.16k. The QR check on a print has its own limit, so scanning prints cannot use up the card check.
+        [Test]
+        [Category("FR-39")]
+        public void PrintVerification_UsesItsOwnRateLimitPolicy()
+        {
+            static string Policy(string method) => typeof(ElectionsController).GetMethod(method)!
+                .GetCustomAttributes(typeof(Microsoft.AspNetCore.RateLimiting.EnableRateLimitingAttribute), false)
+                .Cast<Microsoft.AspNetCore.RateLimiting.EnableRateLimitingAttribute>().Single().PolicyName!;
+
+            Assert.That(Policy(nameof(ElectionsController.VerifyPrint)), Is.EqualTo(Constants.RateLimitPolicies.PrintVerification));
+            Assert.That(Policy(nameof(ElectionsController.VerifyDocument)), Is.EqualTo(Constants.RateLimitPolicies.CredentialVerification));
+        }
+
+        [TestCase(0, 0, 1, 1)]
+        [TestCase(5000, 9999, 1000, 1440)]
+        [TestCase(20, 30, 20, 30)]
+        [Category("FR-39")]
+        public void PrintVerifySettings_AreClampedToTheDtoRange(int limit, int minutes, int expectedLimit, int expectedMinutes)
+        {
+            var config = new Mock<IOrgConfigService>();
+            config.Setup(c => c.GetConfigAsync()).ReturnsAsync(new OrgConfigDto
+            {
+                Elections = new ElectionSettingsDto { PrintVerifyLimit = limit, PrintVerifyWindowMinutes = minutes }
+            });
+
+            var result = GHCAA.API.Extensions.RateLimitingExtensions.ReadPrintVerifySettings(ContextWith(config.Object));
+
+            Assert.That(result, Is.EqualTo((expectedLimit, expectedMinutes)));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public void PrintVerifySettings_ConfigReadFails_UsesTheDefaults()
+        {
+            var config = new Mock<IOrgConfigService>();
+            config.Setup(c => c.GetConfigAsync()).ThrowsAsync(new InvalidOperationException("database down"));
+
+            var result = GHCAA.API.Extensions.RateLimitingExtensions.ReadPrintVerifySettings(ContextWith(config.Object));
+
+            Assert.That(result, Is.EqualTo((60, 15)));
+        }
+
+        private static Microsoft.AspNetCore.Http.DefaultHttpContext ContextWith(IOrgConfigService config) => new()
+        {
+            RequestServices = new ServiceCollection().AddSingleton(config).BuildServiceProvider()
+        };
+
         private static readonly ElectionReadinessDto PartlyReady = new(false,
         [
             new(Constants.Elections.Readiness.RollFrozen, true),
@@ -688,6 +737,68 @@ namespace GHCAA.Tests.Controllers
             _electionServiceMock.Setup(x => x.GetReadinessAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(PartlyReady);
 
             AssertNamesUnmet(await _controller.Approve(55, access.Object, CancellationToken.None));
+        }
+    }
+
+    // 37.16k. Runs the real pipeline in Production so the real limits apply. The print limit is
+    // lowered to 2 through OrgConfig, which is where an admin would change it.
+    [TestFixture]
+    [NonParallelizable]
+    public class ElectionsPrintVerificationRateLimitTests
+    {
+        private GHCAA.Tests.Integration.ErrorResponseShapeTestFactory _factory = null!;
+        private IDisposable _app = null!;
+        private HttpClient _client = null!;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            _factory = new GHCAA.Tests.Integration.ErrorResponseShapeTestFactory();
+            var app = _factory.WithWebHostBuilder(b => b.ConfigureTestServices(services =>
+            {
+                var real = services.Last(d => d.ServiceType == typeof(IOrgConfigService));
+                services.Remove(real);
+                services.AddScoped<IOrgConfigService>(sp => new LowPrintLimit(Resolve(sp, real)));
+            }));
+            _app = app;
+            _client = app.CreateClient();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _client.Dispose();
+            _app.Dispose();
+            _factory.Dispose();
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task CardVerification_StillAnswers_AfterPrintLimitIsHit()
+        {
+            var printUrl = $"/api/elections/print-records/{Guid.NewGuid()}/verification";
+
+            for (var i = 0; i < 2; i++)
+                Assert.That((int)(await _client.GetAsync(printUrl)).StatusCode, Is.Not.EqualTo(429));
+            Assert.That((int)(await _client.GetAsync(printUrl)).StatusCode, Is.EqualTo(429));
+
+            Assert.That((int)(await _client.GetAsync("/api/verify/NOSUCHCODE")).StatusCode, Is.Not.EqualTo(429));
+        }
+
+        private static IOrgConfigService Resolve(IServiceProvider sp, ServiceDescriptor d) =>
+            d.ImplementationFactory is not null ? (IOrgConfigService)d.ImplementationFactory(sp)
+            : d.ImplementationInstance is not null ? (IOrgConfigService)d.ImplementationInstance
+            : (IOrgConfigService)ActivatorUtilities.CreateInstance(sp, d.ImplementationType!);
+
+        private sealed class LowPrintLimit(IOrgConfigService inner) : IOrgConfigService
+        {
+            public async Task<OrgConfigDto> GetConfigAsync()
+            {
+                var config = await inner.GetConfigAsync();
+                return config with { Elections = config.Elections with { PrintVerifyLimit = 2 } };
+            }
+
+            public Task UpdateConfigAsync(OrgConfigDto dto, string updatedByAdminId) => inner.UpdateConfigAsync(dto, updatedByAdminId);
         }
     }
 }

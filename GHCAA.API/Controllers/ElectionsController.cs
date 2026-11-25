@@ -482,10 +482,10 @@ public sealed class ElectionsController(
         };
     }
 
-    /// <summary>37.14t: what a filled form's QR code points at. Unknown ids and test elections are 404. Shares the credential-check rate limit.</summary>
+    /// <summary>37.14t: what a filled form's QR code points at. Unknown ids and test elections are 404. Has its own rate limit, set in OrgConfig (37.16k).</summary>
     [HttpGet("print-records/{printId:guid}/verification")]
     [AllowAnonymous]
-    [EnableRateLimiting(RateLimitPolicies.CredentialVerification)]
+    [EnableRateLimiting(RateLimitPolicies.PrintVerification)]
     [ProducesResponseType<ElectionFormPrintVerifyDto>(StatusCodes.Status200OK)]
     public async Task<IActionResult> VerifyPrint(Guid printId, CancellationToken ct) =>
         (await documentService.VerifyPrintAsync(printId, ct)) is { } result ? Ok(result) : NotFound();

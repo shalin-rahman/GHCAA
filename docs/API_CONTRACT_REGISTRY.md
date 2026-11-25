@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-25 — GET /api/elections/print-records/{printId}/verification, GET /api/elections/{id}/documents/{formCode}, GET/PUT /api/config
+- Change: the print verification route now has its own `PrintVerification` rate limit instead of sharing `CredentialVerification`. It answers 429 after `elections.printVerifyLimit` checks (default 60) per IP in `elections.printVerifyWindowMinutes` (default 15). Hitting it no longer uses up the ID card check at `GET /api/verify/{shortCode}`, which keeps its 30 per 15 minutes. `ElectionSettingsDto` gains `printVerifyLimit` (int, 1 to 1000) and `printVerifyWindowMinutes` (int, 1 to 1440). A filled download by the same official of unchanged content (same election, form and content hash, not revoked) now returns the existing print record and its QR code instead of adding a row; a revoked record is never reused. This replaces "two prints of the same content give two records" in the 2026-11-12 entry.
+- Reason: TODO 37.16k, plan session S04.
+- Web: `ElectionSettings` and `DEFAULT_ELECTION_SETTINGS` carry the two fields; the settings page spreads the server values, so a save keeps them. No screen edits them yet.
+- Mobile: no change. `OrgConfig` reads only the election fields it shows, and the 429 is handled like any other.
+
 ### 2026-11-13 — POST /api/auth/register, POST /api/events/register
 - Change: a refused request now answers with a status and the reason in `detail` instead of a 500 with no detail. POST /api/auth/register answers 409 "Member with same Email, NID, or Mobile already exists." for a duplicate application. POST /api/events/register answers 409 with the reason when the member is already registered, the event is members only, inactive, not open yet, closed, ended or full, and 404 for an unknown event. Success replies do not change. The services throw `RequestConflictException` (a subclass of `InvalidOperationException`) for these cases, and only that type is mapped; any other fault still reaches `ExceptionMiddleware` as a 500.
 - Reason: TODO 84.102, found while writing the membership and event walkthroughs.

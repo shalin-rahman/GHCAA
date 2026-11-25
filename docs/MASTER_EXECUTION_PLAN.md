@@ -33,7 +33,7 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S04 (37.16k). Then run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S05 (37.16i). Then run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Committed by the owner before 2026-11-21:** the 37.14t print-record work, its migration
   `20261112120000_AddElectionFormPrints`, the revoke concurrency token, the ER-17 phase bands and
@@ -124,7 +124,7 @@ summary text and link in sync with that card. Run top to bottom.
 | S01 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S02 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S03 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S04 | 37.16k | [Rate-limit print verification and reuse print records](#s04) | M | backend | | S03 |
+| S04 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
 | S06 | 37.14n, 37.14t | [Run the print-record walkthrough and QR check](#s06) | S | local stack run | | S05 |
 | S07 | 99.3 | [Run full CI and get owner acceptance](#s07) | S | full ci-local | | S01, S02 |
@@ -298,55 +298,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
-
-<a id="s04"></a>
-**S04 · 37.16k · M**
-- Goal: print verification has its own rate limit read from OrgConfig, and a second identical filled
-  download returns the first print id and adds no row.
-- Before you start: S03 closed. `grep -n "CredentialVerification" GHCAA.API/Controllers/ElectionsController.cs`
-  shows the policy on the print verification route (line 486).
-- Read (only these): `GHCAA.API/Extensions/RateLimitingExtensions.cs`; `RateLimitPolicies` in
-  `GHCAA.Domain/Constants.cs` (line 41); `ElectionSettingsDto` in `GHCAA.Application/DTOs/OrgConfigDto.cs`
-  (line 27); `GeneratePdfAsync` in `ElectionDocumentService.cs` (line 98, the `new ElectionFormPrint`
-  at 128); `ElectionFormPrint` in `GHCAA.Domain/Models/Election.cs`; memory
-  `gotcha_ratelimit_api_policy_overrides_named_policies`.
-- Change (only these files): `GHCAA.Domain/Constants.cs`, `RateLimitingExtensions.cs`,
-  `GHCAA.API/Controllers/ElectionsController.cs`, `OrgConfigDto.cs`, `ElectionDocumentService.cs`,
-  `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json`, `docs/CONFIG_DRIVEN_FRAMEWORK.md`,
-  `docs/API_CONTRACT_REGISTRY.md`, `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`,
-  `GHCAA.Tests/Controllers/ElectionsControllerTests.cs`, the authz catalog output.
-- Do not touch: the `CredentialVerification` policy and its numbers; the route
-  `GET api/elections/{id:int}/documents/{formCode}/verification` (it keeps the old policy);
-  `appsettings*.json`; the global limiter.
-- Steps:
-  1. Add `RateLimitPolicies.PrintVerification = "PrintVerification"`. -> check: build.
-  2. Add `PrintVerifyLimit` (int, default 60, `[Range(1, 1000)]`) and `PrintVerifyWindowMinutes`
-     (int, default 15, `[Range(1, 1440)]`) to `ElectionSettingsDto`. Both are non-nullable, since
-     stored JSON drops nulls. Update the golden as the failure message of
-     `OrgConfigGoldenSnapshotTests.cs` says, and add both keys to `CONFIG_DRIVEN_FRAMEWORK.md`.
-     -> check: `--filter "FullyQualifiedName~OrgConfigGoldenSnapshotTests"` passes.
-  3. Register the policy in `RateLimitingExtensions.cs`: fixed window, per IP, numbers read from the
-     OrgConfig election settings. -> check: the rate-limit test below.
-  4. Put `[EnableRateLimiting(RateLimitPolicies.PrintVerification)]` on the print verification
-     action only. -> check: the controller test below.
-  5. In `GeneratePdfAsync`, before the insert, look for a print with the same `ElectionId`,
-     `FormCode`, `PrintedByUserId` and `ContentHash` and `RevokedAt == null`. When found, use its
-     `Id` and insert nothing. -> check: the two service tests below.
-- Contract: no new route. `GET api/elections/print-records/{printId:guid}/verification` stays
-  anonymous with the same response; only its rate-limit policy changes (429 past the limit).
-  `ElectionSettingsDto` gains the two fields. Record both in `docs/API_CONTRACT_REGISTRY.md`.
-- Tests: `ElectionsControllerTests.cs` :: `PrintVerification_UsesItsOwnRateLimitPolicy` (attribute
-  names `PrintVerification`); `ElectionDocumentServiceTests.cs` ::
-  `GeneratePdf_SameOfficialSameContent_ReusesPrintId` and `GeneratePdf_RevokedPrint_IsNotReused`;
-  `ElectionsControllerTests.cs` :: `CardVerification_StillAnswers_AfterPrintLimitIsHit`. Tag
-  `[Category("FR-39")]`.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ElectionDocumentServiceTests|FullyQualifiedName~ElectionsControllerTests"`;
-  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
-  `python scripts/ci-local.py --only contract`.
-- Done when: the four tests pass; the registry and the catalog are updated; 37.16k DONE.
-- Stop and ask if: the limiter cannot read OrgConfig per request without blocking on async code.
-  Default: read both values once at startup and note in the tracker that a change needs a restart.
-  Also stop if the global limiter replaces the named policy; report what the test shows.
 
 <a id="s05"></a>
 **S05 · 37.16i · M**
@@ -5873,6 +5824,7 @@ brief asks for it.
 | 2026-11-21 | 84.100 (S01) | The load failure did not come back: `npm run test:unit` gave 130 of 130 files and 1149 of 1149 tests, twice, so no spec needed a fix. The ci-local `unit-tests` step now fails on a failed or missing "Test Files" count, even when the exit code is 0. A temporary throwing spec made `ci-local.py --only web` fail; after it was deleted the layer passed 4 of 4. `test_ci_local.py`: 6 of 6 OK. One reviewer finding (the tests overwrote the real step log) fixed | `scripts/ci-local.py`, `scripts/test_ci_local.py` (new), `docs/TODO.md`, this file |
 | 2026-11-21 | 84.101, 84.99 (S02) | ci-local runs `dotnet tool restore` in `GHCAA.API`, lists the tool manifests nearest first, and names a stray one above the repo when swagger is missing; the stray `C:\Users\dotnet-tools.json` was already gone. Six migrations (the card's five and `SeedPolicySiteContent`, on the owner's word) wrap `setval` in `DO $sv$`. The idempotent script applied twice on an empty PostgreSQL database, and `Migrate()` built a second one with all 38 migrations. `docs/api/swagger.json` regenerated on the owner's word for the 37.14t print-record routes; contract layer 4 of 4. `test_ci_local.py`: 14 of 14 OK; backend layer 7 of 7 | `scripts/ci-local.py`, `scripts/test_ci_local.py`, six PgSql migrations, `docs/api/swagger.json`, `docs/TODO.md`, this file |
 | 2026-11-21 | 37.16j (S03) | `RevokePrint_TwoContextsOnPostgres_OneRevokeOneAuditEntry` (NFR-R5) runs two revokes from two contexts that both read the print before either saves, on its own database on the server in `GHCAA_TEST_PG`. Local PostgreSQL 18: one done, one already recorded, one `RevokedAt`, one `FormPrintRevoked` entry, audit chain valid. Skipped without the variable. `ElectionDocumentServiceTests` 89 passed, 1 skipped without it; 90 of 90 with it. Decision written: a failed audit write rolls the claim back. No service change. Backend layer 7 of 7. `GHCAA.Infrastructure/DependencyInjection.cs` had picked up CRLF line endings in the working copy; it was put back to the LF bytes in HEAD | `GHCAA.Tests/Services/ElectionDocumentServiceTests.cs`, `docs/TODO.md`, this file |
+| 2026-11-25 | 37.16k (S04) | Print verification has its own `PrintVerification` policy, its limit and window read on each request from OrgConfig through the cache (owner choice), with a fallback to the defaults if the read fails and the numbers in the partition key. A second identical filled download by the same official returns the first unrevoked record; a printer with no user id never matches. A real-pipeline test gets 429 on the third print check with a limit of 2 while the card check still answers. Reviewer findings fixed (fallback and clamp, null user, comments, the 37.14t supersede note). Targeted run 209 passed, 1 skipped; backend 7 of 7; contract 4 of 4. Known gap: two simultaneous downloads can still add two rows | `RateLimitingExtensions.cs`, `ElectionsController.cs`, `ElectionDocumentService.cs`, `OrgConfigDto.cs`, `Constants.cs`, two test files, golden OrgConfig, `election.models.ts`, registry, `CONFIG_DRIVEN_FRAMEWORK.md`, authorization catalog, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 

@@ -93,6 +93,8 @@ export interface ElectionSettings {
     countRequesterOnly: boolean;
     unfreezeCutoffDaysBeforeNominationClose: number;
     defaultPrintMode: ElectionPrintMode;
+    printVerifyLimit: number;
+    printVerifyWindowMinutes: number;
 }
 
 // Same values as ElectionSettingsDto. Used when a stored config or the build fallback has no section.
@@ -108,7 +110,9 @@ export const DEFAULT_ELECTION_SETTINGS: ElectionSettings = {
     publishPerSeatBallots: true,
     countRequesterOnly: false,
     unfreezeCutoffDaysBeforeNominationClose: 2,
-    defaultPrintMode: 'Blank'
+    defaultPrintMode: 'Blank',
+    printVerifyLimit: 60,
+    printVerifyWindowMinutes: 15
 };
 
 export interface AdminElectionPositionDto {

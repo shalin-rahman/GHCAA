@@ -774,17 +774,67 @@ public sealed class ElectionDocumentServiceTests : TestBase
         _context.ElectionFormPrints.Should().BeEmpty();
     }
 
-    // Two prints of the same content are two records, and the hash shows they match.
+    // 37.16k. A repeat download by the same official with unchanged content keeps one record.
     [Test]
-    public async Task GeneratePdf_SameContentTwice_TwoRecordsOneHash()
+    [Category("FR-39")]
+    public async Task GeneratePdf_SameOfficialSameContent_ReusesPrintId()
     {
         await SetPhaseAsync(ElectionPhase.Nomination);
+        var official = new ElectionPrinter(await AddUserAsync(), ["Admin"]);
 
-        var a = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
-        var b = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
+        var a = await _service.GeneratePdfAsync(_election.Id, "ER-10", official, ElectionPrintMode.Filled);
+        var b = await _service.GeneratePdfAsync(_election.Id, "er-10", official, ElectionPrintMode.Filled);
 
-        a.PrintId!.Value.Should().NotBe(b.PrintId!.Value);
-        _context.ElectionFormPrints.Select(x => x.ContentHash).Distinct().Should().ContainSingle();
+        b.Outcome.Should().Be(ElectionPrintOutcome.Printed);
+        b.PrintId.Should().Be(a.PrintId!.Value);
+        _context.ElectionFormPrints.Should().ContainSingle();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task GeneratePdf_RevokedPrint_IsNotReused()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var official = new ElectionPrinter(await AddUserAsync(), ["Admin"]);
+        var first = (await _service.GeneratePdfAsync(_election.Id, "ER-10", official, ElectionPrintMode.Filled)).PrintId!.Value;
+        (await _service.RevokePrintAsync(_election.Id, first, await AddUserAsync(), "Misprint")).Should().BeNull();
+
+        var second = (await _service.GeneratePdfAsync(_election.Id, "ER-10", official, ElectionPrintMode.Filled)).PrintId!.Value;
+
+        second.Should().NotBe(first);
+        _context.ElectionFormPrints.Count().Should().Be(2);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task GeneratePdf_OtherOfficialOrChangedContent_GetsItsOwnRecord()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var official = new ElectionPrinter(await AddUserAsync(), ["Admin"]);
+        var first = (await _service.GeneratePdfAsync(_election.Id, "ER-10", official, ElectionPrintMode.Filled)).PrintId!.Value;
+        var other = new ElectionPrinter(await AddUserAsync(), ["Admin"]);
+
+        var byOther = (await _service.GeneratePdfAsync(_election.Id, "ER-10", other, ElectionPrintMode.Filled)).PrintId!.Value;
+        _election.Title += " (amended)";
+        await _context.SaveChangesAsync();
+        var changed = (await _service.GeneratePdfAsync(_election.Id, "ER-10", official, ElectionPrintMode.Filled)).PrintId!.Value;
+
+        new[] { first, byOther, changed }.Should().OnlyHaveUniqueItems();
+        _context.ElectionFormPrints.Count().Should().Be(3);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task GeneratePdf_PrinterWithNoUserId_IsNeverReused()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var anonymous = new ElectionPrinter(null, ["Admin"]);
+
+        var first = (await _service.GeneratePdfAsync(_election.Id, "ER-10", anonymous, ElectionPrintMode.Filled)).PrintId!.Value;
+        var second = (await _service.GeneratePdfAsync(_election.Id, "ER-10", anonymous, ElectionPrintMode.Filled)).PrintId!.Value;
+
+        second.Should().NotBe(first);
+        _context.ElectionFormPrints.Count().Should().Be(2);
     }
 
     [Test]

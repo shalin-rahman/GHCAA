@@ -208,6 +208,8 @@
     "PublishPerSeatBallots": true,
     "CountRequesterOnly": false,
     "UnfreezeCutoffDaysBeforeNominationClose": 2,
-    "DefaultPrintMode": "Blank"
+    "DefaultPrintMode": "Blank",
+    "PrintVerifyLimit": 60,
+    "PrintVerifyWindowMinutes": 15
   }
 }

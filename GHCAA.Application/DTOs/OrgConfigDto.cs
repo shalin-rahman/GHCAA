@@ -50,6 +50,11 @@ namespace GHCAA.Application.DTOs
         // 37.14s. Blank by default; the other copy stays one click away.
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public Enums.ElectionPrintMode DefaultPrintMode { get; init; } = Enums.ElectionPrintMode.Blank;
+        // 37.16k. Anonymous QR checks on printed forms, per IP.
+        [System.ComponentModel.DataAnnotations.Range(1, 1000)]
+        public int PrintVerifyLimit { get; init; } = 60;
+        [System.ComponentModel.DataAnnotations.Range(1, 1440)]
+        public int PrintVerifyWindowMinutes { get; init; } = 15;
     }
 
     public record DocumentEntryDto

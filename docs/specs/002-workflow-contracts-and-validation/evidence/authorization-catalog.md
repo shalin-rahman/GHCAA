@@ -103,10 +103,10 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/auth/refresh` | `AuthController.Refresh` (line 77) | Auth, Refresh |
 | POST | `/api/auth/refresh-mobile` | `AuthController.RefreshMobile` (line 111) | Auth, Refresh |
 | POST | `/api/auth/register` | `RegistrationController.Register` (line 28) | Registration |
-| POST | `/api/auth/resend-otp` | `RegistrationController.ResendOtp` (line 107) | Registration, Auth |
+| POST | `/api/auth/resend-otp` | `RegistrationController.ResendOtp` (line 116) | Registration, Auth |
 | POST | `/api/auth/reset-password` | `AuthController.ResetPassword` (line 389) | Auth |
-| GET | `/api/auth/status/{id:int}` | `RegistrationController.GetStatus` (line 74) | Registration |
-| POST | `/api/auth/verify-email` | `RegistrationController.VerifyEmail` (line 92) | Registration, Auth |
+| GET | `/api/auth/status/{id:int}` | `RegistrationController.GetStatus` (line 83) | Registration |
+| POST | `/api/auth/verify-email` | `RegistrationController.VerifyEmail` (line 101) | Registration, Auth |
 | GET | `/api/campaigns/public` | `CampaignsController.GetPublicCampaigns` (line 23) |  |
 | GET | `/api/campaigns/{slug}` | `CampaignsController.GetBySlug` (line 30) |  |
 | GET | `/api/campaigns/{slug}/honour-roll` | `CampaignsController.GetHonourRoll` (line 38) |  |
@@ -117,12 +117,12 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | GET | `/api/election-content/{kind}/{key}` | `ElectionContentController.GetPublishedByKey` (line 36) |  |
 | GET | `/api/elections/current` | `ElectionsController.GetCurrent` (line 136) |  |
 | GET | `/api/elections/latest-declared` | `ElectionsController.GetLatestDeclared` (line 143) |  |
-| GET | `/api/elections/print-records/{printId:guid}/verification` | `ElectionsController.VerifyPrint` (line 488) | CredentialVerification |
+| GET | `/api/elections/print-records/{printId:guid}/verification` | `ElectionsController.VerifyPrint` (line 490) | PrintVerification |
 | GET | `/api/elections/{id:int}` | `ElectionsController.Get` (line 50) |  |
 | GET | `/api/elections/{id:int}/audit/verify` | `ElectionsController.VerifyAudit` (line 108) |  |
 | GET | `/api/elections/{id:int}/board` | `ElectionsController.Board` (line 61) |  |
 | GET | `/api/elections/{id:int}/candidate-list` | `ElectionsController.CandidateList` (line 68) |  |
-| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 524) | CredentialVerification |
+| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 526) | CredentialVerification |
 | GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 253) |  |
 | GET | `/api/elections/{id:int}/opened-ballots` | `ElectionsController.OpenedBallots` (line 98) |  |
 | GET | `/api/elections/{id:int}/results` | `ElectionsController.Results` (line 87) |  |
@@ -265,7 +265,7 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| GET | `/api/events/registration/{id}` | `EventsController.GetRegistrationForInvitation` (line 134) |  |
+| GET | `/api/events/registration/{id}` | `EventsController.GetRegistrationForInvitation` (line 147) |  |
 
 ### 3.5 Authenticated + in-body Admin or SuperAdmin
 
@@ -292,7 +292,7 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 |---|---|---|---|
 | DELETE | `/api/Forum/posts/{postId}` | `ForumController.DeletePost` (line 106) |  |
 | DELETE | `/api/Forum/topics/{topicId}` | `ForumController.DeleteTopic` (line 94) |  |
-| GET | `/api/events/my-registrations` | `EventsController.GetMyRegistrations` (line 117) |  |
+| GET | `/api/events/my-registrations` | `EventsController.GetMyRegistrations` (line 130) |  |
 | GET | `/api/financials/my-dues` | `FinancialsController.GetMyDues` (line 109) |  |
 | GET | `/api/financials/my-history` | `FinancialsController.GetMyPaymentHistory` (line 33) |  |
 
@@ -371,7 +371,7 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 | POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 369) |  |
 | POST | `/api/elections/{id:int}/key-destroyed` | `ElectionsController.KeyDestroyed` (line 404) |  |
 | POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 152) |  |
-| POST | `/api/elections/{id:int}/print-records/{printId:guid}/revoke` | `ElectionsController.RevokePrint` (line 496) |  |
+| POST | `/api/elections/{id:int}/print-records/{printId:guid}/revoke` | `ElectionsController.RevokePrint` (line 498) |  |
 | POST | `/api/elections/{id:int}/readiness/attest` | `ElectionsController.AttestReadiness` (line 180) |  |
 | POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 199) |  |
 | POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 216) |  |
@@ -461,24 +461,24 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | GET | `/api/election-content/admin` | `ElectionContentController.GetAll` (line 44) |  |
 | GET | `/api/election-content/admin/{id:int}` | `ElectionContentController.GetById` (line 51) |  |
 | PUT | `/api/election-content/{id:int}` | `ElectionContentController.Update` (line 70) |  |
-| GET | `/api/elections/forms/{code}/blank` | `ElectionsController.BlankForm` (line 511) |  |
-| POST | `/api/events/admin` | `EventsController.CreateEvent` (line 170) |  |
-| GET | `/api/events/admin/all` | `EventsController.GetAllEventsForAdmin` (line 162) |  |
-| POST | `/api/events/admin/approve-registration` | `EventsController.ApproveRegistration` (line 226) |  |
-| POST | `/api/events/admin/budget` | `EventsController.UpdateBudget` (line 299) |  |
-| POST | `/api/events/admin/checkin/qr` | `EventsController.QRCodeCheckIn` (line 248) |  |
-| POST | `/api/events/admin/expenses` | `EventsController.AddExpense` (line 307) |  |
-| DELETE | `/api/events/admin/expenses/{id}` | `EventsController.DeleteExpense` (line 315) |  |
-| GET | `/api/events/admin/registrations` | `EventsController.GetAllRegistrations` (line 218) |  |
-| POST | `/api/events/admin/registrations/{id}/send-invitation` | `EventsController.SendInvitation` (line 240) |  |
-| POST | `/api/events/admin/tasks` | `EventsController.CreateTask` (line 267) |  |
-| DELETE | `/api/events/admin/tasks/{id}` | `EventsController.DeleteTask` (line 283) |  |
-| POST | `/api/events/admin/tasks/{id}/toggle` | `EventsController.ToggleTask` (line 275) |  |
-| GET | `/api/events/admin/{eventId}/budget` | `EventsController.GetEventBudget` (line 291) |  |
-| GET | `/api/events/admin/{eventId}/tasks` | `EventsController.GetEventTasks` (line 259) |  |
-| DELETE | `/api/events/admin/{id}` | `EventsController.DeleteEvent` (line 187) |  |
-| PUT | `/api/events/admin/{id}` | `EventsController.UpdateEvent` (line 178) |  |
-| POST | `/api/events/admin/{id}/logo` | `EventsController.UploadEventLogo` (line 195) |  |
+| GET | `/api/elections/forms/{code}/blank` | `ElectionsController.BlankForm` (line 513) |  |
+| POST | `/api/events/admin` | `EventsController.CreateEvent` (line 183) |  |
+| GET | `/api/events/admin/all` | `EventsController.GetAllEventsForAdmin` (line 175) |  |
+| POST | `/api/events/admin/approve-registration` | `EventsController.ApproveRegistration` (line 239) |  |
+| POST | `/api/events/admin/budget` | `EventsController.UpdateBudget` (line 312) |  |
+| POST | `/api/events/admin/checkin/qr` | `EventsController.QRCodeCheckIn` (line 261) |  |
+| POST | `/api/events/admin/expenses` | `EventsController.AddExpense` (line 320) |  |
+| DELETE | `/api/events/admin/expenses/{id}` | `EventsController.DeleteExpense` (line 328) |  |
+| GET | `/api/events/admin/registrations` | `EventsController.GetAllRegistrations` (line 231) |  |
+| POST | `/api/events/admin/registrations/{id}/send-invitation` | `EventsController.SendInvitation` (line 253) |  |
+| POST | `/api/events/admin/tasks` | `EventsController.CreateTask` (line 280) |  |
+| DELETE | `/api/events/admin/tasks/{id}` | `EventsController.DeleteTask` (line 296) |  |
+| POST | `/api/events/admin/tasks/{id}/toggle` | `EventsController.ToggleTask` (line 288) |  |
+| GET | `/api/events/admin/{eventId}/budget` | `EventsController.GetEventBudget` (line 304) |  |
+| GET | `/api/events/admin/{eventId}/tasks` | `EventsController.GetEventTasks` (line 272) |  |
+| DELETE | `/api/events/admin/{id}` | `EventsController.DeleteEvent` (line 200) |  |
+| PUT | `/api/events/admin/{id}` | `EventsController.UpdateEvent` (line 191) |  |
+| POST | `/api/events/admin/{id}/logo` | `EventsController.UploadEventLogo` (line 208) |  |
 | POST | `/api/financials/dues/generate` | `FinancialsController.GenerateAnnualDues` (line 136) |  |
 | GET | `/api/financials/member/{memberId}/history` | `FinancialsController.GetMemberPaymentHistory` (line 221) |  |
 | DELETE | `/api/financials/payment/{id}` | `FinancialsController.DeletePayment` (line 208) |  |

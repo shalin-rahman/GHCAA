@@ -168,7 +168,10 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
     "showTurnoutDuringPolling": false,
     "publishPerSeatBallots": true,
     "countRequesterOnly": false,
-    "unfreezeCutoffDaysBeforeNominationClose": 2
+    "unfreezeCutoffDaysBeforeNominationClose": 2,
+    "defaultPrintMode": "Blank",
+    "printVerifyLimit": 60,
+    "printVerifyWindowMinutes": 15
   },
   "localization": {
     "defaultLocale": "en",
@@ -184,6 +187,13 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
 `workflow.credentialValidityMonths` (84.60) sets how many months a newly issued ID card or certificate
 stays valid. The default is 12 and the cap is 600. 0 means the credential never expires. Changing it
 does not touch credentials already issued. Admins edit it on the Workflow tab of the Settings page.
+
+`elections.printVerifyLimit` (default 60, 1 to 1000) and `elections.printVerifyWindowMinutes` (default
+15, 1 to 1440) (37.16k) set how many anonymous QR checks of printed election forms one IP address may
+make in one window. They feed the `PrintVerification` rate limit on
+`GET /api/elections/print-records/{printId}/verification`. The ID card check keeps its own fixed
+limit. The limiter reads the cached config, so a saved change applies on the next request; a change
+made on another instance shows within the 10-minute cache. Development keeps the relaxed limit of 1000.
 
 ---
 

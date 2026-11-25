@@ -39,6 +39,8 @@ namespace GHCAA.Domain
             public const string PasswordReset = "passwordReset";
             public const string ScholarshipStatus = "scholarshipStatus";
             public const string CredentialVerification = "credentialVerification";
+            // 37.16k. Numbers come from OrgConfig Elections.PrintVerifyLimit and PrintVerifyWindowMinutes.
+            public const string PrintVerification = "PrintVerification";
         }
 
         public static class OutputCachePolicies

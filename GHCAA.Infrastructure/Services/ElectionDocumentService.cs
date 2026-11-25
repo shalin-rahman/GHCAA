@@ -125,12 +125,28 @@ public sealed class ElectionDocumentService(
         var tables = await LoadTablesAsync(election, form.Code, cancellationToken);
         var fields = await LoadFieldValuesAsync(election, form.Code, cancellationToken);
         var facts = Facts(election, rollCount);
+        var hash = ContentHash(form, facts, fields, tables);
+
+        // 37.16k. The same official downloading unchanged content gets the existing record back, so the
+        // QR code stays the same and the print log does not fill with copies. A revoked record is never reused,
+        // and a printer with no user id never matches, since two such callers are not the same official.
+        var existing = printer.UserId is null ? null : await db.ElectionFormPrints.AsNoTracking()
+            .Where(x => x.ElectionId == election.Id && x.FormCode == form.Code && x.PrintedByUserId == printer.UserId
+                && x.ContentHash == hash && x.RevokedAt == null)
+            .OrderByDescending(x => x.PrintedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (existing is not null)
+        {
+            var again = await RenderAsync(form, new FilledRecord(election, facts, tables, fields, existing), cancellationToken);
+            return new ElectionPdfResult(ElectionPrintOutcome.Printed, again, existing.Id);
+        }
+
         var print = new ElectionFormPrint
         {
             Id = Guid.NewGuid(),
             ElectionId = election.Id,
             FormCode = form.Code,
-            ContentHash = ContentHash(form, facts, fields, tables),
+            ContentHash = hash,
             PrintedAt = DateTime.UtcNow,
             PrintedByUserId = printer.UserId,
             PrintedByRole = await PrinterRoleAsync(election.Id, printer, cancellationToken),
