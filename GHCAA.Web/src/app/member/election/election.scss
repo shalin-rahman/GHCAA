@@ -1,0 +1,91 @@
+.seat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.seat-title {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+.seat-hint {
+  margin-top: calc(-1 * var(--space-2));
+  font-size: var(--font-size-caption);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    border-color: rgba(var(--accent-rgb), 0.5);
+  }
+
+  &:has(input:checked) {
+    border-color: var(--accent-color);
+    background: rgba(var(--accent-rgb), 0.08);
+  }
+
+  &:has(input:disabled) {
+    cursor: default;
+  }
+
+  &:has(input:disabled:not(:checked)):hover {
+    border-color: var(--glass-border);
+  }
+
+  input {
+    flex-shrink: 0;
+    accent-color: var(--accent-color);
+  }
+
+  img {
+    flex-shrink: 0;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--glass-border);
+  }
+}
+
+.choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  line-height: var(--line-height-body);
+
+  strong {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  small {
+    font-size: var(--font-size-caption);
+  }
+}
+
+.choice-abstain {
+  border-style: dashed;
+  background: transparent;
+}
+
+// A 64-character fingerprint has no break points and overflows a phone screen.
+.fingerprint-note code {
+  overflow-wrap: anywhere;
+}

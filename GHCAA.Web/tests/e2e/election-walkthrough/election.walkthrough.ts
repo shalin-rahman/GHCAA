@@ -920,7 +920,12 @@ test('election walkthrough', async ({ browser, baseURL }) => {
       ok: printed.length >= filledOk && printed.length > 0,
       table: { head: ['Form', 'Print id', 'Revoked'], rows: printed.map(p => [p.form, p.id, p.revoked ? 'yes' : 'no']) },
     });
-    const first = printed[0];
+    // 37.16i: the officials list. It is newest first, so its first row is the one revoked below.
+    const listed = (await call('GET', `/elections/${eid}/print-records`, await token(cc))).body as any[];
+    note('check', ccWeb.label, 'The print records list returns every print', `GET /elections/${eid}/print-records gave ${listed.length} rows; the database holds ${printed.length}.`,
+      { ok: listed.length === printed.length });
+    const newest = listed[0];
+    const first = newest ? { id: String(field(newest, 'Id')), form: String(field(newest, 'FormCode')) } : undefined;
     if (!first) {
       report.bug('Filled form downloads left no print record.');
     } else {
@@ -930,9 +935,35 @@ test('election walkthrough', async ({ browser, baseURL }) => {
         { ok: before.status === 200 && field(before.body, 'Revoked') === false });
       await visitor.show(`/verify/form/${first.id}`, `QR check for the ${first.form} print`);
 
+      await ccWeb.goto(`/officials/elections/${eid}`);
+      await card(ccWeb.page, c.title).getByRole('button', { name: 'Print records', exact: true }).click();
+      const records = ccWeb.page.locator('app-election-print-records');
+      const rows = records.locator('tbody tr');
+      await expect(rows.first()).toBeVisible({ timeout: 30_000 });
+      const shown = await rows.count();
+      note('check', ccWeb.label, 'The Print records table shows every print', `${shown} rows on the officials page.`, { ok: shown === listed.length });
+      await ccWeb.shot('Print records', 'Each filled form printed for this election, newest first.');
+
+      await rows.first().locator('[data-testid=revoke-open]').click();
+      const reasonBox = records.locator(`#revoke-reason-${first.id}`);
+      await expect(reasonBox).toBeVisible({ timeout: 10_000 });
+      const submit = records.locator('[data-testid=revoke-submit]');
+      await reasonBox.fill('  ');
+      const blankRefused = await submit.isDisabled();
+      note('refusal', ccWeb.label, 'A revoke with no reason is refused', 'With only spaces in the reason, the Revoke button stays disabled.', { ok: blankRefused });
+      if (!blankRefused) report.bug('The Revoke button is enabled with a blank reason.');
+      await reasonBox.fill('Printed with the wrong venue.');
+      await submit.click();
+      await ccWeb.confirm('Revoke print: confirm');
+      const revokedToast = await toast(ccWeb.page, /Print revoked/, 60_000);
+      const revokedRow = rows.first();
+      const rowShowsIt = await shows(revokedRow.getByText('Printed with the wrong venue.'));
+      note('check', ccWeb.label, 'The Chief Commissioner revokes the print on the officials page', 'The row shows the revoke date and reason, and its Revoke button is gone.',
+        { ok: revokedToast && rowShowsIt && (await revokedRow.locator('[data-testid=revoke-open]').count()) === 0 });
+      await ccWeb.shot('Print revoked', 'The row now shows the date and the reason.');
+
+      // A second revoke and an unknown id cannot be reached from the page, so they go to the API.
       const revoke = `/elections/${eid}/print-records/${first.id}/revoke`;
-      await probe(cc, 'A revoke with no reason is refused', 'POST', revoke, { Reason: '  ' }, [400]);
-      await probe(cc, 'The Chief Commissioner revokes the print', 'POST', revoke, { Reason: 'Printed with the wrong venue.' }, [204]);
       await probe(cc, 'A second revoke of the same print is refused', 'POST', revoke, { Reason: 'Again.' }, [409]);
       await probe(cc, 'A revoke of an unknown print is not found', 'POST', `/elections/${eid}/print-records/00000000-0000-0000-0000-000000000001/revoke`, { Reason: 'No such print.' }, [404]);
 

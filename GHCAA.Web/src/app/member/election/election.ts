@@ -33,7 +33,8 @@ export interface VoteReceipt {
     selector: 'app-member-election',
     standalone: true,
     imports: [CommonModule, ElectionNomination, LoadingPanelComponent, PageHeaderComponent],
-    templateUrl: './election.html'
+    templateUrl: './election.html',
+    styleUrl: './election.scss'
 })
 export class MemberElection {
     private readonly elections = inject(ElectionsService);

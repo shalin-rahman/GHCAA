@@ -185,15 +185,14 @@ with the reason.
 | Close, count, declare | Two-person close; count with the key file; two-person declare; public results and tracking codes. |
 | Recounts | Requests recorded, allowed or refused, figures entered; a request dated after the window refused. |
 | Key destroyed, forms, audit | Destroy refused inside the recount window; a handover item ticked and an unknown item refused; every form filled and blank; public form check; an unknown form code not found; audit chain verified. |
-| Print records | A record per filled print; public check by print id; revoke with no reason refused, revoke, second revoke refused, unknown id not found; audit chain still whole. |
+| Print records | A record per filled print; the officials list returns every print; public check by print id; on the officials page the Print records table shows every print, Revoke stays disabled with a blank reason, and the Chief Commissioner revokes the newest print through the confirm dialog; second revoke refused and unknown id not found through the API; audit chain still whole. |
 | Archive | Two-person archive; public results after archiving. |
 
-Not covered yet, each waiting on its build: the print records list and revoke screen (37.16i), the
-print check's own rate limit and row reuse (37.16k), candidate photo approval (37.16h), officer
+Not covered yet, each waiting on its build: candidate photo approval (37.16h), officer
 conflict declarations (37.16e), key copy holders (37.14a), polling extension (37.12y), unopposed
 seats and paper counts (37.1p), the ten-year purge (37.14f), by-elections and vacant seats (95.4,
-95.5). Not covered by choice: test elections, the authenticator app, and the mobile screens, which
-have their own tests.
+95.5). Not covered by choice: test elections, the authenticator app, the print check's own rate limit
+and row reuse (37.16k), and the mobile screens, which have their own tests.
 
 ## Changing the input data
 

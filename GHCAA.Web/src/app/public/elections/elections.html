@@ -30,13 +30,19 @@
             @if (b.groups.length === 0) {
             <p>No officials have accepted an appointment yet.</p>
             }
-            @for (group of b.groups; track group.groupName) {
-            <h4>{{ group.groupName }}</h4>
-            <ul>
-                @for (member of group.members; track member.personaName + member.displayName) {
-                <li><strong>{{ member.displayName }}</strong>, {{ member.personaName }}</li>
+            @if (b.groups.length > 0) {
+            <div class="official-groups">
+                @for (group of b.groups; track group.groupName) {
+                <section class="official-group">
+                    <h4>{{ group.groupName }}</h4>
+                    <ul>
+                        @for (member of group.members; track member.personaName + member.displayName) {
+                        <li><strong>{{ member.displayName }}</strong>, {{ member.personaName }}</li>
+                        }
+                    </ul>
+                </section>
                 }
-            </ul>
+            </div>
             }
             @if (b.keyFingerprint) {
             <p>Ballot key fingerprint: <code>{{ b.keyFingerprint }}</code></p>

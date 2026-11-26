@@ -61,7 +61,7 @@
                 @if (alreadyVoted() || trackingCode()) { You have voted. }</p>
         }
         @if (fingerprint) {
-            <p class="text-muted">Ballots are sealed with the returning officer's key. Its fingerprint is <code>{{ fingerprint }}</code>. It should match the one the commission announced.</p>
+            <p class="text-muted fingerprint-note">Ballots are sealed with the returning officer's key. Its fingerprint is <code>{{ fingerprint }}</code>. It should match the one the commission announced.</p>
         }
         @if (!closed && step() === 'review') {
             <div class="glass-card stack gap-2">
@@ -80,12 +80,12 @@
         } @else if (!receipt()) {
             <div class="stack gap-6">
                 @for (seat of seats(); track seat.seatId) {
-                    <div class="glass-card" role="group" [attr.aria-labelledby]="'seat-title-' + seat.seatId">
-                        <h2 [id]="'seat-title-' + seat.seatId">{{ seat.positionTitle }}</h2>
-                        <p class="text-muted">{{ seat.places === 1 ? 'Choose one candidate.' : pickUpTo(seat.places) }}</p>
-                        <div class="stack gap-2">
+                    <div class="glass-card seat-card" role="group" [attr.aria-labelledby]="'seat-title-' + seat.seatId">
+                        <h2 class="seat-title" [id]="'seat-title-' + seat.seatId">{{ seat.positionTitle }}</h2>
+                        <p class="text-muted seat-hint">{{ seat.places === 1 ? 'Choose one candidate.' : pickUpTo(seat.places) }}</p>
+                        <div class="choices">
                             @for (candidate of seat.candidates; track candidate.nominationId) {
-                                <label class="flex gap-2 items-center">
+                                <label class="choice">
                                     <input [type]="seat.places === 1 ? 'radio' : 'checkbox'"
                                         [name]="'seat-' + seat.seatId"
                                         [checked]="isPicked(seat.seatId, candidate.nominationId)"
@@ -94,17 +94,17 @@
                                     @if (candidate.photoUrl) {
                                         <img [src]="candidate.photoUrl" [alt]="candidate.name" width="48" height="48">
                                     }
-                                    <span><strong>{{ candidate.name }}</strong>
-                                        @if (candidate.statement) { <br><small class="text-muted">{{ candidate.statement }}</small> }
+                                    <span class="choice-text"><strong>{{ candidate.name }}</strong>
+                                        @if (candidate.statement) { <small class="text-muted">{{ candidate.statement }}</small> }
                                     </span>
                                 </label>
                             }
-                            <label class="flex gap-2 items-center">
+                            <label class="choice choice-abstain">
                                 <input type="radio" [name]="'seat-' + seat.seatId"
                                     [checked]="isAbstained(seat.seatId)" [disabled]="closed"
                                     [attr.aria-describedby]="'abstain-help-' + seat.seatId"
                                     (click)="abstain(seat)">
-                                <span><strong>Abstain on this seat</strong><br>
+                                <span class="choice-text"><strong>Abstain on this seat</strong>
                                     <small class="text-muted" [id]="'abstain-help-' + seat.seatId">{{ abstainHelp }}</small>
                                 </span>
                             </label>
