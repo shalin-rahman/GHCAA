@@ -20,7 +20,7 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-26. **Open:** 139 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-26. **Open:** 134 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
 <!-- backlog-check: off -->
 - **Done 2026-11-26, not yet committed:** 37.16m (the walkthrough revokes a print on the officials
@@ -34,11 +34,11 @@ IDs out of the active text (rule 9 in section 2).
   stay together under "Phase I" in section 4. The owner answered decisions D1 to D8 of spec 029 the same day, so no session of the
   package waits on a gate. The decision item closed with the answers (S122, see the progress
   log); 100.16 to 100.20 are the build items.
-- **Cards:** every phase (A to I) and track H (H00 to H09) is in the eleven-part form, checked
+- **Cards:** every open phase (B to I; phase A closed 2026-11-26) and track H (H00 to H09) is in the eleven-part form, checked
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S07 (99.3). Run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S09 (84.51, 84.49 API part). Run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
@@ -129,9 +129,9 @@ summary text and link in sync with that card. Run top to bottom.
 | S04 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S05 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S06 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S07 | 99.3 | [Run full CI and get owner acceptance](#s07) | S | full ci-local | | S01, S02 |
+| S07 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | **B** | **P1 items with no owner gate** | | | | | |
-| S08 | 84.25, 28.25 | [Check mentorship and job validation plus config E2E](#s08) | M | backend, e2e | | |
+| S08 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S09 | 84.51, 84.49 (API part) | [Verify login lockout and member NID API paths](#s09) | S | local API | | |
 | S10 | 84.92 (backend) | [Add payment verification and rejection APIs](#s10) | M | API | | |
 | S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
@@ -280,7 +280,7 @@ Rules in section 2 apply to every card. A card in a rewritten phase has the elev
 this order, and the plan check fails when one is missing or when a named file does not exist. A file
 the card creates is marked "(new)". Phases still in the short form are listed by the check as owed.
 
-<!-- card-template: A B C D E F G H I -->
+<!-- card-template: B C D E F G H I -->
 
 | Part | What it holds |
 |---|---|
@@ -299,57 +299,7 @@ the card creates is marked "(new)". Phases still in the short form are listed by
 Names on a card were checked against the code on 2026-11-14. A line number is a hint; find the symbol
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
-### Phase A. CI health and the rest of session 2b
-
-<a id="s07"></a>
-**S07 · 99.3 · S**
-- Goal: one full `ci-local.py` run with every failure named, and the owner's acceptance of wave 1.
-- Before you start: S01 and S02 closed. At least 10 GB free on C: (section 2, rule 14).
-- Read (only these): the 99.3 and 98.34 tracker entries.
-- Change (only these files): `docs/TODO.md`, this plan.
-- Do not touch: any code. A failure found here becomes a tracker item, not a fix.
-- Steps:
-  1. `python scripts/ci-local.py`. If disk space is short, run `--only backend`, then `web`, then
-     `mobile`, then `contract`, one at a time. -> check: a pass or fail line for each step.
-  2. For each failure write one line: step, cause, tracker ID. The `audit` step stays red under
-     98.34, which is on hold. -> check: no failure without an ID.
-  3. Ask the owner (question dialog) to accept wave 1, with the result table in the question.
-     -> check: the answer is recorded in the 99.3 entry with its date.
-- Contract: none.
-- Tests: none added.
-- Run: `python scripts/ci-local.py`.
-- Done when: the owner accepts; 99.3 DONE with the run date and counts.
-- Stop and ask if: a step other than `audit` fails. Default: open an item for it, give it a card, and
-  ask the owner whether acceptance waits on that card.
-
 ### Phase B. P1 items with no owner gate
-
-<a id="s08"></a>
-**S08 · 84.25, 28.25 · M**
-- Goal: the mentorship controller and the job DTO have tests for each refusal case, and the config
-  regression run is recorded as the cover for 28.25.
-- Before you start: no card needed. Local stack up (`.\GHCAA.Tools\run-app.ps1`) for step 3.
-- Read (only these): `GHCAA.Tests/Controllers/MentorshipControllerTests.cs`,
-  `GHCAA.Tests/Validators/JobDtoValidationTests.cs`, `GHCAA.Web/tests/e2e/config-regression.spec.ts`.
-- Change (only these files): the two test files above; `docs/TODO.md`.
-- Do not touch: the controller and the DTO. No FluentValidation validator is added (they never run;
-  `CreateJobDto` already uses DataAnnotations). No `--update-snapshots`.
-- Steps:
-  1. Run the focused command below. -> check: it passes; note the count.
-  2. In the two test files look for a test of each case: 401 without a login, 400 on an invalid
-     body, 409 on a duplicate request, 403 on an AdminOnly action as a member. Add a test for each
-     missing case, in the file's style. -> check: one test per case, all passing.
-  3. In `GHCAA.Web`: `npx playwright test tests/e2e/config-regression.spec.ts`. -> check: all pass;
-     note the count.
-- Contract: none.
-- Tests: `MentorshipControllerTests.cs` and `JobDtoValidationTests.cs` :: one test per case in
-  step 2, named `<Action>_<Case>_Returns<Code>`.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~MentorshipControllerTests|FullyQualifiedName~JobDtoValidationTests"`;
-  then `python scripts/ci-local.py --only backend`.
-- Done when: 84.25 DONE with the test count; 28.25 DONE as covered by the config regression run,
-  with its count and date.
-- Stop and ask if: the config regression run fails. Default: 28.25 stays open with the failing test
-  named; no snapshot is updated.
 
 <a id="s09"></a>
 **S09 · 84.51, 84.49 (API part) · S**
@@ -5742,6 +5692,8 @@ brief asks for it.
 | 2026-11-26 | 37.14n, 37.14t (S06) | Steps 1 to 3: the local walkthrough ran green on 2026-11-25 and again on 2026-11-26, Print records section included. Step 4: the owner scanned the QR code on a filled ER-01 print with a phone on the same Wi-Fi; the verify page opened and showed the print record. Phone model and browser not given. The web server needed `ng serve --host 0.0.0.0` and an inbound rule for port 4200, since `npm run start` listens on localhost only | `docs/TODO.md`, this file |
 | 2026-11-26 | 37.16m (found after S06) | The walkthrough now drives the 37.16i officials Print records table: list route matches the database (51 of 51), table shows every print, Revoke disabled with a blank reason, newest print revoked through the confirm dialog. Local run green in demo mode: 17 of 17 sections, 161 steps, no findings, 4.3 minutes | `election.walkthrough.ts`, walkthrough README, `docs/TODO.md`, this file |
 | 2026-11-26 | 37.16n (owner review) | Member ballot restyled with compact seat cards and choice rows, fingerprint wraps on a phone; public officials block spaces its groups apart. Type check 0, specs 61 of 61, mock browser check dark and light, desktop and phone | `member/election/election.{html,ts,scss}`, `public/elections/elections.{html,scss}`, `docs/TODO.md`, this file |
+| 2026-11-26 | 99.3 (S07) | Full `ci-local.py` run passed 17 of 17 steps across backend, contract, web and mobile, `vulnerable-packages` and `audit` included; no failures, so no new items. Owner accepted wave 1 the same day. 98.34 stays on hold with a note that its gate passed | `docs/TODO.md`, this file |
+| 2026-11-26 | 84.25, 28.25 (S08) | Mentorship refusal cases now all tested: added a 401 on send without a member claim, the admin-close note limit behind the 400, and the action's own AdminOnly policy refusing a member through `AddAppAuthorization`; reviewer pass made the 400 and 403 test names match what they assert. Focused run 30 of 30, `ci-local.py --only backend` 7 of 7. 28.25 closed as covered by `config-regression.spec.ts`: 6 of 6 against the local stack, no snapshot update | `MentorshipControllerTests.cs`, `docs/TODO.md`, spec 004 `tasks.md`, this file |
 
 <!-- backlog-check: on -->
 

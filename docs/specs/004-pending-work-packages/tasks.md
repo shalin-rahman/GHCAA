@@ -72,9 +72,8 @@ breakdown.
   baselines, exclude generated/vendor files explicitly, agree on the per-file
   threshold, and make CI failure actionable without weakening the tracker
   requirement.
-- [ ] **28.25 — Record visual regression evidence.** After the dependent Angular
-  consumer is complete, run the documented Playwright snapshot command and
-  record its result or the reason the task is superseded.
+- [x] **28.25 — Done 2026-11-26.** Closed as covered by `config-regression.spec.ts`,
+  6 of 6 passed against the local stack.
 - [ ] **34.D7–34.D8 — Complete local quality evidence.** Regenerate the stale
   Mobile goldens as a standalone change; then run public and admin browser
   checks after the recorded local role blocker is resolved.
@@ -92,7 +91,8 @@ breakdown.
   groups and association fit, and raise each accepted gap through the tracker.
 - [x] **84.21, 84.31 — Done 2026-11-01.** Duplicate family service removed;
   spec folder 010 clash resolved by moving the election fixes to 027.
-- [ ] **84.23, 84.25, 84.27, 84.35, 84.39 — Close focused
+- [x] **84.25 — Done 2026-11-26.** Mentorship refusal cases and job DTO rules tested.
+- [ ] **84.23, 84.27, 84.35, 84.39 — Close focused
   findings.** Follow each item's stated source path, reuse existing specs and
   tests, and do not widen a remediation beyond its acceptance.
 - [ ] **84.49 — Apply owner-selected profile validation.** Allow NID edits at
