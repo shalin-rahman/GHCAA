@@ -62,7 +62,7 @@ namespace GHCAA.API.Controllers
             }
             catch (System.ComponentModel.DataAnnotations.ValidationException ex)
             {
-                // A bad or taken NID. Without this the middleware turned it into a 500.
+                // Bad or taken NID, or a broken academic record rule.
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             if (!success) return NotFound();

@@ -159,7 +159,7 @@ public class MemberServiceTests : TestBase
 
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<System.ComponentModel.DataAnnotations.ValidationException>()
             .WithMessage("The first academic record must be for Govt. Haraganga College.");
     }
 
@@ -173,7 +173,7 @@ public class MemberServiceTests : TestBase
 
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<System.ComponentModel.DataAnnotations.ValidationException>()
             .WithMessage("Academic history is required. Add the configured institution as the first record.");
     }
 
@@ -194,7 +194,7 @@ public class MemberServiceTests : TestBase
 
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<System.ComponentModel.DataAnnotations.ValidationException>()
             .WithMessage("Only the first academic record may be the institutional record.");
     }
 
@@ -669,6 +669,51 @@ public class MemberServiceTests : TestBase
 
         await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("This NID is already in use.");
+    }
+
+    // The error log write saves the request's DbContext, so a refused save must leave nothing tracked.
+    [Category("FR-01")]
+    [Test]
+    public async Task UpdateProfile_WrongFirstInstitution_LeavesMemberUnchanged()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+
+        var act = () => _service.UpdateProfileAsync(member.Id, new UpdateProfileDto
+        {
+            NID = "1234567891",
+            FullName = "Changed Name",
+            PresentAddress = "Changed Address",
+            AcademicHistory = [new AcademicRecordDto { InstitutionName = "Other College", Degree = "HSC", PassingYear = 2000, IsOrgProfile = true }]
+        });
+
+        await act.Should().ThrowAsync<ValidationException>()
+            .WithMessage("The first academic record must be for Govt. Haraganga College.");
+
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+        var stored = await _context.Members.Include(m => m.AcademicHistory).SingleAsync(m => m.Id == member.Id);
+        stored.NID.Should().Be("1234567890");
+        stored.FullName.Should().Be("John Doe");
+        stored.PresentAddress.Should().Be("Present Address");
+        stored.AcademicHistory.Should().ContainSingle(a => a.InstitutionName == "Govt. Haraganga College");
+    }
+
+    [Category("FR-01")]
+    [Test]
+    public async Task UpdateProfile_EmptyAcademicHistory_RejectsWithReason()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+
+        var act = () => _service.UpdateProfileAsync(member.Id, new UpdateProfileDto { NID = "1234567891", FullName = "Changed Name", AcademicHistory = [] });
+
+        await act.Should().ThrowAsync<ValidationException>()
+            .WithMessage("At least one academic record is required.");
+
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+        var stored = await _context.Members.SingleAsync(m => m.Id == member.Id);
+        stored.NID.Should().Be("1234567890");
+        stored.FullName.Should().Be("John Doe");
     }
 
     [Category("FR-02")]

@@ -38,7 +38,7 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S09 (84.51, 84.49 API part). Run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S10 (84.92 backend), then S133 (84.104). S132 closed 2026-11-27. Run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
@@ -132,8 +132,10 @@ summary text and link in sync with that card. Run top to bottom.
 | S07 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | **B** | **P1 items with no owner gate** | | | | | |
 | S08 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S09 | 84.51, 84.49 (API part) | [Verify login lockout and member NID API paths](#s09) | S | local API | | |
+| S09 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
+| S132 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S10 | 84.92 (backend) | [Add payment verification and rejection APIs](#s10) | M | API | | |
+| S133 | 84.104 | [Stop the error log write from saving a failed request's changes](#s133) | S | API, mobile | | |
 | S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
 | S12 | 84.80 (backend) | [Cancel event registrations and promote the waitlist](#s12) | M | API | | |
 | S13 | 84.80 (clients) | [Add registration cancellation to both clients](#s13) | M | web, mobile | | S12 |
@@ -301,32 +303,42 @@ by name. When a name on a card is not in the code, stop and ask; do not guess a 
 
 ### Phase B. P1 items with no owner gate
 
-<a id="s09"></a>
-**S09 · 84.51, 84.49 (API part) · S**
-- Goal: a recorded local run shows the lockout and unlock work, and an imported member can replace a
-  placeholder NID.
-- Before you start: no card needed. Local stack up. A SuperAdmin login and one member invite at hand.
-- Read (only these): the 84.51 and 84.49 tracker entries; `Constants.Login` and `Constants.Nid` in
-  `GHCAA.Domain/Constants.cs`.
-- Change (only these files): `docs/TODO.md`.
-- Do not touch: any code. A wrong result becomes a tracker note, not a fix.
+<a id="s133"></a>
+**S133 · 84.104 · S**
+- Goal: a request that throws stores nothing it changed, even though the error log row is still written.
+- Before you start: no card needed. `grep -n "SaveChangesAsync" GHCAA.Infrastructure/Services/ErrorLogService.cs`
+  shows the save that runs on the request's `ApplicationDbContext`.
+- Read (only these): `LogAsync` in `GHCAA.Infrastructure/Services/ErrorLogService.cs`; the catch in
+  `GHCAA.API/Middleware/ExceptionMiddleware.cs`; the `ApplicationDbContext` registration in
+  `GHCAA.Infrastructure/DependencyInjection.cs`; `AdminUpdateMemberAsync` in
+  `GHCAA.Infrastructure/Services/MemberService_Search.cs`; `updateMember` in
+  `GHCAA.Mobile/lib/features/admin/admin_service.dart` and its caller in
+  `GHCAA.Mobile/lib/screens/member/profile_edit_screen.dart`; the 84.104 tracker entry.
+- Change (only these files): `ErrorLogService.cs`, `MemberService_Search.cs`, `admin_service.dart`,
+  `profile_edit_screen.dart`, `GHCAA.Tests/Services/ErrorLogServiceTests.cs`,
+  `GHCAA.Tests/Services/MemberServiceTests.cs`, one Flutter test under `GHCAA.Mobile/test/`,
+  `docs/TODO.md`.
+- Do not touch: the status codes S132 set (400 for the academic record rules); `ExceptionMiddleware`'s
+  response shape; the DbContext pooling setup; the web admin member form.
 - Steps:
-  1. 84.51: send five wrong passwords to `setup-with-password` for one user. -> check: the sixth
-     try gives 423, and login for that user gives 423.
-  2. `POST api/roles/users/{id}/unlock` as SuperAdmin. -> check: login then succeeds.
-  3. 84.49: import one member through `POST api/admin/members/import` with a placeholder NID.
-     -> check: the member exists.
-  4. As that member, `PUT api/profile` with a valid 10-digit NID, then with an invalid one.
-     -> check: 200, then 400 with the reason in the body.
-  5. Paste the method, route and status of each call into the two tracker entries. No tokens or
-     passwords in the tracker. -> check: each step has its status line.
-- Contract: none.
-- Tests: none added. The HTTP log is the evidence.
-- Run: the calls above with `curl` or the Swagger page.
-- Done when: 84.51 DONE; 84.49 says the API check passed and stays PARTIAL for B4 and B5 (S33) and
-  the device check (gate G-DEV).
-- Stop and ask if: a call gives another status. Default: record it, leave the item open, and do not
-  change code in this session.
+  1. In `LogAsync`, write the error row without saving other tracked changes: clear the change tracker
+     first, or write through a separate context. Prefer clearing the tracker; the context is pooled, so
+     check a second context does not break pooling. -> check: the new `ErrorLogServiceTests` test.
+  2. In `AdminUpdateMemberAsync`, run the academic record check before any member field changes. -> check:
+     the new `MemberServiceTests` test.
+  3. Mobile admin edit: return the server's `detail` for a refused update and show it on the profile
+     edit screen, the same way the member profile save shows it. -> check: the Flutter test.
+- Contract: no route or status change.
+- Tests: `ErrorLogServiceTests.LogAsync_AfterFailedRequest_DoesNotSaveTrackedChanges` proves a modified
+  tracked entity is not stored while the error row is; `MemberServiceTests.AdminUpdateMember_AcademicRule_LeavesMemberUnchanged`
+  proves a refused admin edit changes nothing; a Flutter test shows the 400 reason on the admin edit.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ErrorLogService|FullyQualifiedName~MemberServiceTests|FullyQualifiedName~ExceptionMiddleware"`,
+  `cd GHCAA.Mobile; flutter analyze; flutter test <new test> --exclude-tags golden`, then
+  `python scripts/ci-local.py --only backend` and `--only mobile`.
+- Done when: the three tests pass, the backend and mobile layers pass, and 84.104 is DONE with the run log.
+- Stop and ask if: another caller relies on `LogAsync` saving the request's changes (default: keep the
+  old behaviour for that caller and record it in 84.104), or clearing the tracker breaks a test outside
+  this card.
 
 <a id="s10"></a>
 **S10 · 84.92 (backend) · M**
@@ -5695,6 +5707,11 @@ brief asks for it.
 | 2026-11-26 | 99.3 (S07) | Full `ci-local.py` run passed 17 of 17 steps across backend, contract, web and mobile, `vulnerable-packages` and `audit` included; no failures, so no new items. Owner accepted wave 1 the same day. 98.34 stays on hold with a note that its gate passed | `docs/TODO.md`, this file |
 | 2026-11-26 | 84.25, 28.25 (S08) | Mentorship refusal cases now all tested: added a 401 on send without a member claim, the admin-close note limit behind the 400, and the action's own AdminOnly policy refusing a member through `AddAppAuthorization`; reviewer pass made the 400 and 403 test names match what they assert. Focused run 30 of 30, `ci-local.py --only backend` 7 of 7. 28.25 closed as covered by `config-regression.spec.ts`: 6 of 6 against the local stack, no snapshot update | `MentorshipControllerTests.cs`, `docs/TODO.md`, spec 004 `tasks.md`, this file |
 
+| 2026-11-26 | 84.49 API part, 84.51 run (S09) | Local API run. 84.49: member import 200; profile save with NID `12345` 400 with the NID reason, then a 10-digit NID 200 and stored. The save needs the imported member's empty required fields filled first, and a first academic record for another college gives 500 yet stores the NID; noted in 84.49. 84.49 stays PARTIAL for S33 and G-DEV. 84.51: five wrong setup passwords 400, the sixth 423, unlock 204, login after unlock 200; login while locked gave 401, not 423, so 84.51 stays PARTIAL on S09 for the owner's answer | `docs/TODO.md`, this file |
+| 2026-11-26 | 84.51 (S09) | Owner kept 401 for login on a locked account, so an outsider cannot tell the account is locked; the running-API lockout and unlock check passed | `docs/TODO.md`, this file |
+| 2026-11-27 | 84.103 (added), S132 (added) | The profile-save 500 found in the S09 run now has its own item and card: a first academic record for another college answers 500 and the NID is still stored. Placed after S09 and run before S10 | `docs/TODO.md`, this file |
+| 2026-11-27 | 84.103 (S132) | A refused profile save answers 400 with the reason and stores nothing. The NID was kept by `ErrorLogService.LogAsync`, whose save runs on the request's DbContext after `ExceptionMiddleware` catches the throw; `UpdateProfileAsync` now checks before it changes the member. Registration answered 500 and admin 409 for the same rule; both now answer 400. Nine new tests passed, fixtures 90/90, ci-local backend 7 of 7, and the member 794 check against the local API gave 400 with the NID unchanged | `GHCAA.Infrastructure/Services/MemberService*.cs`, `ProfileController.cs`, `RegistrationController.cs`, `AdminController.cs`, tests, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
+| 2026-11-27 | 84.104 (added), S133 (added) | The error log save found in S132 gets its own item and card: it writes a failed request's tracked changes. The admin member edit that changes fields before the check and the mobile admin edit that hides the reason go with it. Placed after S10 | `docs/TODO.md`, this file |
 <!-- backlog-check: on -->
 
 ## 13. History

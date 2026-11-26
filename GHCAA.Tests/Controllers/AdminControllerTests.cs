@@ -150,6 +150,22 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        [Category("FR-01")]
+        public async Task UpdateMemberAdmin_AcademicRule_Returns400WithTheReason()
+        {
+            const string reason = "Only the first academic record may be the institutional record.";
+            var dto = new AdminMemberUpdateDto { FullName = "Updated Name" };
+            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, 1, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new System.ComponentModel.DataAnnotations.ValidationException(reason));
+
+            var result = await _controller.UpdateMemberAdmin(100, dto, CancellationToken.None);
+
+            var problem = (ObjectResult)result;
+            Assert.That(problem.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)problem.Value!).Detail, Is.EqualTo(reason));
+        }
+
+        [Test]
         public async Task SyncMembers_ReturnsOk_WithCount()
         {
             _memberServiceMock.Setup(x => x.SyncAlumniAsync(It.IsAny<CancellationToken>())).ReturnsAsync(12);

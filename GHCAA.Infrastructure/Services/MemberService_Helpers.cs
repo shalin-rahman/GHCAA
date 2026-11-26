@@ -2,6 +2,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -21,12 +22,12 @@ namespace GHCAA.Infrastructure.Services
             string institutionName)
         {
             if (academicHistory.Count == 0)
-                throw new InvalidOperationException("At least one academic record is required.");
+                throw new ValidationException("At least one academic record is required.");
 
             var primary = academicHistory[0];
             if (!string.Equals(primary.InstitutionName?.Trim(), institutionName, StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException(
+                throw new ValidationException(
                     $"The first academic record must be for {institutionName}.");
             }
 
@@ -34,7 +35,7 @@ namespace GHCAA.Infrastructure.Services
                 record.IsOrgProfile ||
                 string.Equals(record.InstitutionName?.Trim(), institutionName, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new InvalidOperationException(
+                throw new ValidationException(
                     "Only the first academic record may be the institutional record.");
             }
 

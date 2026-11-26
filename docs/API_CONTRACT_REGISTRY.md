@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-27 — PUT /api/profile, POST /api/auth/register, PUT /api/admin/members/{id}
+- Change: a broken academic record rule now answers 400 with the reason in `detail`. The rules are: at least one record, the first record is the configured college, and only the first record is the institutional one. PUT /api/profile and POST /api/auth/register answered 500 for these; PUT /api/admin/members/{id} answered 409. A refused profile save no longer stores the NID or any other field the request carried. "The institution name is not configured" stays a 500. No shape change.
+- Reason: TODO 84.103, plan session S132.
+- Web: no change needed. The global interceptor toasts `detail` for the profile, registration and admin member pages.
+- Mobile: profile edit and registration already show the server reason. `AdminService.updateMember` swallows every error and returns false, as it did for the old 409; tracked in TODO 84.104.
+
 ### 2026-11-25 — GET /api/elections/{id}/print-records
 - Change: new route (ElectionStaff, `Count` and `ManageSetup`, no step-up) that lists an election's filled print records, newest first, as `ElectionFormPrintRowDto[]` (`id`, `formCode`, `printedAt`, `printedByRole`, `phaseAtPrint`, `revokedAt`, `revokeReason`). 404 for an unknown election, 403 without both permissions. Additive only; the revoke route does not change.
 - Reason: TODO 37.16i, plan session S05.

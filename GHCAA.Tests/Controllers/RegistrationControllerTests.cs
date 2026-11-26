@@ -53,6 +53,22 @@ namespace GHCAA.Tests.Controllers
             Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Member with same Email, NID, or Mobile already exists."));
         }
 
+        // The DTO check lets through a first record for another college.
+        [Category("FR-01")]
+        [Test]
+        public async Task Register_AcademicRule_Returns400WithTheReason()
+        {
+            const string reason = "The first academic record must be for Govt. Haraganga College.";
+            _memberServiceMock.Setup(x => x.RegisterAsync(It.IsAny<MemberRegistrationDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new System.ComponentModel.DataAnnotations.ValidationException(reason));
+
+            var result = await _controller.Register(new MemberRegistrationDto(), null, null, null, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo(reason));
+        }
+
         [Test]
         public void Register_OtherInvalidOperation_IsRethrown()
         {

@@ -209,6 +209,10 @@ namespace GHCAA.API.Controllers
             {
                 return Forbid();
             }
+            catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
             catch (InvalidOperationException ex)
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);

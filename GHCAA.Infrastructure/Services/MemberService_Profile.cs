@@ -225,6 +225,14 @@ namespace GHCAA.Infrastructure.Services
             {
                 throw new ValidationException("This NID is already in use.");
             }
+
+            // Check before touching the member: the error log write after a throw saves this DbContext.
+            if (dto.AcademicHistory != null)
+            {
+                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
+                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
+            }
+
             member.NID = nid;
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) member.FullName = dto.FullName;
@@ -265,9 +273,6 @@ namespace GHCAA.Infrastructure.Services
             // Handle Academic History
             if (dto.AcademicHistory != null)
             {
-                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
-                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
-
                 // Clear existing and replace with new history
                 member.AcademicHistory.Clear();
                 foreach (var a in dto.AcademicHistory)

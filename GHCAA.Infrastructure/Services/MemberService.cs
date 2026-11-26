@@ -231,7 +231,7 @@ namespace GHCAA.Infrastructure.Services
         {
             if (academicHistory == null || !academicHistory.Any())
             {
-                throw new InvalidOperationException(
+                throw new System.ComponentModel.DataAnnotations.ValidationException(
                     "Academic history is required. Add the configured institution as the first record.");
             }
 

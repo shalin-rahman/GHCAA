@@ -87,6 +87,23 @@ namespace GHCAA.Tests.Controllers
             Assert.That(((ProblemDetails)problem.Value!).Detail, Is.EqualTo(GHCAA.Domain.Constants.Nid.Message));
         }
 
+        [Category("FR-01")]
+        [TestCase("At least one academic record is required.")]
+        [TestCase("The first academic record must be for Govt. Haraganga College.")]
+        [TestCase("Only the first academic record may be the institutional record.")]
+        public async Task UpdateProfile_AcademicRule_Returns400WithTheReason(string reason)
+        {
+            var dto = new UpdateProfileDto { AcademicHistory = [] };
+            _memberServiceMock.Setup(x => x.UpdateProfileAsync(10, dto, It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new System.ComponentModel.DataAnnotations.ValidationException(reason));
+
+            var result = await _controller.UpdateProfile(dto, CancellationToken.None);
+
+            var problem = (ObjectResult)result;
+            Assert.That(problem.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)problem.Value!).Detail, Is.EqualTo(reason));
+        }
+
         [Test]
         public async Task ChangePassword_ReturnsOk_OnSuccess()
         {

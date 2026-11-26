@@ -110,7 +110,7 @@ public class MemberService_LinkedIn_Tests : TestBase
 
         // Act & Assert
         var act = async () => await _service.UpdateProfileAsync(member.Id, dto);
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<System.ComponentModel.DataAnnotations.ValidationException>()
             .WithMessage("The first academic record must be for Govt. Haraganga College.");
     }
 

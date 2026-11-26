@@ -75,6 +75,11 @@ namespace GHCAA.API.Controllers
                 // 84.102: a duplicate application used to reach ExceptionMiddleware as a bare 500.
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
+            catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+            {
+                // The DTO check lets through a first record for another college.
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
             return CreatedAtAction(nameof(GetStatus), new { id = memberId, email = dto.Email }, new { MemberId = memberId, Message = "Application submitted. OTP sent to email." });
         }
 
