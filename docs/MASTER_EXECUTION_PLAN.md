@@ -20,8 +20,13 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-21. **Open:** 144 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-26. **Open:** 139 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
+<!-- backlog-check: off -->
+- **Done 2026-11-26, not yet committed:** 37.16m (the walkthrough revokes a print on the officials
+  Print records table; local run green, 17 of 17 sections) and 37.16n (member ballot and public
+  officials block restyle). Both wait for the owner's commit; see the progress log.
+<!-- backlog-check: on -->
 - **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
   19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
   sit in section 3 by priority and after what they need: S110 to S113 (P1) in phase B before S14,
@@ -33,13 +38,8 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S07 (99.3). S06 stays open for step 4 only, the phone scan of a printed QR code,
-  which the owner chose to skip for now on 2026-11-25; 37.14n and 37.14t are PARTIAL with "phone scan
-  left". Run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S07 (99.3). Run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
-- **Committed by the owner before 2026-11-21:** the 37.14t print-record work, its migration
-  `20261112120000_AddElectionFormPrints`, the revoke concurrency token, the ER-17 phase bands and
-  the walkthrough "Print records" section. The walkthrough ran green on 2026-11-25 (S06 step 3).
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
   items get gate cards (section 5) and no slot until the gate clears.
@@ -128,7 +128,7 @@ summary text and link in sync with that card. Run top to bottom.
 | S03 | done 2026-11-21, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S04 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S05 | done 2026-11-25, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S06 | 37.14n, 37.14t | [Phone scan of a printed QR code (walkthrough done)](#s06) | S | local stack run | | S05 |
+| S06 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S07 | 99.3 | [Run full CI and get owner acceptance](#s07) | S | full ci-local | | S01, S02 |
 | **B** | **P1 items with no owner gate** | | | | | |
 | S08 | 84.25, 28.25 | [Check mentorship and job validation plus config E2E](#s08) | M | backend, e2e | | |
@@ -300,37 +300,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase A. CI health and the rest of session 2b
-
-<a id="s06"></a>
-**S06 · 37.14n, 37.14t · S**
-- Goal: one printed QR code opens the verify page on a phone. Steps 1 to 3 (the walkthrough) are done
-  (2026-11-25, see the progress log); only step 4 is left.
-- Before you start: S05 closed. Read memory `gotcha_election_walkthrough_local_run`. The local
-  `.env` already has `GeneralSettings__PortalBaseUrl`; do not edit it.
-- Read (only these): `scripts/run-election-walkthrough.bat`;
-  `GHCAA.Web/tests/e2e/election-walkthrough/README.md`.
-- Change (only these files): `docs/TODO.md`;
-  `GHCAA.Web/tests/e2e/election-walkthrough/README.md` and `election.walkthrough.ts`, only when a
-  step fails because the test is wrong.
-- Do not touch: `.env`, `appsettings*.json`, application code. A failure caused by the application
-  goes to the tracker as a new item; it is not fixed in this session.
-- Steps:
-  1. Restart the local API so the print migration applies. -> check: the API log shows
-     `20261112120000_AddElectionFormPrints` applied or already present.
-  2. In `GHCAA.Web`: `npx ng serve --host 0.0.0.0`; port 4200 open in the firewall. -> check: the
-     site opens from the phone's browser on the same network.
-  3. Run `scripts\run-election-walkthrough.bat`. The run also covers roll unfreeze and refreeze,
-     filled prints refused before their phase, the receipt PDF on API ballots, a handover tick and
-     an unknown form code. -> check: the report shows every section green, "Print records" included.
-  4. Owner step: scan one printed QR code with a phone. -> check: the verify page opens; record
-     phone, browser and result in the tracker.
-- Contract: none.
-- Tests: none added. The walkthrough is the evidence.
-- Run: `scripts\run-election-walkthrough.bat`.
-- Done when: the walkthrough is green; the phone scan opens the verify page; 37.14n and 37.14t DONE.
-  The preprod release is gate G-REL and is not part of these items.
-- Stop and ask if: the owner is not at hand for the scan. Default: close step 3, set both items
-  PARTIAL with "phone scan left", and leave the card open for step 4 only.
 
 <a id="s07"></a>
 **S07 · 99.3 · S**
@@ -5770,7 +5739,9 @@ brief asks for it.
 | 2026-11-25 | 37.16k (S04) | Print verification has its own `PrintVerification` policy, its limit and window read on each request from OrgConfig through the cache (owner choice), with a fallback to the defaults if the read fails and the numbers in the partition key. A second identical filled download by the same official returns the first unrevoked record; a printer with no user id never matches. A real-pipeline test gets 429 on the third print check with a limit of 2 while the card check still answers. Reviewer findings fixed (fallback and clamp, null user, comments, the 37.14t supersede note). Targeted run 209 passed, 1 skipped; backend 7 of 7; contract 4 of 4. Known gap: two simultaneous downloads can still add two rows | `RateLimitingExtensions.cs`, `ElectionsController.cs`, `ElectionDocumentService.cs`, `OrgConfigDto.cs`, `Constants.cs`, two test files, golden OrgConfig, `election.models.ts`, registry, `CONFIG_DRIVEN_FRAMEWORK.md`, authorization catalog, `docs/TODO.md`, this file |
 | 2026-11-25 | 37.16i (S05) | `GET api/elections/{id}/print-records` lists an election's prints newest first, revoked ones included, for officials with Count and ManageSetup, no step-up. The web officials view gets a Print records table with Revoke behind a reason and the confirm dialog; the reason field sits on the page below the table, since the confirm dialog takes no input and a colspan row hides the table headers. Mobile lists the same rows read only. Tests written after the code. Filtered backend run 169 passed, 1 skipped (PostgreSQL only); web specs 57 of 57; Flutter sheet test 3 of 3; browser check with a mocked API. Not yet seen on the live stack: a revoke followed by the verify page; S06 covers it | `ElectionsController.cs`, `ElectionDocumentService.cs`, `IElectionDocumentService.cs`, `ElectionDtos.cs`, three test files, `election-print-records/`, `admin-elections.*`, `elections.service.ts`, `election.models.ts`, `app.constants.ts`, `election_print_records_sheet.dart` and its test, `election_service.dart`, `election_management_screen.dart`, `app_constants.dart`, `verify-election.py`, registry, swagger, authorization catalog, `docs/TODO.md`, this file |
 | 2026-11-25 | 37.14n, 37.14t (S06, steps 1 to 3) | Local walkthrough green against the real API: 17 of 17 sections, 156 steps, no findings, 3.7 minutes in demo mode; Print records 9 of 9 (51 records for 50 filled downloads, verify page issued then revoked, blank reason refused, second revoke refused, unknown id not found). Print migration already applied on `GHCAADB_v2`. The bat's wait loop fails with redirected input, so the run used its clean step and `npm run test:e2e:walkthrough` directly. Phone scan left (owner choice); both items PARTIAL and the card stays open for step 4 | `docs/TODO.md`, this file |
+| 2026-11-26 | 37.14n, 37.14t (S06) | Steps 1 to 3: the local walkthrough ran green on 2026-11-25 and again on 2026-11-26, Print records section included. Step 4: the owner scanned the QR code on a filled ER-01 print with a phone on the same Wi-Fi; the verify page opened and showed the print record. Phone model and browser not given. The web server needed `ng serve --host 0.0.0.0` and an inbound rule for port 4200, since `npm run start` listens on localhost only | `docs/TODO.md`, this file |
 | 2026-11-26 | 37.16m (found after S06) | The walkthrough now drives the 37.16i officials Print records table: list route matches the database (51 of 51), table shows every print, Revoke disabled with a blank reason, newest print revoked through the confirm dialog. Local run green in demo mode: 17 of 17 sections, 161 steps, no findings, 4.3 minutes | `election.walkthrough.ts`, walkthrough README, `docs/TODO.md`, this file |
+| 2026-11-26 | 37.16n (owner review) | Member ballot restyled with compact seat cards and choice rows, fingerprint wraps on a phone; public officials block spaces its groups apart. Type check 0, specs 61 of 61, mock browser check dark and light, desktop and phone | `member/election/election.{html,ts,scss}`, `public/elections/elections.{html,scss}`, `docs/TODO.md`, this file |
 
 <!-- backlog-check: on -->
 
