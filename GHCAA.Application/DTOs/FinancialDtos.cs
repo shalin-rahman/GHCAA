@@ -16,6 +16,9 @@ namespace GHCAA.Application.DTOs
         public Enums.FinancialCategory FinancialCategory { get; set; }
         public Enums.PaymentMethod PaymentMethod { get; set; }
         public string? Notes { get; set; }
+
+        // The admin's reason when a declared payment was rejected; null otherwise.
+        public string? RejectionReason { get; set; }
     }
 
     // 84.92. One row of the admin queue of declared payments waiting for review.

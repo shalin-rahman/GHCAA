@@ -133,6 +133,18 @@ describe('Register Component', () => {
         expect(component.loading()).toBe(false);
     });
 
+    it('lets the applicant enter the email code after filing', () => {
+        component.model.PaymentMethodId = 1;
+        component.model.DateOfBirth = '';
+        component.files['photo'] = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+        regServiceMock.register.mockReturnValue(of({ memberId: 7 }));
+
+        component.onSubmit(mockForm);
+
+        expect(component.currentStep()).toBe(4);
+        expect(component.loading()).toBe(false);
+    });
+
     it('should fail submission if payment method is missing', () => {
         component.model.PaymentMethodId = 0;
         component.onSubmit(mockForm);

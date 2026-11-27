@@ -394,7 +394,7 @@ not block a build yet). For the full mechanism and where it stands, see
 |---|---|
 | `AcademicRecord` | FK → Member |
 | `ProfessionalRecord` | FK → Member; has `OrganizationName`, `Designation`, `StartDate` (Required) |
-| `PaymentHistory` | FK → Member; has `TransactionId` (Required), `Amount`, `Status` |
+| `PaymentHistory` | FK → Member; has `TransactionId` (Required), `Amount`, `Status`, `RejectionReason` (set only by an admin reject, 84.92) |
 | `MembershipDue` | FK → Member; annual due tracking |
 | `MembershipHistory` | FK → Member; type-change audit |
 | `MembershipFeeConfig` | Fee table by MembershipType + Year |
@@ -1137,7 +1137,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `AcademicRecord` | `id?, institutionName, degree, subject, admissionYear?, passingYear, isOrgProfile, result?, certificatePath?` | `AcademicRecordDto` |
 | `ProfessionalRecord` | `id?, organizationName, designation, sector?, location?, startDate, endDate?, isCurrent` | `ProfessionalRecordDto` |
 | `ECHistoryRecord` | `periodTitle, position, startDate, endDate?, changeReason?, isCurrent` | `ECHistoryDto` |
-| `PaymentHistory` | `id, memberId, transactionId, amount, paidAt, status, financialCategory, notes?, paymentMethod, receiptPath?` | `PaymentHistoryDto` |
+| `PaymentHistory` | `id, memberId, transactionId, amount, paidAt, status, financialCategory, notes?, rejectionReason?, paymentMethod, receiptPath?` | `PaymentHistoryDto` |
 | `SavedPaymentMethod` | `id, memberId, displayName, method, accountNumber, icon?, isDefault, lastUsedAt?` | `SavedPaymentMethodDto` |
 | `AlumniEvent` | `id, title, description, startDate, endDate, location, registrationFee?, requiresPayment, isActive, imageUrl?, registrationStartDate?, registrationEndDate?, adminNote?, allowNonMembers, participantCount?` | `EventDto` |
 | `EventRegistration` | `id, eventId, eventTitle, memberId?, memberName?, isNonMember, guestName/Email/Mobile?, paymentReference, receiptPath?, paymentMethod, status, registeredAt, approvedAt?` | `EventRegistrationDto` |
@@ -1516,6 +1516,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `/admin/article-approvals` | `ArticleApproval` | `authGuard + adminGuard` |
 | `/admin/contact-messages` | `ContactMessages` | `authGuard + adminGuard` |
 | `/admin/ledger` | `Ledger` | `authGuard + superAdminGuard` |
+| `/admin/payments-pending` | `PaymentsPending` | `authGuard + superAdminGuard`; verify or reject declared payments (84.92) |
 | `/admin/payments/fees` | `AdminFeeConfig` | `authGuard + superAdminGuard` |
 | `/admin/payments` | `AdminPaymentConfig` | `authGuard + superAdminGuard` |
 | `/admin/roles` | `AdminRoles` | `authGuard + superAdminGuard` |

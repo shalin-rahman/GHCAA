@@ -54,4 +54,17 @@ describe('Payments Component', () => {
         expect(component.getCategoryLabel('MembershipFee')).toBe('Yearly Membership Fee');
         expect(component.getCategoryLabel('Utilities')).toBe('Utilities');
     });
+
+    it('shows the rejection reason', () => {
+        financialServiceMock.getMyHistory.mockReturnValue(of([
+            { id: 1, transactionId: 'TX-1', amount: 500, paidAt: '2026-11-20', status: 'Failed', financialCategory: 'MembershipFee', notes: 'Annual dues', rejectionReason: 'Reference not found | bank checked' },
+            { id: 2, transactionId: 'TX-2', amount: 500, paidAt: '2026-11-21', status: 'Pending', financialCategory: 'MembershipFee', notes: 'Annual dues' },
+            { id: 3, transactionId: 'TX-3', amount: 500, paidAt: '2026-11-22', status: 'Failed', financialCategory: 'MembershipFee', notes: 'Annual dues | gateway timeout', rejectionReason: null },
+        ]));
+        component.ngOnInit();
+        fixture.detectChanges();
+        const reasons = fixture.nativeElement.querySelectorAll('.rejection-reason');
+        expect(reasons.length).toBe(1);
+        expect(reasons[0].textContent).toContain('Reason: Reference not found | bank checked');
+    });
 });

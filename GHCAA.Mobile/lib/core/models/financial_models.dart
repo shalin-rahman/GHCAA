@@ -8,6 +8,10 @@ class LedgerEntry {
   final DateTime paidAt;
   final String financialCategory;
   final String? notes;
+  final String? status;
+
+  // Set by the API only when an admin rejected the payment, never for a gateway failure.
+  final String? rejectionReason;
   final Map<String, dynamic> raw;
 
   LedgerEntry({
@@ -15,6 +19,8 @@ class LedgerEntry {
     required this.paidAt,
     required this.financialCategory,
     this.notes,
+    this.status,
+    this.rejectionReason,
     required this.raw,
   });
 
@@ -24,9 +30,15 @@ class LedgerEntry {
       paidAt: DateTime.parse(json['paidAt'] as String),
       financialCategory: json['financialCategory'] as String,
       notes: json['notes'] as String?,
+      status: json['status']?.toString(),
+      rejectionReason: _nonBlank(json['rejectionReason'] as String?),
       raw: json,
     );
   }
+
+  static String? _nonBlank(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
+
+  bool get isFailed => status == 'Failed' || status == '2';
 }
 
 class DueItem {

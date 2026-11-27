@@ -32,12 +32,15 @@ class FinancialService {
         // Parse-only, for the throw: a renamed/missing amount, paidAt or financialCategory
         // should fail here instead of silently landing in the ledger as null/"Alumni
         // Contribution". The map below is still built from the raw item, unchanged.
-        LedgerEntry.fromJson(Map<String, dynamic>.from(item as Map));
+        final entry =
+            LedgerEntry.fromJson(Map<String, dynamic>.from(item as Map));
         return {
           ...item,
           'date': item['paidAt'],
           'description': item['financialCategory']?.toString() ?? item['notes'] ?? 'Alumni Contribution',
           'amount': item['amount'],
+          'isFailed': entry.isFailed,
+          'rejectionReason': entry.rejectionReason,
         };
       }).toList();
     } catch (e) {

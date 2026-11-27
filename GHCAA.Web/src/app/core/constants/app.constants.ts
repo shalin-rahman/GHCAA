@@ -40,6 +40,8 @@ export type NavScope = typeof NAV_SCOPE[keyof typeof NAV_SCOPE];
 // 37.13y/z: mirror the limits in Constants.Elections and AppointmentReasonDto on the API.
 export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
 export const ELECTION_APPOINTMENT_REASON_MAX = 400;
+// Matches Constants.PaymentReview on the API.
+export const PAYMENT_REJECT_REASON = { MIN_VISIBLE: 3, MAX: 500 } as const;
 
 // 82.42: the /lookups/{group} route takes any string and matches it against the Lookups
 // table's LookupGroup column — these are the exact group names GHCAA.Mobile's DropdownService

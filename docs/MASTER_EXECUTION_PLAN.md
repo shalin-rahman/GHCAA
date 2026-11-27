@@ -20,12 +20,11 @@ IDs out of the active text (rule 9 in section 2).
 
 ## 1. Handover
 
-- **Date:** 2026-11-26. **Open:** 134 items (`python scripts/backlog_inventory.py`), held 12
+- **Date:** 2026-11-27. **Open:** 133 items (`python scripts/backlog_inventory.py`), held 12
   (`--state ONHOLD`).
 <!-- backlog-check: off -->
-- **Done 2026-11-26, not yet committed:** 37.16m (the walkthrough revokes a print on the officials
-  Print records table; local run green, 17 of 17 sections) and 37.16n (member ballot and public
-  officials block restyle). Both wait for the owner's commit; see the progress log.
+- **Closed 2026-11-27 and committed:** S132 (84.103), S10 (84.92 backend; the item stays PARTIAL
+  for S11) and S133 (84.104). S11 (84.92 clients) closed 2026-11-28. See the progress log.
 <!-- backlog-check: on -->
 - **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
   19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
@@ -38,7 +37,7 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S11 (84.92 clients). S133 closed 2026-11-27. Run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S12 (84.80 backend). S11 closed 2026-11-28. Run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
@@ -136,7 +135,7 @@ summary text and link in sync with that card. Run top to bottom.
 | S132 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S10 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S133 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
+| S11 | done 2026-11-28, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S12 | 84.80 (backend) | [Cancel event registrations and promote the waitlist](#s12) | M | API | | |
 | S13 | 84.80 (clients) | [Add registration cancellation to both clients](#s13) | M | web, mobile | | S12 |
 | S110 | 100.1, 100.2 | [Fix public links, add Join, clean index.html](#s110) | S | web | | |
@@ -240,6 +239,8 @@ summary text and link in sync with that card. Run top to bottom.
 | S92 | 84.66 | [Limit pending archive requests and explain refusals](#s92) | M | API, both clients | | |
 | S93 | 51.5 | [Configure file storage and add admin settings](#s93) | M | API, web | | S80 |
 | S94 | 84.98 | [Close theme gaps and verify both color modes](#s94) | M | web, mobile | | |
+| S134 | 84.105 | [Name or settle pending payments of archived members](#s134) | S | API, web | | |
+| S135 | 84.106 | [Show the mobile receipt link only on paid rows](#s135) | S | mobile | | |
 | S95 | 90.1, 90.2 | [Add saved-report storage and query service](#s95) | L | API | 15 | S18 |
 | S96 | 90.3, 90.5 | [Add saved-report API endpoints](#s96) | M | API | | S95 |
 | S97 | 90.4 | [Build the saved-report web page](#s97) | M | web | | S96 |
@@ -302,58 +303,6 @@ Names on a card were checked against the code on 2026-11-14. A line number is a 
 by name. When a name on a card is not in the code, stop and ask; do not guess a replacement.
 
 ### Phase B. P1 items with no owner gate
-
-<a id="s11"></a>
-**S11 · 84.92 (clients) · M**
-- Goal: the web admin has a pending payments page with verify and reject; the member payment screens
-  on web and mobile show the status and the rejection reason.
-- Before you start: S10 closed. The three routes answer on the local API. Verify answers 200
-  `{ dueId }`, and `dueId` is null when no single open due matched; show that as "no due
-  settled". Reject's 400 is a validation problem with the message under `errors.Reason`.
-  The walkthrough already calls the verify route and reports the missing screen.
-- Read (only these): `GHCAA.Web/src/app/admin/ledger/ledger.ts` (page pattern);
-  `GHCAA.Web/src/app/core/services/financial.service.ts`; `GHCAA.Web/src/app/member/payments/payments.ts`;
-  `GHCAA.Web/src/app/app.routes.ts` (admin block); `ADMIN_NAV_SECTIONS` in
-  `GHCAA.Web/src/app/core/services/nav.service.ts`; `GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart`;
-  `GHCAA.Mobile/lib/core/models/financial_models.dart`;
-  `GHCAA.Web/tests/e2e/membership-walkthrough/README.md`.
-- Change (only these files): web `src/app/admin/payments-pending/` (new: component, template, spec),
-  `app.routes.ts`, `nav.service.ts`, `financial.service.ts` and its spec, `member/payments/payments.ts`
-  with its template and spec; mobile `financial_portal_screen.dart`, `financial_models.dart`,
-  `GHCAA.Mobile/test/financial_portal_rejection_test.dart` (new);
-  `GHCAA.Web/tests/e2e/membership-walkthrough/membership.walkthrough.ts` and `README.md`;
-  `docs/PROJECT_MAP.md`; `docs/TODO.md`.
-- Do not touch: the admin routes `payments` and `ledger` and their pages; mobile gets no admin
-  verify screen (not asked for); theme files (use the existing tokens and shared components).
-- Steps:
-  1. Web service: `getPendingPayments()`, `verifyPayment(id)`, `rejectPayment(id, reason)`.
-     -> check: service spec.
-  2. Page at route `admin/payments-pending` with the same guard as `admin/ledger`: a table in
-     `.table-wrap` (member, amount, reference, submitted, proof link, actions). Proof opens through
-     the secure files route the ledger page uses. Verify asks through the confirm dialog. Reject
-     opens a dialog with a reason field, disabled under 3 visible characters. A 409 shows the server
-     message and reloads the list. -> check: component spec.
-  3. Add the page to the finance section of `ADMIN_NAV_SECTIONS`. -> check: the link shows for an
-     admin.
-  4. Member payments page (web) and `financial_portal_screen.dart` (mobile): show the status and,
-     on a failed declaration, the reason from `notes`. -> check: spec and widget test.
-  5. Membership walkthrough: verify one fee on the new page and reject one declaration with a
-     reason; remove the 84.92 gap line and update "What the run covers" in the README. -> check:
-     `scripts\run-membership-walkthrough.bat` is green.
-  6. Browser check in light and dark. -> check: table, both dialogs and the member reason show.
-- Contract: none new (uses S10's routes).
-- Tests: `payments-pending` spec :: "lists pending payments", "reject stays disabled under 3
-  characters", "verify calls the service and reloads", "409 shows the message and reloads";
-  `payments.spec.ts` :: "shows the rejection reason"; `financial_portal_rejection_test.dart` ::
-  "shows the rejection reason on a failed payment".
-- Run: in `GHCAA.Web`: `npm run type-check; npm run test:unit -- src/app/admin/payments-pending src/app/member/payments`;
-  in `GHCAA.Mobile`: `flutter analyze; flutter test test/financial_portal_rejection_test.dart`; then
-  `python scripts/ci-local.py --only web` and `--only mobile`.
-- Done when: the walkthrough is green with the two new steps; 84.92 DONE; the 78.9 entry notes
-  Treasurer Tasks 1 and 2 are unblocked.
-- Stop and ask if: the nav has no finance section, or the member payment DTO does not carry `notes`.
-  Default for the first: put the link beside "Ledger". For the second: stop, since it needs a DTO
-  change that belongs in S10.
 
 <a id="s12"></a>
 **S12 · 84.80 (backend) · M**
@@ -3674,6 +3623,51 @@ the code does not have, or already has:
 - Stop and ask if: changing Dart's hex order breaks stored themes (check the seed and OrgConfig
   values first).
 
+<a id="s134"></a>
+**S134 · 84.105 · S**
+- Goal: an archived member's pending payment no longer shows as "Unknown member" on
+  `admin/payments-pending`.
+- Before you start: no card dependency. Ask the owner first: should archiving reject the member's
+  pending payments with a reason, or should the pending list keep them and name the member?
+- Read (only these): `GHCAA.Infrastructure/Services/FinancialService.cs` (`GetPendingPaymentsAsync`,
+  `RejectPaymentAsync`); the member service's `ArchiveMemberAsync`; the `Member` global query filter
+  in `ApplicationDbContext`; `GHCAA.Web/src/app/admin/payments-pending/payments-pending.html`.
+- Change (only these files): `FinancialService.cs` or the member service, by the owner's answer;
+  `payments-pending.html` and `.spec.ts` if the list shows an archived tag;
+  `GHCAA.Tests/Services/FinancialServiceTests.cs`; `docs/TODO.md`.
+- Do not touch: the `Member` query filter itself; the reject rule of 3 to 500 visible characters.
+- Steps:
+  1. Keep and name: read the member name with `IgnoreQueryFilters()` in the pending query and mark
+     the row archived. -> check: the test sees the archived member's name.
+  2. Or settle on archive: reject each Pending payment of the member with a fixed reason from
+     `Constants`, in the archive transaction. -> check: the test sees no Pending row left.
+- Contract: if the pending DTO gains a field, record it in `docs/API_CONTRACT_REGISTRY.md`.
+- Tests: `FinancialServiceTests` :: `PendingPayments_NameArchivedMember` or
+  `ArchiveMember_RejectsPendingPayments`, by the owner's answer.
+- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FinancialService"`;
+  web spec when the page changes.
+- Done when: the chosen case has a test and 84.105 closes.
+- Stop and ask if: settling on archive would also need a member notice the owner did not ask for.
+
+<a id="s135"></a>
+**S135 · 84.106 · S**
+- Goal: the mobile financial portal shows "GET RECEIPT" only on Completed payments.
+- Before you start: no card dependency.
+- Read (only these): `GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart` (the history
+  row and `_downloadReceipt`); `GHCAA.Mobile/test/financial_portal_rejection_test.dart` (how it
+  builds the screen).
+- Change (only these files): `financial_portal_screen.dart`;
+  `GHCAA.Mobile/test/financial_portal_rejection_test.dart`; `docs/TODO.md`.
+- Do not touch: the receipt route; the web payments page.
+- Steps:
+  1. Build the link only when the row's status is Completed. -> check: a Failed and a Pending row
+     have no link.
+- Contract: none.
+- Tests: `financial_portal_rejection_test.dart` :: `receipt link only on completed payments`.
+- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/financial_portal_rejection_test.dart --exclude-tags golden`.
+- Done when: the test passes and 84.106 closes.
+- Stop and ask if: the status in the history map is not the enum name the test expects.
+
 <a id="s95"></a>
 **S95 · 90.1, 90.2 · L · migration 15**
 - Goal: saved reports are stored, and `ReportService` runs a whitelisted, capped query per entity and
@@ -4571,7 +4565,7 @@ cards assumed that the code does not have, or already has:
 - Run: `cd GHCAA.Web; npm run type-check; npm run test:unit -- src/app/common/data-table src/app/admin/members src/app/member/payments src/app/member/giving`.
 - Done when: the specs pass and 100.12 is PARTIAL with the remaining count recorded; it closes when
   the count is zero.
-- Stop and ask if: the admin payments list the tracker names does not exist yet (84.92 builds it);
+- Stop and ask if: the admin payments list the tracker names is not `admin/payments-pending` (built in S11);
   the 88.5 grid fits only with changes to the import page.
 
 <a id="s120"></a>
@@ -4613,7 +4607,7 @@ cards assumed that the code does not have, or already has:
 - Goal: the admin header search also finds members, events and payments, within the admin's role.
 - Before you start: S88 (96.3, shared header and search) done. The search routes today:
   `GET api/admin/members?searchQuery=` and `GET api/events/admin/all`. There is no payment search
-  route; if S11 (84.92) has not added one, record the gap on 100.14 and leave payments out.
+  route (S11 added none, only `GET api/financials/pending`), so record the gap on 100.14 and leave payments out.
 - Read (only these): `GHCAA.Web/src/app/layouts/admin-layout/admin-layout.html` and `.ts` (the
   `app-search-bar`); `GHCAA.Web/src/app/common/search-bar/search-bar.component.ts`;
   `GHCAA.Web/src/app/core/services/admin.service.ts`; `core/services/events.service.ts`.
@@ -4800,7 +4794,7 @@ installable web app: the answer was no.
 **S127 · 100.19 (API) · L**
 - Goal: an admin records a refund against a payment, a second person approves it, and only an
   approved refund changes the payment and the reports.
-- Before you start: S11 (84.92) done. There is no general approval mechanism in the code
+- Before you start: S11 is done (2026-11-28). There is no general approval mechanism in the code
   (`IElectionApprovalService` is election only; `PendingApprovalsController` only counts queues),
   so record that on 100.19 and ask the owner: (a) a refund-only approve and reject route with the
   recorder barred, counted in the pending summary (default), or (b) wait for S73 (92.2, approval
@@ -5629,6 +5623,7 @@ brief asks for it.
 | 2026-11-27 | 84.104 (added), S133 (added) | The error log save found in S132 gets its own item and card: it writes a failed request's tracked changes. The admin member edit that changes fields before the check and the mobile admin edit that hides the reason go with it. Placed after S10 | `docs/TODO.md`, this file |
 | 2026-11-27 | 84.92 backend (S10) | Three AdminOnly routes: GET `financials/pending`, POST `{id}/verify` (200 `{ dueId }`, not 204, so the admin sees whether a due was settled), POST `{id}/reject` (204, reason of 3 to 500 visible characters). A payment has no due link, so the due is the single open membership due of the same member and amount (owner choice). Code review fixes: verify claims the payment and the due in one transaction, a due already linked is never relinked, and both reject 400s share the validation problem shape. `update-status` deprecated in the registry. Focused fixtures 61 of 61, ci-local backend 7 of 7 and contract 4 of 4 after the swagger snapshot was regenerated. Walkthrough step type-checks; not run, S11 runs it with the screen | `FinancialsController.cs`, `FinancialService.cs`, `FinancialDtos.cs`, `IFinancialService.cs`, `Constants.cs`, tests, membership walkthrough and README, `docs/api/swagger.json`, authorization catalog, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
 | 2026-11-27 | 84.104 (S133) | The error log write clears the change tracker first, so a failed request's edits are not saved with the error row; safe while `ExceptionMiddleware` is the only caller. Admin member edit checks the Lifelong Patron and academic rules before changing the member, and records a membership type change only after the committee seat checks. Mobile admin edit shows the server's reason. Card filter 64/64, `ci-local.py --only backend` 7 of 7, `--only mobile` 2 of 2, new widget test passed | `ErrorLogService.cs`, `MemberService_Search.cs`, `admin_service.dart`, `profile_edit_screen.dart`, tests, `docs/TODO.md`, this file |
+| 2026-11-28 | 84.92 clients (S11); 84.105 and 84.106 (added), S134 and S135 (added) | Admin web page `admin/payments-pending` verifies and rejects declared payments; the member sees the reason on web and mobile. Owner, 2026-11-27: the reason gets its own `PaymentHistory.RejectionReason` column, so the session also changed the API, DTO and tests and added a migration that copies older reasons from their audit rows; the card listed only client files. Membership walkthrough passed with the reason check; CI backend, web, mobile and contract all pass. Register form loading flag fixed. Archived members' pending payments (84.105) and the mobile receipt link on unpaid rows (84.106) logged | `docs/TODO.md`, this file, `docs/API_CONTRACT_REGISTRY.md`, `docs/PROJECT_MAP.md` |
 <!-- backlog-check: on -->
 
 ## 13. History

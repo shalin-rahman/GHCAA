@@ -143,6 +143,7 @@ export interface PaymentHistory {
     status: PaymentStatus;
     financialCategory: FinancialCategory;
     notes?: string;
+    rejectionReason?: string | null;
     paymentMethod: PaymentMethod;
     receiptPath?: string;
 }

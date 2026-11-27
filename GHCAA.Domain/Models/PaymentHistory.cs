@@ -22,6 +22,11 @@ namespace GHCAA.Domain.Models
         [MaxLength(500)]
         public string? ReceiptPath { get; set; }
 
+        // 84.92. Set only when an admin rejects a declared payment. Kept apart from Notes, which
+        // holds the member's own note and gateway failure text.
+        [MaxLength(Constants.PaymentReview.MaxReasonLength)]
+        public string? RejectionReason { get; set; }
+
         // 24.13: Stores the gateway's own transaction identifier (bKash paymentID / SSLCommerz val_id).
         // UNIQUE partial index (WHERE NOT NULL) prevents duplicate callback processing.
         [MaxLength(255)]

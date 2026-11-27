@@ -54,14 +54,13 @@ and its row here in the same piece of work.
 
 | Section | Steps and refusals checked |
 |---|---|
-| Clean slate | Earlier walkthrough applicants archived; the cash method found, switched on or created. |
+| Clean slate | Pending payments left by earlier runs rejected and earlier walkthrough applicants archived; the cash method found, switched on or created. |
 | Application | Applicant one fills the three-step web form (identity, academic and career record, payment, photo, certificate, consent), gets the email code and lands on the login page. Applicant two applies through the API with photo and receipt; a wrong email code is refused; the right one verifies. The status route answers for both. The same person applying again (same NID, email, mobile) gets 409 with the reason. An applicant cannot log in before approval. |
-| Payment | Approval is refused while the fee is unpaid. The ledger is shown. The declared payment is in the review queue; the admin verifies it through the API; a second verify and a reject after it are refused. |
+| Payment | Approval is refused while the fee is unpaid. The Pending Payments page lists the declared payments. The admin verifies applicant one's on the page; a second verify and a reject after it are refused. Applicant two's declaration is rejected on the page: a reason under 3 characters is refused by the API and keeps the button off, then the reason is saved and the payment turns Failed with it in its own field, leaving the member's note as written. |
 | Approval | The application in the approvals queue and its review panel; approved on the web with the membership number; a second approval refused. Applicant two declined with a reason on the web; a second rejection refused; the rejected applicant cannot log in. |
 | First login | The new member logs in with the NID, is made to change the password, sees the dashboard; the old password no longer works; the welcome notification is there; ID card, profile and payments pages shown. |
 
-Not covered yet, each waiting on its build: a screen to verify a declared payment (84.92, the run
-uses the verify route and reports the gap), email verification from the profile (97.1), the applied date and
+Not covered yet, each waiting on its build: email verification from the profile (97.1), the applied date and
 waiting days on the approvals list (84.95), and a reason on termination (84.97). Not covered
 by choice: online payment gateways, the mobile app's registration screens (their own tests), and
 bulk import (88.x).

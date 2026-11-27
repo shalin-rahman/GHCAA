@@ -126,8 +126,12 @@ test('membership walkthrough', async ({ browser, baseURL }) => {
     const su = await token(superAdmin);
     const earlier = (await call('GET', `/admin/members?searchQuery=${encodeURIComponent('(local walkthrough)')}&statusFilter=all&pageSize=50`, su)).body;
     const old = (field<any[]>(earlier, 'Items') ?? []).filter(m => String(field(m, 'FullName') ?? '').endsWith(SUFFIX));
+    // Archiving leaves a declared payment in the review queue with no name, so earlier runs' payments are rejected first.
+    const stale = ((await call<any[]>('GET', '/financials/pending', su)).body ?? [])
+      .filter(p => String(field(p, 'TransactionReference') ?? '').startsWith('WALK-'));
+    for (const p of stale) await send('POST', `/financials/${field(p, 'Id')}/reject`, su, { Reason: 'Left over from an earlier walkthrough run' });
     for (const m of old) await send('DELETE', `/admin/members/${field(m, 'Id')}`, su);
-    note('api', superAdmin.name, 'Earlier walkthrough applicants archived', `${old.length} archived.`);
+    note('api', superAdmin.name, 'Earlier walkthrough applicants archived', `${old.length} archived; ${stale.length} leftover pending payments rejected.`);
 
     const cash = await ensureCashMethod(su);
     const manual = cash.method;
@@ -276,25 +280,67 @@ test('membership walkthrough', async ({ browser, baseURL }) => {
     actors.push(adminWeb);
     const approveFirst = `/admin/members/${memberIds[first.key]}/approve`;
     await probe(admin.name, ad, 'Approval is refused while the fee is unpaid', 'POST', approveFirst, {}, [400]);
-    const history = (await call<any[]>('GET', `/financials/member/${memberIds[first.key]}/history`, ad)).body;
-    const pending = history.find(p => ['Pending', 0].includes(field(p, 'Status')));
-    await adminWeb.goto('/admin/ledger');
-    await adminWeb.shot('Ledger', 'The declared payment is Pending. There is no screen to open the proof and verify it (tracker 84.92).');
+    const pendingFor = async (memberId: number) =>
+      ((await call<any[]>('GET', `/financials/member/${memberId}/history`, ad)).body ?? [])
+        .find(p => ['Pending', 0].includes(field(p, 'Status')));
+    const pending = await pendingFor(memberIds[first.key]);
+    const queue = (await call<any[]>('GET', '/financials/pending', ad)).body ?? [];
+    await adminWeb.goto('/admin/payments-pending');
+    const rowFor = (name: string) => adminWeb.page.locator('tr', { hasText: name }).first();
+    await expect(rowFor(firstId.name)).toBeVisible({ timeout: 20_000 });
+    await adminWeb.shot('Pending payments', `${queue.length} declared payment(s) wait for review, each with its reference and proof.`);
     if (pending) {
       const paymentId = field(pending, 'Id');
-      const queue = (await call<any[]>('GET', '/financials/pending', ad)).body ?? [];
       const queued = queue.some(p => field(p, 'Id') === paymentId);
       note('check', admin.name, 'The declared payment is in the review queue', `GET /financials/pending lists ${queue.length} payment(s).`, { ok: queued });
       if (!queued) report.bug(`Payment ${paymentId} is Pending but GET /financials/pending does not list it.`);
-      const verified = await call('POST', `/financials/${paymentId}/verify`, ad);
-      note('api', admin.name, 'Payment verified through the API', `Payment ${paymentId}, ${field(pending, 'Amount')}; due ${field(verified.body, 'DueId') ?? 'none matched'}.`);
+      const [reply] = await Promise.all([
+        adminWeb.page.waitForResponse(r => r.url().includes(`/financials/${paymentId}/verify`) && r.request().method() === 'POST', { timeout: 60_000 }),
+        (async () => { await rowFor(firstId.name).getByRole('button', { name: 'Verify' }).click(); await adminWeb.confirm('Verifying the payment'); })(),
+      ]);
+      const dueId = field(await reply.json().catch(() => ({})), 'DueId');
+      await expect(rowFor(firstId.name)).toBeHidden({ timeout: 20_000 });
+      await adminWeb.shot('Payment verified', `Payment ${paymentId}, ${field(pending, 'Amount')}; due ${dueId ?? 'none matched'}. The row leaves the queue.`);
       await probe(admin.name, ad, 'A second verify is refused', 'POST', `/financials/${paymentId}/verify`, {}, [409]);
       await probe(admin.name, ad, 'Rejecting a verified payment is refused', 'POST', `/financials/${paymentId}/reject`, { Reason: 'Walkthrough check' }, [409]);
-      report.gap('No admin screen verifies a declared payment yet; the walkthrough used POST /financials/{id}/verify (tracker 84.92, screen in plan S11).');
     } else {
       note('check', admin.name, 'No pending payment was found for the applicant', undefined, { ok: false });
     }
     report.reachedPhase('Payment verified');
+
+    // 84.92: the second applicant's declaration is rejected with a reason the member can read.
+    const declined = S.applicants.find(a => a.outcome === 'reject');
+    if (declined) {
+      const declinedId = ids(declined, S.applicants.indexOf(declined));
+      const declaration = await pendingFor(memberIds[declined.key]);
+      const reason = 'Reference not found in the cash book';
+      if (declaration) {
+        const paymentId = field(declaration, 'Id');
+        await probe(admin.name, ad, 'A reject reason shorter than 3 characters is refused', 'POST', `/financials/${paymentId}/reject`, { Reason: ' a ' }, [400]);
+        await rowFor(declinedId.name).getByRole('button', { name: 'Reject' }).click();
+        const confirmReject = adminWeb.page.getByTestId('confirm-reject');
+        await adminWeb.page.locator('.rejection-box textarea').fill('ab');
+        const blocked = await confirmReject.isDisabled();
+        note('check', admin.name, 'Reject stays off under 3 characters', undefined, { ok: blocked });
+        if (!blocked) report.bug('The reject button allows a reason under 3 characters.');
+        await adminWeb.page.locator('.rejection-box textarea').fill(reason);
+        await adminWeb.shot('Reason for rejecting the payment');
+        await Promise.all([
+          adminWeb.page.waitForResponse(r => r.url().includes(`/financials/${paymentId}/reject`) && r.request().method() === 'POST', { timeout: 60_000 }),
+          confirmReject.click(),
+        ]);
+        await expect(rowFor(declinedId.name)).toBeHidden({ timeout: 20_000 });
+        await adminWeb.shot('Payment rejected', 'The row leaves the queue. The member sees the payment as Failed with the reason.');
+        const after = ((await call<any[]>('GET', `/financials/member/${memberIds[declined.key]}/history`, ad)).body ?? [])
+          .find(p => field(p, 'Id') === paymentId);
+        const notesKept = !String(field(after, 'Notes') ?? '').includes(reason);
+        const failed = ['Failed', 2].includes(field(after, 'Status')) && field(after, 'RejectionReason') === reason && notesKept;
+        note('check', admin.name, 'The rejected payment is Failed and carries the reason apart from the member note', `Status ${field(after, 'Status')}, reason "${field(after, 'RejectionReason') ?? ''}", notes "${field(after, 'Notes') ?? ''}".`, { ok: failed });
+        if (!failed) report.bug(`Payment ${paymentId} was rejected but is not Failed with the reason.`);
+      } else {
+        note('check', admin.name, `No pending payment was found for ${declinedId.name}`, undefined, { ok: false });
+      }
+    }
 
     // 3. Approval and rejection
     report.section('Approval', 'The admin reviews each application in the approvals queue, approves one and declines the other with a reason.');

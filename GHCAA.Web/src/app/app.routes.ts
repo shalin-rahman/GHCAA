@@ -339,6 +339,11 @@ export const routes: Routes = [
                 canActivate: [superAdminGuard]
             },
             {
+                path: 'payments-pending',
+                loadComponent: () => import('./admin/payments-pending/payments-pending').then(m => m.PaymentsPending),
+                canActivate: [superAdminGuard]
+            },
+            {
                 path: 'events',
                 loadComponent: () => import('./admin/events/admin-events').then(m => m.AdminEvents)
             },

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { PaymentStatus, FinancialCategory, MembershipFeeConfig, CreateMembershipFeeConfig, UpdateMembershipFeeConfig } from '../models/business.models';
-import { buildHttpParams } from '../utils/http.util';
+import { buildHttpParams, silentHeaders } from '../utils/http.util';
 
 
 /** Matches PaymentHistoryDto.cs */
@@ -17,8 +17,22 @@ export interface PaymentRecord {
     financialCategory: FinancialCategory;
     paymentMethod: any; // Or proper enum if defined
     notes?: string;
+    // The admin's reason when a declared payment was rejected; null otherwise.
+    rejectionReason?: string | null;
 }
 
+
+/** Matches PendingPaymentDto.cs */
+export interface PendingPayment {
+    id: number;
+    memberId?: number;
+    memberName?: string;
+    dueId?: number | null;
+    amount: number;
+    transactionReference: string;
+    proofPath?: string | null;
+    submittedAt: string;
+}
 
 /** Matches MembershipDueDto.cs */
 export interface MembershipDue {
@@ -70,6 +84,27 @@ export class FinancialService {
     // attach the token; the caller turns the blob into an object URL to display it.
     getReceipt(paymentId: number): Observable<Blob> {
         return this.http.get(`${this.apiUrl}/receipt/${paymentId}`, { responseType: 'blob' });
+    }
+
+    // Admin: review of declared payments (84.92)
+    getPendingPayments(): Observable<PendingPayment[]> {
+        return this.http.get<PendingPayment[]>(`${this.apiUrl}/pending`);
+    }
+
+    // Verify and reject are silent: the page shows the server's 400 or 409 message itself.
+    // dueId is null when no single open due of the same member and amount was found.
+    verifyPayment(id: number): Observable<{ dueId: number | null }> {
+        return this.http.post<{ dueId: number | null }>(`${this.apiUrl}/${id}/verify`, {}, { headers: silentHeaders() });
+    }
+
+    rejectPayment(id: number, reason: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/reject`, { reason }, { headers: silentHeaders() });
+    }
+
+    // The proof sits behind the secure files route, which needs the auth header, so it comes back as a blob.
+    getProof(proofPath: string): Observable<Blob> {
+        const path = proofPath.replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+        return this.http.get(`${API_ENDPOINTS.SECURE_FILES}/${path}`, { responseType: 'blob' });
     }
 
     // Admin: Membership/Registration Fee Configs

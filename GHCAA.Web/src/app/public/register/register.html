@@ -12,24 +12,24 @@
                         [class.clickable]="maxStepReached() >= 1" (click)="goToStep(1)">
                         <span class="step-num">{{ currentStep() > 1 ? '✓' : '01' }}</span>
                         <div class="flex flex-col">
-                            <span class="step-txt">Induction</span>
-                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Identity & Reachability</small>
+                            <span class="step-txt">Identity</span>
+                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Name, contact & address</small>
                         </div>
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 2" [class.done]="currentStep() > 2"
                         [class.clickable]="maxStepReached() >= 2" (click)="goToStep(2)">
                         <span class="step-num">{{ currentStep() > 2 ? '✓' : '02' }}</span>
                         <div class="flex flex-col">
-                            <span class="step-txt">Background</span>
-                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Academic & Career Milestones</small>
+                            <span class="step-txt">Study & Work</span>
+                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Education, jobs & emergency contact</small>
                         </div>
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 3" [class.done]="submitted()"
                         [class.clickable]="maxStepReached() >= 3" (click)="goToStep(3)">
                         <span class="step-num">{{ submitted() ? '✓' : '03' }}</span>
                         <div class="flex flex-col">
-                            <span class="step-txt">Finalize</span>
-                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Registry Filing & Subscription</small>
+                            <span class="step-txt">Documents</span>
+                            <small class="text-[9px] opacity-40 uppercase font-black -mt-1">Photo, documents & consent</small>
                         </div>
                     </div>
                 </div>

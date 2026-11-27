@@ -63,6 +63,9 @@
                                 <td class="amount">{{ item.amount | appCurrency }}</td>
                                 <td>
                                     <span class="status-badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+                                    @if (rejectionReason(item); as reason) {
+                                    <small class="rejection-reason">Reason: {{ reason }}</small>
+                                    }
                                 </td>
                                 <td class="text-right">
                                     @if (isCompleted(item.status)) {

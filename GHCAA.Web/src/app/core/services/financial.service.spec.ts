@@ -63,5 +63,35 @@ describe('FinancialService', () => {
         expect(req.request.body).toEqual(dto);
         req.flush({ id: 5 });
     });
+
+    it('should fetch pending payments', () => {
+        service.getPendingPayments().subscribe(p => expect(p.length).toBe(1));
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/pending`);
+        expect(req.request.method).toBe('GET');
+        req.flush([{ id: 7, amount: 500, transactionReference: 'TX1', submittedAt: '2026-11-27' }]);
+    });
+
+    it('should verify a payment and return the settled due', () => {
+        service.verifyPayment(7).subscribe(r => expect(r.dueId).toBeNull());
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/7/verify`);
+        expect(req.request.method).toBe('POST');
+        req.flush({ dueId: null });
+    });
+
+    it('should reject a payment with the reason in the body', () => {
+        service.rejectPayment(7, 'Wrong reference').subscribe();
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/7/reject`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual({ reason: 'Wrong reference' });
+        req.flush(null, { status: 204, statusText: 'No Content' });
+    });
+
+    it('should fetch a proof through the secure files route as a blob', () => {
+        service.getProof('/secure_uploads/12/proofs/a b.jpg').subscribe();
+        const req = httpMock.expectOne(`${API_ENDPOINTS.SECURE_FILES}/secure_uploads/12/proofs/a%20b.jpg`);
+        expect(req.request.method).toBe('GET');
+        expect(req.request.responseType).toBe('blob');
+        req.flush(new Blob(['x']));
+    });
 });
 

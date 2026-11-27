@@ -308,13 +308,11 @@ namespace GHCAA.Infrastructure.Services
             if (payment.Status != Enums.PaymentStatus.Pending) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
 
             var now = DateTime.UtcNow;
-            // Appended the way UpdatePaymentStatusAsync does, so the member's own note stays.
-            var notes = string.IsNullOrEmpty(payment.Notes) ? trimmed : $"{payment.Notes} | {trimmed}";
             var claimed = await _db.PaymentHistories
                 .Where(p => p.Id == paymentId && p.Status == Enums.PaymentStatus.Pending)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(p => p.Status, Enums.PaymentStatus.Failed)
-                    .SetProperty(p => p.Notes, notes)
+                    .SetProperty(p => p.RejectionReason, trimmed)
                     .SetProperty(p => p.UpdatedAt, now)
                     .SetProperty(p => p.UpdatedByAdminId, adminUserId), cancellationToken);
             if (claimed == 0) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
@@ -844,7 +842,8 @@ namespace GHCAA.Infrastructure.Services
                 Status = p.Status,
                 FinancialCategory = p.FinancialCategory,
                 PaymentMethod = p.PaymentMethod,
-                Notes = p.Notes
+                Notes = p.Notes,
+                RejectionReason = p.RejectionReason
             };
         }
 
@@ -877,7 +876,8 @@ namespace GHCAA.Infrastructure.Services
                 Status = payment.Status,
                 FinancialCategory = payment.FinancialCategory,
                 PaymentMethod = payment.PaymentMethod,
-                Notes = payment.Notes
+                Notes = payment.Notes,
+                RejectionReason = payment.RejectionReason
             };
         }
 

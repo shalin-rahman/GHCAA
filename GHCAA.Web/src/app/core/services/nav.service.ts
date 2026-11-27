@@ -91,6 +91,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: [SUPER_ADMIN_ROLE], section: 'Elections' },
 
     { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
+    { path: '/admin/payments-pending', label: 'Pending Payments', icon: 'ledger', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
     { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
     { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
     { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Finance & Fundraising' },

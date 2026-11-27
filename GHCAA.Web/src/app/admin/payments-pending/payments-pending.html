@@ -1,0 +1,79 @@
+<div class="admin-feature">
+    <app-page-header title="Pending Payments" [total]="payments().length"
+        emptySubtitle="Payments members have declared, waiting for review">
+        <small subtitle>{{ payments().length }} payment(s) waiting for review</small>
+    </app-page-header>
+
+    @if (loading()) {
+    <app-loading-panel label="Loading pending payments..." [size]="64"></app-loading-panel>
+    } @else {
+    <div class="glass-card table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Amount</th>
+                    <th>Reference</th>
+                    <th>Submitted</th>
+                    <th>Proof</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of payments(); track p.id) {
+                <tr>
+                    <td>{{ p.memberName || 'Unknown member' }}</td>
+                    <td>{{ p.amount | appCurrency }}</td>
+                    <td class="mono">{{ p.transactionReference }}</td>
+                    <td>{{ p.submittedAt | appDate }}</td>
+                    <td>
+                        @if (p.proofPath) {
+                        <button type="button" class="btn btn-secondary btn-sm" (click)="openProof(p)">View proof</button>
+                        } @else {
+                        <span class="text-muted">None</span>
+                        }
+                    </td>
+                    <td class="actions-cell">
+                        <button type="button" class="btn btn-accent btn-sm" (click)="verify(p)"
+                            [disabled]="busyId() !== null">Verify</button>
+                        <button type="button" class="btn btn-outline btn-sm" (click)="openReject(p)"
+                            [disabled]="busyId() !== null">Reject</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state"><p>No payments are waiting for review.</p></div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
+
+@if (rejecting(); as p) {
+<div class="modal-overlay" (click)="closeReject()">
+    <div class="modal-box reveal-top" (click)="$event.stopPropagation()">
+        <app-modal-header title="Reject payment" (closed)="closeReject()"></app-modal-header>
+        <div class="modal-body">
+            <p class="mb-4" data-testid="reject-summary">{{ p.memberName || 'Member' }}, {{ p.amount | appCurrency }}@if (p.transactionReference) {, reference
+                <span class="mono">{{ p.transactionReference }}</span>}</p>
+            <div class="rejection-box">
+                <label for="reject-reason">Reason (the member sees this)</label>
+                <textarea id="reject-reason" [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                    [maxlength]="reasonMax" placeholder="For example: the reference does not match our bank statement"></textarea>
+                @if (rejectError()) {
+                <p class="reject-error" role="alert">{{ rejectError() }}</p>
+                }
+            </div>
+        </div>
+        <div class="modal-footer flex justify-between">
+            <button type="button" class="btn btn-secondary" (click)="closeReject()">Cancel</button>
+            <button type="button" class="btn btn-danger" data-testid="confirm-reject" (click)="reject()"
+                [disabled]="!canReject()">{{ busyId() !== null ? 'Rejecting...' : 'Reject payment' }}</button>
+        </div>
+    </div>
+</div>
+}

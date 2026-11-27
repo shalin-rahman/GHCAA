@@ -181,4 +181,9 @@ export class Payments implements OnInit {
     isCompleted(status: any): boolean {
         return status === 'Completed' || status === 1 || status === '1';
     }
+
+    // The API sets this only when an admin rejected the payment, never for a gateway failure.
+    rejectionReason(item: { rejectionReason?: string | null }): string | null {
+        return item.rejectionReason?.trim() || null;
+    }
 }

@@ -592,7 +592,8 @@ public class FinancialServiceTests : TestBase
         _context.ChangeTracker.Clear();
         var saved = await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id);
         saved.Status.Should().Be(Enums.PaymentStatus.Failed);
-        saved.Notes.Should().Be("member note | TrxID not found in bKash statement");
+        saved.Notes.Should().Be("member note");
+        saved.RejectionReason.Should().Be("TrxID not found in bKash statement");
         saved.UpdatedByAdminId.Should().Be(42);
         (await _context.MembershipDues.SingleAsync(d => d.Id == due.Id)).IsPaid.Should().BeFalse();
         _activityMock.Verify(x => x.LogActivityAsync(member.Id, Constants.PaymentReview.RejectedAuditType, It.IsAny<string>(), 42,
@@ -649,6 +650,25 @@ public class FinancialServiceTests : TestBase
         var saved = await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id);
         saved.Status.Should().Be(Enums.PaymentStatus.Completed);
         saved.Notes.Should().Be("member note");
+        saved.RejectionReason.Should().BeNull();
+    }
+
+    [Category("FR-21")]
+    [Test]
+    public async Task MemberHistory_ReturnsRejectionReasonApartFromNotes()
+    {
+        var member = await CreateMinimalMemberAsync("RJ3");
+        var rejected = await AddPaymentAsync(member.Id, "TRX-RJ3", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+        await AddPaymentAsync(member.Id, "TRX-RJ3-GW", 500, Enums.PaymentStatus.Failed, DateTime.UtcNow.AddDays(-1));
+        await _service.RejectPaymentAsync(rejected.Id, 42, "Bank says | not received");
+        _context.ChangeTracker.Clear();
+
+        var history = (await _service.GetMemberPaymentHistoryAsync(member.Id)).ToList();
+
+        var row = history.Single(h => h.TransactionId == "TRX-RJ3");
+        row.Notes.Should().Be("member note");
+        row.RejectionReason.Should().Be("Bank says | not received");
+        history.Single(h => h.TransactionId == "TRX-RJ3-GW").RejectionReason.Should().BeNull();
     }
 
     [Test]

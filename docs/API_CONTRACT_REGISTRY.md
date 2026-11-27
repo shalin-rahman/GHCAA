@@ -12,6 +12,13 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-27 — GET /api/financials/my-history, POST /api/financials/{id}/reject
+- Change: additive. `PaymentHistoryDto` gains `rejectionReason` (string or null), so the my-history rows and the transaction snapshot carry it. POST `{id}/reject` now stores the trimmed reason in the new `PaymentHistories.RejectionReason` column and leaves `notes` as the member wrote it; it no longer appends " | reason" to `notes`. A gateway failure keeps `rejectionReason` null.
+- Migration `20261127120000_AddPaymentRejectionReason` adds the column and fills it for payments already rejected, from the reason in each payment's latest "Payment Rejected" activity row. When `notes` ends with exactly " | reason" (or equals the reason), that suffix is removed so the reason does not show twice. A malformed activity row is skipped. A payment rejected with no activity row keeps the reason in `notes` and gets no `rejectionReason`. Down writes the reason back into `notes` before the column goes.
+- Reason: TODO 84.92, plan session S11. The clients had been splitting the reason out of `notes` on " | ", which broke when the member's own note or the reason held that text.
+- Web: member payments page and admin pending payments page (`/admin/payments-pending`) done in S11; the payments page reads `rejectionReason`.
+- Mobile: `LedgerEntry.rejectionReason` reads the field; the financial portal shows it on a failed row. No admin review screen on mobile.
+
 ### 2026-11-27 — PUT /api/admin/members/{id}, all routes on a server error
 - Change: no route or DTO change. A request that fails no longer stores the changes it made before the throw: the error log write clears the request's change tracker before saving its row. A PUT /api/admin/members/{id} refused by the Lifelong Patron rule, the academic record rule or a committee seat check leaves the member and the membership change history as they were.
 - Reason: TODO 84.104, plan session S133.
@@ -25,8 +32,8 @@ glance.
 - Reject's 400 is a validation problem with the message under `errors.Reason`, whether the empty or short reason was caught by the DTO rules or by the visible-character check.
 - Deprecated: `PATCH /api/financials/update-status/{id}` keeps working for one release and then goes. It writes no activity row and never touches a due. New callers use verify or reject.
 - Reason: TODO 84.92, plan session S10.
-- Web: not yet. The admin screen comes in plan session S11.
-- Mobile: not yet. Plan session S11.
+- Web: done in plan session S11, see the my-history entry above.
+- Mobile: done in plan session S11 for the member view only, see the my-history entry above.
 
 ### 2026-11-27 — PUT /api/profile, POST /api/auth/register, PUT /api/admin/members/{id}
 - Change: a broken academic record rule now answers 400 with the reason in `detail`. The rules are: at least one record, the first record is the configured college, and only the first record is the institutional one. PUT /api/profile and POST /api/auth/register answered 500 for these; PUT /api/admin/members/{id} answered 409. A refused profile save no longer stores the NID or any other field the request carried. "The institution name is not configured" stays a 500. No shape change.

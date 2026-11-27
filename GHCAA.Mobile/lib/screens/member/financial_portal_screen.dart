@@ -651,6 +651,21 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                                                   color: AppTheme
                                                       .textSecondaryDark,
                                                   fontWeight: FontWeight.bold)),
+                                          if (item['isFailed'] == true) ...[
+                                            const SizedBox(height: 4),
+                                            const Text('FAILED',
+                                                style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: AppTheme.dangerColor,
+                                                    fontWeight:
+                                                        FontWeight.w900)),
+                                          ],
+                                          if (item['rejectionReason'] != null)
+                                            Text(
+                                                'Reason: ${item['rejectionReason']}',
+                                                style: const TextStyle(
+                                                    fontSize: 11,
+                                                    color: AppTheme.dangerColor)),
                                         ],
                                       ),
                                     ),

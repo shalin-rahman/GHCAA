@@ -19,7 +19,7 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
 import { interpolateOrgTemplate } from '../../core/utils/org-template';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
-import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
@@ -311,6 +311,8 @@ export class Register implements OnDestroy {
         if (this.selectedPaymentMethod()?.isOnline) {
           this.initiateGateway(res.memberId);
         } else {
+          // The code step reuses this flag; left on, its button stays disabled.
+          this.loading.set(false);
           this.submitted.set(true);
           this.currentStep.set(4);
           this.notify.success('Registry filing submitted successfully. Please verify your email.');
