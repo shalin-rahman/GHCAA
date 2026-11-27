@@ -82,6 +82,53 @@ namespace GHCAA.API.Controllers
             return success ? Ok() : NotFound();
         }
 
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingPayments(CancellationToken cancellationToken)
+        {
+            return Ok(await _financialService.GetPendingPaymentsAsync(cancellationToken));
+        }
+
+        // Returns 200 with the due it marked paid (dueId is null when no single due matched),
+        // so the admin can see whether a due was settled.
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        [HttpPost("{id:int}/verify")]
+        public async Task<IActionResult> VerifyPayment(int id, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId)) return Unauthorized();
+
+            var result = await _financialService.VerifyPaymentAsync(id, adminId, cancellationToken);
+            return result.Outcome switch
+            {
+                PaymentReviewOutcome.Done => Ok(new { dueId = result.DueId }),
+                PaymentReviewOutcome.NotFound => NotFound(),
+                _ => Problem(detail: "This payment has already been reviewed.", statusCode: StatusCodes.Status409Conflict)
+            };
+        }
+
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        [HttpPost("{id:int}/reject")]
+        public async Task<IActionResult> RejectPayment(int id, [FromBody] RejectPaymentDto dto, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId)) return Unauthorized();
+
+            var result = await _financialService.RejectPaymentAsync(id, adminId, dto.Reason, cancellationToken);
+            return result.Outcome switch
+            {
+                PaymentReviewOutcome.Done => NoContent(),
+                PaymentReviewOutcome.NotFound => NotFound(),
+                PaymentReviewOutcome.InvalidReason => ReasonRefused(),
+                _ => Problem(detail: "This payment has already been reviewed.", statusCode: StatusCodes.Status409Conflict)
+            };
+        }
+
+        // Same validation shape as the DataAnnotations refusal, so clients read one format.
+        private IActionResult ReasonRefused()
+        {
+            ModelState.AddModelError(nameof(RejectPaymentDto.Reason), "The reason must have at least 3 visible characters.");
+            return ValidationProblem(statusCode: StatusCodes.Status400BadRequest, modelStateDictionary: ModelState);
+        }
+
         [HttpGet("receipt/{paymentId}")]
         public async Task<IActionResult> DownloadReceipt(int paymentId, CancellationToken cancellationToken)
         {

@@ -9,6 +9,11 @@ namespace GHCAA.Application.Interfaces
         Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default);
         Task<bool> UpdatePaymentStatusAsync(int paymentId, Enums.PaymentStatus status, string? notes = null, CancellationToken cancellationToken = default);
 
+        // 84.92: the admin review queue. Only a Pending payment changes; any other status is Settled.
+        Task<IReadOnlyList<PendingPaymentDto>> GetPendingPaymentsAsync(CancellationToken cancellationToken = default);
+        Task<PaymentReviewResult> VerifyPaymentAsync(int paymentId, int adminUserId, CancellationToken cancellationToken = default);
+        Task<PaymentReviewResult> RejectPaymentAsync(int paymentId, int adminUserId, string reason, CancellationToken cancellationToken = default);
+
         // Membership History
         Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default);
         Task RecordMembershipChangeAsync(int memberId, string from, string to, int? adminId = null, string? reason = null, CancellationToken cancellationToken = default);

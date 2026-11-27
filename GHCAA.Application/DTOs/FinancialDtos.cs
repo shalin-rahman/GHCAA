@@ -18,6 +18,42 @@ namespace GHCAA.Application.DTOs
         public string? Notes { get; set; }
     }
 
+    // 84.92. One row of the admin queue of declared payments waiting for review.
+    public class PendingPaymentDto
+    {
+        public int Id { get; set; }
+        public int? MemberId { get; set; }
+        public string? MemberName { get; set; }
+
+        // A payment row has no due link, so this is the one unpaid membership due of the same
+        // member and amount, or null when none or several fit.
+        public int? DueId { get; set; }
+        public decimal Amount { get; set; }
+        public string TransactionReference { get; set; } = null!;
+        public string? ProofPath { get; set; }
+
+        // The date the member declared they paid. The row keeps no separate created time.
+        public DateTime SubmittedAt { get; set; }
+    }
+
+    public class RejectPaymentDto
+    {
+        [Required(ErrorMessage = "A reason is required.")]
+        [MinLength(Constants.PaymentReview.MinReasonLength, ErrorMessage = "The reason must be at least 3 characters.")]
+        [MaxLength(Constants.PaymentReview.MaxReasonLength, ErrorMessage = "The reason must not exceed 500 characters.")]
+        public string Reason { get; set; } = null!;
+    }
+
+    public enum PaymentReviewOutcome { Done, NotFound, Settled, InvalidReason }
+
+    public class PaymentReviewResult
+    {
+        public PaymentReviewOutcome Outcome { get; set; }
+
+        // Verify only: the due marked paid, or null when no single due matched.
+        public int? DueId { get; set; }
+    }
+
     public class CreatePaymentHistoryDto
     {
         [Required(ErrorMessage = "Transaction ID is required.")]

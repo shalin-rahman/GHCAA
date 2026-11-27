@@ -12,6 +12,22 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-27 — PUT /api/admin/members/{id}, all routes on a server error
+- Change: no route or DTO change. A request that fails no longer stores the changes it made before the throw: the error log write clears the request's change tracker before saving its row. A PUT /api/admin/members/{id} refused by the Lifelong Patron rule, the academic record rule or a committee seat check leaves the member and the membership change history as they were.
+- Reason: TODO 84.104, plan session S133.
+- Web: no change needed.
+- Mobile: `AdminService.updateMember` now rethrows, and the profile edit screen shows the server's `detail` for a refused admin save.
+
+### 2026-11-27 — GET /api/financials/pending, POST /api/financials/{id}/verify, POST /api/financials/{id}/reject, PATCH /api/financials/update-status/{id}
+- Change: three new AdminOnly routes for reviewing declared payments. GET `pending` returns the Pending payments, oldest first, as `PendingPaymentDto[]` (`id`, `memberId`, `memberName`, `dueId`, `amount`, `transactionReference`, `proofPath`, `submittedAt`). POST `{id}/verify` sets the payment Completed and answers 200 `{ dueId }`. POST `{id}/reject` takes `{ reason }`, sets the payment Failed, appends the trimmed reason to `notes` and answers 204. Both answer 404 for an unknown id and 409 when the payment is not Pending; reject answers 400 when the reason has fewer than 3 visible characters or more than 500. Both record the acting admin, write an activity row and notify the member with the `PAYMENT_STATUS_UPDATED` template (`Status` is `Completed` or `Failed`; reject adds `Reason`).
+- A payment row has no due link. `dueId` is the one unpaid, unlinked membership due of the same member and amount, and only for a MembershipFee payment; it is null when none or several fit. Verify marks that due paid and links it, and leaves dues alone when `dueId` is null. Verify answers 200 with a body, not the 204 the plan card asked for, so the admin can see whether a due was settled. `submittedAt` is the payment's `PaidAt`, because the row keeps no created time.
+- Verify claims the payment and the due in one transaction. A due already linked to another payment is never relinked, so a second payment of the same amount gets `dueId: null`.
+- Reject's 400 is a validation problem with the message under `errors.Reason`, whether the empty or short reason was caught by the DTO rules or by the visible-character check.
+- Deprecated: `PATCH /api/financials/update-status/{id}` keeps working for one release and then goes. It writes no activity row and never touches a due. New callers use verify or reject.
+- Reason: TODO 84.92, plan session S10.
+- Web: not yet. The admin screen comes in plan session S11.
+- Mobile: not yet. Plan session S11.
+
 ### 2026-11-27 — PUT /api/profile, POST /api/auth/register, PUT /api/admin/members/{id}
 - Change: a broken academic record rule now answers 400 with the reason in `detail`. The rules are: at least one record, the first record is the configured college, and only the first record is the institutional one. PUT /api/profile and POST /api/auth/register answered 500 for these; PUT /api/admin/members/{id} answered 409. A refused profile save no longer stores the NID or any other field the request carried. "The institution name is not configured" stays a 500. No shape change.
 - Reason: TODO 84.103, plan session S132.

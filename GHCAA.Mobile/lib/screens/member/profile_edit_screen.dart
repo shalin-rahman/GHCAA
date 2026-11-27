@@ -276,8 +276,15 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (id is! int) {
         success = false;
       } else {
-        success =
-            await ref.read(adminServiceProvider).updateMember(id, payload);
+        try {
+          success =
+              await ref.read(adminServiceProvider).updateMember(id, payload);
+        } on DioException catch (e) {
+          success = false;
+          serverReason = ApiException.serverMessage(e.response?.data);
+        } catch (_) {
+          success = false;
+        }
       }
     } else {
       try {
@@ -287,6 +294,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       } on DioException catch (e) {
         success = false;
         serverReason = ApiException.serverMessage(e.response?.data);
+      } catch (_) {
+        success = false;
       }
     }
 

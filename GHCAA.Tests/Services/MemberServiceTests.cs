@@ -1275,6 +1275,74 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    [Category("NFR-R5")]
+    public async Task AdminUpdateMember_AcademicRule_LeavesMemberUnchanged()
+    {
+        var member = await CreateAndSaveTestMemberAsync(name: "Original Name");
+        var updateDto = new AdminMemberUpdateDto
+        {
+            FullName = "Refused Name",
+            Email = member.Email,
+            MobileNo = member.MobileNo,
+            NID = member.NID,
+            DateOfBirth = new DateTime(1990, 1, 1),
+            MembershipType = Enums.MembershipType.Founding,
+            Category = Enums.MemberCategory.Active,
+            Status = Enums.MembershipStatus.Active,
+            AcademicHistory = new List<AcademicRecordDto>
+            {
+                new AcademicRecordDto { InstitutionName = "Other College", Degree = "HSC", Subject = "Science", PassingYear = 2007 }
+            }
+        };
+
+        var act = async () => await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
+
+        await act.Should().ThrowAsync<ValidationException>();
+        _context.ChangeTracker.Entries().Should().NotContain(e => e.State != EntityState.Unchanged);
+        _mockFinancialService.Verify(x => x.RecordMembershipChangeAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        var stored = await _context.Members.AsNoTracking().SingleAsync(m => m.Id == member.Id);
+        stored.FullName.Should().Be("Original Name");
+    }
+
+    [Test]
+    [Category("NFR-R5")]
+    public async Task AdminUpdateMember_EcPositionMissing_DoesNotRecordMembershipChange()
+    {
+        var member = await CreateAndSaveTestMemberAsync(name: "Original Name");
+        _context.ECPeriods.Add(new ECPeriod { Title = "EC 2024-2027", StartDate = new DateTime(2024, 1, 1), IsActive = true });
+        await _context.SaveChangesAsync();
+        var updateDto = new AdminMemberUpdateDto
+        {
+            FullName = "Refused Name",
+            Email = member.Email,
+            MobileNo = member.MobileNo,
+            NID = member.NID,
+            DateOfBirth = new DateTime(1990, 1, 1),
+            MembershipType = Enums.MembershipType.Founding,
+            Category = Enums.MemberCategory.Active,
+            Status = Enums.MembershipStatus.Active,
+            AcademicHistory = new List<AcademicRecordDto>
+            {
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true }
+            },
+            ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = "EC 2024-2027", PositionId = 9999, StartDate = new DateTime(2024, 1, 1) }
+            }
+        };
+
+        var act = async () => await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        _mockFinancialService.Verify(x => x.RecordMembershipChangeAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        var stored = await _context.Members.AsNoTracking().SingleAsync(m => m.Id == member.Id);
+        stored.FullName.Should().Be("Original Name");
+        stored.MembershipType.Should().Be(Enums.MembershipType.General);
+    }
+
+    [Test]
     public async Task RegisterAsync_WithFailingStorage_ShouldRollbackTransaction()
     {
         // Assemble

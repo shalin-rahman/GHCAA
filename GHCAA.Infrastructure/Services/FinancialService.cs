@@ -206,6 +206,203 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<IReadOnlyList<PendingPaymentDto>> GetPendingPaymentsAsync(CancellationToken cancellationToken = default)
+        {
+            var pending = await _db.PaymentHistories
+                .AsNoTracking()
+                .Where(p => p.Status == Enums.PaymentStatus.Pending)
+                .OrderBy(p => p.PaidAt).ThenBy(p => p.Id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.MemberId,
+                    MemberName = p.Member != null ? p.Member.FullName : null,
+                    p.Amount,
+                    p.TransactionId,
+                    p.ReceiptPath,
+                    p.PaidAt,
+                    p.FinancialCategory
+                })
+                .ToListAsync(cancellationToken);
+
+            var memberIds = pending.Where(p => p.MemberId.HasValue).Select(p => p.MemberId!.Value).Distinct().ToList();
+            var openDues = await _db.MembershipDues
+                .AsNoTracking()
+                .Where(d => memberIds.Contains(d.MemberId) && !d.IsPaid && d.PaymentHistoryId == null)
+                .Select(d => new { d.Id, d.MemberId, d.Amount })
+                .ToListAsync(cancellationToken);
+
+            return pending.Select(p =>
+            {
+                int? dueId = null;
+                if (p.MemberId.HasValue && p.FinancialCategory == Enums.FinancialCategory.MembershipFee)
+                {
+                    var fits = openDues.Where(d => d.MemberId == p.MemberId.Value && d.Amount == p.Amount).Take(2).ToList();
+                    if (fits.Count == 1) dueId = fits[0].Id;
+                }
+
+                return new PendingPaymentDto
+                {
+                    Id = p.Id,
+                    MemberId = p.MemberId,
+                    MemberName = p.MemberName,
+                    DueId = dueId,
+                    Amount = p.Amount,
+                    TransactionReference = p.TransactionId,
+                    ProofPath = p.ReceiptPath,
+                    SubmittedAt = p.PaidAt
+                };
+            }).ToList();
+        }
+
+        public async Task<PaymentReviewResult> VerifyPaymentAsync(int paymentId, int adminUserId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.AsNoTracking().FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
+            if (payment == null) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.NotFound };
+            if (payment.Status != Enums.PaymentStatus.Pending) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
+
+            var now = DateTime.UtcNow;
+            int? dueId = null;
+            // One transaction, so a payment is never left Completed with its due still open.
+            await using (var transaction = await _db.Database.BeginTransactionAsync(cancellationToken))
+            {
+                // The Status guard in the WHERE makes a second admin acting at the same moment get Settled
+                // instead of a second notification.
+                var claimed = await _db.PaymentHistories
+                    .Where(p => p.Id == paymentId && p.Status == Enums.PaymentStatus.Pending)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.Status, Enums.PaymentStatus.Completed)
+                        .SetProperty(p => p.UpdatedAt, now)
+                        .SetProperty(p => p.UpdatedByAdminId, adminUserId), cancellationToken);
+                if (claimed == 0) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
+
+                var candidateDueId = await FindSingleOpenDueIdAsync(payment, cancellationToken);
+                if (candidateDueId.HasValue)
+                {
+                    // Guarded the same way, so two payments verified together cannot both take one due.
+                    var linked = await _db.MembershipDues
+                        .Where(d => d.Id == candidateDueId.Value && !d.IsPaid && d.PaymentHistoryId == null)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(d => d.IsPaid, true)
+                            .SetProperty(d => d.PaymentDate, now)
+                            .SetProperty(d => d.PaymentHistoryId, payment.Id), cancellationToken);
+                    if (linked == 1) dueId = candidateDueId;
+                }
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+
+            await AfterReviewAsync(payment, adminUserId, Enums.PaymentStatus.Completed, dueId, null, cancellationToken);
+            return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Done, DueId = dueId };
+        }
+
+        public async Task<PaymentReviewResult> RejectPaymentAsync(int paymentId, int adminUserId, string reason, CancellationToken cancellationToken = default)
+        {
+            var trimmed = (reason ?? string.Empty).Trim();
+            var visible = trimmed.Count(c => !char.IsWhiteSpace(c) && !char.IsControl(c));
+            if (visible < Constants.PaymentReview.MinReasonLength || trimmed.Length > Constants.PaymentReview.MaxReasonLength)
+                return new PaymentReviewResult { Outcome = PaymentReviewOutcome.InvalidReason };
+
+            var payment = await _db.PaymentHistories.AsNoTracking().FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
+            if (payment == null) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.NotFound };
+            if (payment.Status != Enums.PaymentStatus.Pending) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
+
+            var now = DateTime.UtcNow;
+            // Appended the way UpdatePaymentStatusAsync does, so the member's own note stays.
+            var notes = string.IsNullOrEmpty(payment.Notes) ? trimmed : $"{payment.Notes} | {trimmed}";
+            var claimed = await _db.PaymentHistories
+                .Where(p => p.Id == paymentId && p.Status == Enums.PaymentStatus.Pending)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Status, Enums.PaymentStatus.Failed)
+                    .SetProperty(p => p.Notes, notes)
+                    .SetProperty(p => p.UpdatedAt, now)
+                    .SetProperty(p => p.UpdatedByAdminId, adminUserId), cancellationToken);
+            if (claimed == 0) return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled };
+
+            await AfterReviewAsync(payment, adminUserId, Enums.PaymentStatus.Failed, null, trimmed, cancellationToken);
+            return new PaymentReviewResult { Outcome = PaymentReviewOutcome.Done };
+        }
+
+        // Only a membership fee settles a due, and only when exactly one unpaid due of that member
+        // has the same amount. A declaration carries no due id, so anything looser could mark the
+        // wrong year paid.
+        private async Task<int?> FindSingleOpenDueIdAsync(PaymentHistory payment, CancellationToken cancellationToken)
+        {
+            if (!payment.MemberId.HasValue || payment.FinancialCategory != Enums.FinancialCategory.MembershipFee) return null;
+
+            var fits = await _db.MembershipDues
+                .Where(d => d.MemberId == payment.MemberId.Value && !d.IsPaid && d.PaymentHistoryId == null && d.Amount == payment.Amount)
+                .Select(d => d.Id)
+                .Take(2)
+                .ToListAsync(cancellationToken);
+            return fits.Count == 1 ? fits[0] : null;
+        }
+
+        // The status change is already saved, so a failed audit row or notification is logged
+        // rather than turned into an error the admin would retry against a settled payment.
+        private async Task AfterReviewAsync(PaymentHistory payment, int adminUserId, Enums.PaymentStatus newStatus, int? dueId, string? reason, CancellationToken cancellationToken)
+        {
+            var verified = newStatus == Enums.PaymentStatus.Completed;
+            try
+            {
+                var metadata = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    PaymentId = payment.Id,
+                    OldStatus = payment.Status.ToString(),
+                    NewStatus = newStatus.ToString(),
+                    DueId = dueId,
+                    Reason = reason
+                });
+                await _activityService.LogActivityAsync(
+                    payment.MemberId,
+                    verified ? Constants.PaymentReview.VerifiedAuditType : Constants.PaymentReview.RejectedAuditType,
+                    verified
+                        ? $"Payment {payment.TransactionId} of {payment.Amount:N2} verified."
+                        : $"Payment {payment.TransactionId} of {payment.Amount:N2} rejected: {reason}",
+                    actorId: adminUserId,
+                    source: Constants.ActivitySources.Web,
+                    metadata: metadata,
+                    cancellationToken: cancellationToken);
+
+                if (payment.MemberId.HasValue)
+                {
+                    var vars = new Dictionary<string, string>
+                    {
+                        { "TrxID", payment.TransactionId },
+                        { "Status", newStatus.ToString() }
+                    };
+                    if (reason != null) vars["Reason"] = reason;
+
+                    await _notification.CreateNotificationFromTemplateAsync(
+                        payment.MemberId.Value,
+                        Constants.TemplateCodes.PaymentStatusUpdated,
+                        Enums.NotificationType.GeneralSystem,
+                        fallbackTitle: verified ? "Payment Verified" : "Payment Rejected",
+                        fallbackMessage: verified
+                            ? $"Your payment of {payment.Amount:N2} has been successfully verified."
+                            : $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) was rejected. Reason: {reason}",
+                        templateVars: vars,
+                        targetUrl: "/finance/history",
+                        cancellationToken: cancellationToken);
+                }
+
+                if (verified)
+                {
+                    await _realTime.SendAdminAlertAsync("NEW_PAYMENT", new
+                    {
+                        MemberId = payment.MemberId,
+                        Amount = payment.Amount,
+                        TransactionId = payment.TransactionId,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning(ex, "Payment {PaymentId} was set to {Status} but the audit row or member notice failed.", payment.Id, newStatus);
+            }
+        }
+
         public async Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var history = await _db.MembershipHistories

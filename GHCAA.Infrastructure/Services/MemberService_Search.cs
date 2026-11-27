@@ -261,17 +261,19 @@ namespace GHCAA.Infrastructure.Services
                     throw new UnauthorizedAccessException("Only a SuperAdmin may edit a SuperAdmin's own member record.");
             }
 
-            // Track membership type change
-            if (member.MembershipType != dto.MembershipType)
+            // Refuse before touching the member, so a refused edit leaves nothing tracked.
+            if (dto.Category == Enums.MemberCategory.LifelongPatron && dto.MembershipType != Enums.MembershipType.Founding)
             {
-                await _financialService.RecordMembershipChangeAsync(
-                    id,
-                    member.MembershipType.ToString(),
-                    dto.MembershipType.ToString(),
-                    adminId,
-                    dto.MembershipChangeReason ?? "Administrative Update",
-                    cancellationToken);
+                _logger.LogWarning("Admin update attempted to assign Lifelong Patron to a non-founding member {Id}.", id);
+                throw new InvalidOperationException("Only Founding members can be assigned as Lifelong Patrons.");
             }
+            if (dto.AcademicHistory != null)
+            {
+                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
+                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
+            }
+
+            var previousMembershipType = member.MembershipType;
 
             member.FullName = dto.FullName;
             member.FatherName = dto.FatherName;
@@ -302,13 +304,6 @@ namespace GHCAA.Infrastructure.Services
 
             member.MembershipType = dto.MembershipType;
             member.Status = dto.Status;
-            // Domain Validation: Only Founding members can be Lifelong Patrons
-            if (dto.Category == Enums.MemberCategory.LifelongPatron && member.MembershipType != Enums.MembershipType.Founding)
-            {
-                _logger.LogWarning("Admin update attempted to assign Lifelong Patron to a non-founding member {Id}.", id);
-                throw new InvalidOperationException("Only Founding members can be assigned as Lifelong Patrons.");
-            }
-
             member.Category = dto.Category;
             member.MembershipChangeReason = dto.MembershipChangeReason;
             member.ECChangeReason = dto.ECChangeReason;
@@ -323,9 +318,6 @@ namespace GHCAA.Infrastructure.Services
             // Sync Academic History
             if (dto.AcademicHistory != null)
             {
-                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
-                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
-
                 member.AcademicHistory.Clear();
                 foreach (var a in dto.AcademicHistory)
                 {
@@ -417,6 +409,18 @@ namespace GHCAA.Infrastructure.Services
             member.IsVerified = dto.IsVerified;
             member.ContributionPoints = dto.ContributionPoints;
             member.LastUpdateDate = DateTime.UtcNow;
+
+            // Its save also stores the edit above, so it runs only after the EC seat checks pass.
+            if (previousMembershipType != dto.MembershipType)
+            {
+                await _financialService.RecordMembershipChangeAsync(
+                    id,
+                    previousMembershipType.ToString(),
+                    dto.MembershipType.ToString(),
+                    adminId,
+                    dto.MembershipChangeReason ?? "Administrative Update",
+                    cancellationToken);
+            }
 
             await _db.SaveChangesAsync(cancellationToken);
 

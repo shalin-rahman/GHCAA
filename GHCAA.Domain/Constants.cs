@@ -365,6 +365,15 @@ namespace GHCAA.Domain
             public const string Mobile = "Mobile";
         }
 
+        // 84.92. Admin review of a member's declared payment.
+        public static class PaymentReview
+        {
+            public const string VerifiedAuditType = "Payment Verified";
+            public const string RejectedAuditType = "Payment Rejected";
+            public const int MinReasonLength = 3;
+            public const int MaxReasonLength = 500;
+        }
+
         // 37.1r. Values the user agent parser writes into the vote row's Metadata.
         public static class UserAgentDevices
         {

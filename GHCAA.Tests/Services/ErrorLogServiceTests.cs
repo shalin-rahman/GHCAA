@@ -1,6 +1,7 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace GHCAA.Tests.Services
@@ -57,6 +58,21 @@ namespace GHCAA.Tests.Services
             Assert.That(row.UserId, Is.Null);
             Assert.That(row.Username, Is.Null);
             Assert.That(row.RequestPath, Is.Null);
+        }
+
+        [Test]
+        [Category("NFR-R5")]
+        public async Task LogAsync_AfterFailedRequest_DoesNotSaveTrackedChanges()
+        {
+            var member = await CreateAndSaveTestMemberAsync(name: "Original Name");
+            member.FullName = "Half-applied edit";
+            var service = CreateService();
+
+            await service.LogAsync(Constants.ErrorLogs.LevelError, "Request failed", null, null, "ExceptionMiddleware", null, null, null, null);
+
+            Assert.That(_context.ErrorLogs.AsNoTracking().Count(), Is.EqualTo(1));
+            var stored = _context.Members.AsNoTracking().Single(m => m.Id == member.Id);
+            Assert.That(stored.FullName, Is.EqualTo("Original Name"));
         }
 
         [Test]

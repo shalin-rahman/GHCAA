@@ -281,9 +281,16 @@ test('membership walkthrough', async ({ browser, baseURL }) => {
     await adminWeb.goto('/admin/ledger');
     await adminWeb.shot('Ledger', 'The declared payment is Pending. There is no screen to open the proof and verify it (tracker 84.92).');
     if (pending) {
-      await call('PATCH', `/financials/update-status/${field(pending, 'Id')}?status=Completed&notes=${encodeURIComponent('Walkthrough: receipt checked')}`, ad);
-      note('api', admin.name, 'Payment marked received through the API', `Payment ${field(pending, 'Id')}, ${field(pending, 'Amount')}.`);
-      report.gap('No admin screen verifies a declared payment; the walkthrough used PATCH update-status (tracker 84.92, plan S10 and S11).');
+      const paymentId = field(pending, 'Id');
+      const queue = (await call<any[]>('GET', '/financials/pending', ad)).body ?? [];
+      const queued = queue.some(p => field(p, 'Id') === paymentId);
+      note('check', admin.name, 'The declared payment is in the review queue', `GET /financials/pending lists ${queue.length} payment(s).`, { ok: queued });
+      if (!queued) report.bug(`Payment ${paymentId} is Pending but GET /financials/pending does not list it.`);
+      const verified = await call('POST', `/financials/${paymentId}/verify`, ad);
+      note('api', admin.name, 'Payment verified through the API', `Payment ${paymentId}, ${field(pending, 'Amount')}; due ${field(verified.body, 'DueId') ?? 'none matched'}.`);
+      await probe(admin.name, ad, 'A second verify is refused', 'POST', `/financials/${paymentId}/verify`, {}, [409]);
+      await probe(admin.name, ad, 'Rejecting a verified payment is refused', 'POST', `/financials/${paymentId}/reject`, { Reason: 'Walkthrough check' }, [409]);
+      report.gap('No admin screen verifies a declared payment yet; the walkthrough used POST /financials/{id}/verify (tracker 84.92, screen in plan S11).');
     } else {
       note('check', admin.name, 'No pending payment was found for the applicant', undefined, { ok: false });
     }

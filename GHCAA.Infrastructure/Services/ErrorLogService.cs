@@ -46,6 +46,8 @@ namespace GHCAA.Infrastructure.Services
                     Username = username
                 };
 
+                // The context is the failed request's own, so drop its pending changes or this save stores them.
+                _db.ChangeTracker.Clear();
                 await _db.ErrorLogs.AddAsync(entry, cancellationToken);
                 await _db.SaveChangesAsync(cancellationToken);
 

@@ -38,7 +38,7 @@ IDs out of the active text (rule 9 in section 2).
   against the code; track H landed 2026-11-21. A new card uses the same form.
   `python scripts/backlog_inventory.py --card <session or item id>` prints a card skeleton and
   the tracker entry.
-- **Next session:** S10 (84.92 backend), then S133 (84.104). S132 closed 2026-11-27. Run the sequence in section 3 top to bottom. Do not skip ahead
+- **Next session:** S11 (84.92 clients). S133 closed 2026-11-27. Run the sequence in section 3 top to bottom. Do not skip ahead
   unless a card's "After" column is met and the owner asks.
 - **Owner answers 2026-11-13:** plan as session cards in this file; ER-17 stays gated at Scrutiny
   (closed the same day, see the log); the book is one batch at the end (track H), never inside a feature session; owner-gated
@@ -134,8 +134,8 @@ summary text and link in sync with that card. Run top to bottom.
 | S08 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S09 | done 2026-11-26, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S132 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
-| S10 | 84.92 (backend) | [Add payment verification and rejection APIs](#s10) | M | API | | |
-| S133 | 84.104 | [Stop the error log write from saving a failed request's changes](#s133) | S | API, mobile | | |
+| S10 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
+| S133 | done 2026-11-27, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
 | S12 | 84.80 (backend) | [Cancel event registrations and promote the waitlist](#s12) | M | API | | |
 | S13 | 84.80 (clients) | [Add registration cancellation to both clients](#s13) | M | web, mobile | | S12 |
@@ -303,99 +303,14 @@ by name. When a name on a card is not in the code, stop and ask; do not guess a 
 
 ### Phase B. P1 items with no owner gate
 
-<a id="s133"></a>
-**S133 · 84.104 · S**
-- Goal: a request that throws stores nothing it changed, even though the error log row is still written.
-- Before you start: no card needed. `grep -n "SaveChangesAsync" GHCAA.Infrastructure/Services/ErrorLogService.cs`
-  shows the save that runs on the request's `ApplicationDbContext`.
-- Read (only these): `LogAsync` in `GHCAA.Infrastructure/Services/ErrorLogService.cs`; the catch in
-  `GHCAA.API/Middleware/ExceptionMiddleware.cs`; the `ApplicationDbContext` registration in
-  `GHCAA.Infrastructure/DependencyInjection.cs`; `AdminUpdateMemberAsync` in
-  `GHCAA.Infrastructure/Services/MemberService_Search.cs`; `updateMember` in
-  `GHCAA.Mobile/lib/features/admin/admin_service.dart` and its caller in
-  `GHCAA.Mobile/lib/screens/member/profile_edit_screen.dart`; the 84.104 tracker entry.
-- Change (only these files): `ErrorLogService.cs`, `MemberService_Search.cs`, `admin_service.dart`,
-  `profile_edit_screen.dart`, `GHCAA.Tests/Services/ErrorLogServiceTests.cs`,
-  `GHCAA.Tests/Services/MemberServiceTests.cs`, one Flutter test under `GHCAA.Mobile/test/`,
-  `docs/TODO.md`.
-- Do not touch: the status codes S132 set (400 for the academic record rules); `ExceptionMiddleware`'s
-  response shape; the DbContext pooling setup; the web admin member form.
-- Steps:
-  1. In `LogAsync`, write the error row without saving other tracked changes: clear the change tracker
-     first, or write through a separate context. Prefer clearing the tracker; the context is pooled, so
-     check a second context does not break pooling. -> check: the new `ErrorLogServiceTests` test.
-  2. In `AdminUpdateMemberAsync`, run the academic record check before any member field changes. -> check:
-     the new `MemberServiceTests` test.
-  3. Mobile admin edit: return the server's `detail` for a refused update and show it on the profile
-     edit screen, the same way the member profile save shows it. -> check: the Flutter test.
-- Contract: no route or status change.
-- Tests: `ErrorLogServiceTests.LogAsync_AfterFailedRequest_DoesNotSaveTrackedChanges` proves a modified
-  tracked entity is not stored while the error row is; `MemberServiceTests.AdminUpdateMember_AcademicRule_LeavesMemberUnchanged`
-  proves a refused admin edit changes nothing; a Flutter test shows the 400 reason on the admin edit.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~ErrorLogService|FullyQualifiedName~MemberServiceTests|FullyQualifiedName~ExceptionMiddleware"`,
-  `cd GHCAA.Mobile; flutter analyze; flutter test <new test> --exclude-tags golden`, then
-  `python scripts/ci-local.py --only backend` and `--only mobile`.
-- Done when: the three tests pass, the backend and mobile layers pass, and 84.104 is DONE with the run log.
-- Stop and ask if: another caller relies on `LogAsync` saving the request's changes (default: keep the
-  old behaviour for that caller and record it in 84.104), or clearing the tracker breaks a test outside
-  this card.
-
-<a id="s10"></a>
-**S10 · 84.92 (backend) · M**
-- Goal: an admin lists pending payment declarations and verifies or rejects one with a reason; the
-  due is marked paid on verify and the member is told either way.
-- Before you start: no card needed. `grep -n "update-status" GHCAA.API/Controllers/FinancialsController.cs`
-  shows one PATCH route.
-- Read (only these): `GHCAA.API/Controllers/FinancialsController.cs` (`update-status`);
-  `UpdatePaymentStatusAsync` in `GHCAA.Infrastructure/Services/FinancialService.cs`;
-  `GHCAA.Domain/Models/PaymentHistory.cs`, `GHCAA.Domain/Models/MembershipDue.cs`;
-  `GHCAA.Application/DTOs/FinancialDtos.cs`; `GHCAA.Application/Interfaces/INotificationService.cs`.
-- Change (only these files): `FinancialsController.cs`, `GHCAA.Application/Interfaces/IFinancialService.cs`,
-  `FinancialService.cs`, `FinancialDtos.cs`, `GHCAA.Tests/Services/FinancialServiceTests.cs`,
-  `GHCAA.Tests/Controllers/FinancialsControllerTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, the authz
-  catalog output, `docs/TODO.md`.
-- Do not touch: `PaymentStatus` in `GHCAA.Domain/Enums.cs` (no new value; reject uses `Failed`);
-  `PaymentCallbackOrchestrator.cs` and the gateway path; the old `PATCH update-status` route keeps
-  working for one release.
-- Steps:
-  1. DTOs: `PendingPaymentDto` and `RejectPaymentDto` with `[Required, MinLength(3)]` on `Reason`;
-     the service also trims and refuses fewer than 3 visible characters. -> check: build.
-  2. Service `GetPendingPaymentsAsync`: rows with `Status == Pending`, oldest first. -> check: test.
-  3. Service `VerifyPaymentAsync(int paymentId, int adminUserId)` and
-     `RejectPaymentAsync(int paymentId, int adminUserId, string reason)`. Only a Pending payment
-     changes; anything else returns a "settled" result. Verify sets `Completed` and, on the linked
-     due, `IsPaid`, `PaymentDate`, `PaymentHistoryId`. Reject sets `Failed` and writes the reason to
-     `Notes`. One `SaveChanges` for each. -> check: tests.
-  4. Both write an activity row (admin, old status, new status) and notify the member through
-     `INotificationService`, in the way `UpdatePaymentStatusAsync` does today. -> check: tests.
-  5. Controller actions per the contract; mark `update-status` deprecated in the registry.
-     -> check: controller tests and the reflection test.
-- Contract: all `AdminOnly`.
-  `GET api/financials/pending` -> 200, array of `{ id, memberId, memberName, dueId, amount,
-  transactionReference, proofPath, submittedAt }`.
-  `POST api/financials/{id:int}/verify` -> 204; 404 unknown; 409 not Pending.
-  `POST api/financials/{id:int}/reject`, body `{ reason }` -> 204; 400 reason under 3 visible
-  characters; 404; 409.
-- Tests: `FinancialServiceTests.cs` :: `Verify_PendingPayment_MarksDuePaid`,
-  `Reject_StoresReasonAndSetsFailed`, `Verify_SettledPayment_ReturnsSettled`,
-  `Reject_SettledPayment_ReturnsSettled`, `GetPending_ReturnsOnlyPending_OldestFirst`,
-  `Verify_NotifiesMember`; `FinancialsControllerTests.cs` :: `Reject_BlankReason_Returns400`,
-  `Verify_Settled_Returns409`, `Pending_AsMember_IsAdminOnly`. Tag with the FR of 84.92 in spec 015.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FinancialServiceTests|FullyQualifiedName~FinancialsControllerTests"`;
-  `python docs/api/authz_catalog.py --write </dev/null`; `python scripts/ci-local.py --only backend`;
-  `python scripts/ci-local.py --only contract`.
-- Done when: the nine tests pass; registry lists the three routes and the deprecation; 84.92 notes
-  "backend done, clients in S11" and stays PARTIAL.
-- Stop and ask if: `PaymentHistory` has no field that links it to a due, so verify cannot find the
-  due. Default: match on member and amount only when exactly one unpaid due fits; otherwise leave
-  the due alone and say so in the response. Also stop if a field in the pending response does not
-  exist on the model; name the missing field.
-
 <a id="s11"></a>
 **S11 · 84.92 (clients) · M**
 - Goal: the web admin has a pending payments page with verify and reject; the member payment screens
   on web and mobile show the status and the rejection reason.
-- Before you start: S10 closed. The three routes answer on the local API.
+- Before you start: S10 closed. The three routes answer on the local API. Verify answers 200
+  `{ dueId }`, and `dueId` is null when no single open due matched; show that as "no due
+  settled". Reject's 400 is a validation problem with the message under `errors.Reason`.
+  The walkthrough already calls the verify route and reports the missing screen.
 - Read (only these): `GHCAA.Web/src/app/admin/ledger/ledger.ts` (page pattern);
   `GHCAA.Web/src/app/core/services/financial.service.ts`; `GHCAA.Web/src/app/member/payments/payments.ts`;
   `GHCAA.Web/src/app/app.routes.ts` (admin block); `ADMIN_NAV_SECTIONS` in
@@ -5712,6 +5627,8 @@ brief asks for it.
 | 2026-11-27 | 84.103 (added), S132 (added) | The profile-save 500 found in the S09 run now has its own item and card: a first academic record for another college answers 500 and the NID is still stored. Placed after S09 and run before S10 | `docs/TODO.md`, this file |
 | 2026-11-27 | 84.103 (S132) | A refused profile save answers 400 with the reason and stores nothing. The NID was kept by `ErrorLogService.LogAsync`, whose save runs on the request's DbContext after `ExceptionMiddleware` catches the throw; `UpdateProfileAsync` now checks before it changes the member. Registration answered 500 and admin 409 for the same rule; both now answer 400. Nine new tests passed, fixtures 90/90, ci-local backend 7 of 7, and the member 794 check against the local API gave 400 with the NID unchanged | `GHCAA.Infrastructure/Services/MemberService*.cs`, `ProfileController.cs`, `RegistrationController.cs`, `AdminController.cs`, tests, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
 | 2026-11-27 | 84.104 (added), S133 (added) | The error log save found in S132 gets its own item and card: it writes a failed request's tracked changes. The admin member edit that changes fields before the check and the mobile admin edit that hides the reason go with it. Placed after S10 | `docs/TODO.md`, this file |
+| 2026-11-27 | 84.92 backend (S10) | Three AdminOnly routes: GET `financials/pending`, POST `{id}/verify` (200 `{ dueId }`, not 204, so the admin sees whether a due was settled), POST `{id}/reject` (204, reason of 3 to 500 visible characters). A payment has no due link, so the due is the single open membership due of the same member and amount (owner choice). Code review fixes: verify claims the payment and the due in one transaction, a due already linked is never relinked, and both reject 400s share the validation problem shape. `update-status` deprecated in the registry. Focused fixtures 61 of 61, ci-local backend 7 of 7 and contract 4 of 4 after the swagger snapshot was regenerated. Walkthrough step type-checks; not run, S11 runs it with the screen | `FinancialsController.cs`, `FinancialService.cs`, `FinancialDtos.cs`, `IFinancialService.cs`, `Constants.cs`, tests, membership walkthrough and README, `docs/api/swagger.json`, authorization catalog, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
+| 2026-11-27 | 84.104 (S133) | The error log write clears the change tracker first, so a failed request's edits are not saved with the error row; safe while `ExceptionMiddleware` is the only caller. Admin member edit checks the Lifelong Patron and academic rules before changing the member, and records a membership type change only after the committee seat checks. Mobile admin edit shows the server's reason. Card filter 64/64, `ci-local.py --only backend` 7 of 7, `--only mobile` 2 of 2, new widget test passed | `ErrorLogService.cs`, `MemberService_Search.cs`, `admin_service.dart`, `profile_edit_screen.dart`, tests, `docs/TODO.md`, this file |
 <!-- backlog-check: on -->
 
 ## 13. History

@@ -897,7 +897,7 @@ All services are registered as **Scoped** unless noted.
 | `IDiscussionService` | `DiscussionService` | Services/ |
 | `ISmsService` | `GreenwebSmsService` | Services/ (**HttpClient**) |
 | `IRealTimeService` | `RealTimeService` | API/Services/ |
-| `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`) |
+| `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`; `LogAsync` clears the request's change tracker before its save, 84.104) |
 | `IDeviceTokenService` | `DeviceTokenService` | Services/ (82.53a; FCM token upsert/read for `NotificationController`) |
 | `IPaymentCallbackOrchestrator` | `PaymentCallbackOrchestrator` | Services/ (82.70; orchestrates gateway verification, ledger updates, and status transitions) |
 | `IScholarshipService` | `ScholarshipService` | Services/ (WP37.2) |
@@ -1690,8 +1690,9 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `sendRequest()` | `(membershipNo, relationshipType, {note?}) => Future<bool>` | `POST /family-links/send` |
 
 Used by `screens/member/family_link_screen.dart`, the only screen with a family-linking UI. Profile
-editing (`profile_edit_screen.dart`) goes through `AuthService.updateProfile()` (`PUT /profile`), not
-through this class.
+editing (`profile_edit_screen.dart`) goes through `AuthService.updateProfile()` (`PUT /profile`), or
+`AdminService.updateMember()` when an admin edits another member, not through this class. A refused admin
+save shows the server's `detail`.
 
 ---
 
@@ -1863,7 +1864,7 @@ with no callers (docs/TODO.md 80.4, 44.16).
 |---|---|---|
 | `DashboardScreen` | `dashboard_screen.dart` | `userProfileProvider`, `roleProvider` |
 | `ProfileScreen` | `profile_screen.dart` | `userProfileProvider` |
-| `ProfileEditScreen` | `profile_edit_screen.dart` | `authServiceProvider`, `networkingServiceProvider` |
+| `ProfileEditScreen` | `profile_edit_screen.dart` | `authServiceProvider`, `adminServiceProvider`, `networkingServiceProvider` |
 | `EventsScreen` | `events_screen.dart` | `eventsServiceProvider` |
 | `EventDetailsScreen` | `event_details_screen.dart` | `eventsServiceProvider` |
 | `JobsScreen` | `jobs_screen.dart` | `jobServiceProvider` |
@@ -2023,6 +2024,7 @@ Keep the walkthrough rows and each walkthrough README's "What the run covers" ta
 | `visual-check.ps1` | `scripts/visual-check.ps1` | Unified 4-stage runner for Visual/E2E tests |
 | `event-forms.spec.ts`| `GHCAA.Web/tests/visual/event-forms.spec.ts` | Playwright visual tests for event modules |
 | `registration_visual_test.dart` | `GHCAA.Mobile/test/registration_visual_test.dart` | Flutter Golden tests for registration wizard |
+| `profile_edit_admin_reason_test.dart` | `GHCAA.Mobile/test/profile_edit_admin_reason_test.dart` | Admin edit shows the server's reason for a refused update (84.104) |
 | `member-journey.spec.ts` | `GHCAA.Web/tests/e2e/member-journey.spec.ts` | E2E Member login/dashboard journey |
 | `admin-workflow.spec.ts` | `GHCAA.Web/tests/e2e/admin-workflow.spec.ts` | E2E Admin approval workflow |
 | `full-membership-event-workflow.spec.ts` | `GHCAA.Web/tests/e2e/` | Quick single-browser check: register, pay, approve, create an event, register, approve participation |

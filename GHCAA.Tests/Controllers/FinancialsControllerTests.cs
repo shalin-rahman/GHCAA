@@ -154,5 +154,89 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
+
+        [Category("FR-23")]
+        [Test]
+        public async Task Reject_BlankReason_Returns400()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.RejectPaymentAsync(5, 7, "   ", It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new PaymentReviewResult { Outcome = PaymentReviewOutcome.InvalidReason });
+
+            var result = await _controller.RejectPayment(5, new RejectPaymentDto { Reason = "   " }, CancellationToken.None);
+
+            var obj = (ObjectResult)result;
+            Assert.That(obj.StatusCode, Is.EqualTo(400));
+            // The same shape [ApiController] gives a DataAnnotations failure.
+            var problem = (ValidationProblemDetails)obj.Value!;
+            Assert.That(problem.Errors.ContainsKey(nameof(RejectPaymentDto.Reason)), Is.True);
+        }
+
+        [Category("FR-23")]
+        [Test]
+        public async Task Verify_Settled_Returns409()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.VerifyPaymentAsync(5, 7, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new PaymentReviewResult { Outcome = PaymentReviewOutcome.Settled });
+
+            var result = await _controller.VerifyPayment(5, CancellationToken.None);
+
+            var obj = (ObjectResult)result;
+            Assert.That(obj.StatusCode, Is.EqualTo(409));
+        }
+
+        [Test]
+        public async Task Verify_UnknownId_Returns404()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.VerifyPaymentAsync(99, 7, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new PaymentReviewResult { Outcome = PaymentReviewOutcome.NotFound });
+
+            var result = await _controller.VerifyPayment(99, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Category("FR-21")]
+        [Test]
+        public async Task Verify_Pending_ReturnsDueIdAndPassesAdminId()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.VerifyPaymentAsync(5, 7, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new PaymentReviewResult { Outcome = PaymentReviewOutcome.Done, DueId = 3 });
+
+            var result = await _controller.VerifyPayment(5, CancellationToken.None);
+
+            var ok = (OkObjectResult)result;
+            Assert.That(ok.Value!.GetType().GetProperty("dueId")!.GetValue(ok.Value), Is.EqualTo(3));
+        }
+
+        [Test]
+        public async Task Reject_Pending_Returns204()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.RejectPaymentAsync(5, 7, "Wrong TrxID", It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new PaymentReviewResult { Outcome = PaymentReviewOutcome.Done });
+
+            var result = await _controller.RejectPayment(5, new RejectPaymentDto { Reason = "Wrong TrxID" }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
+        }
+
+        [Category("FR-23")]
+        [TestCase(nameof(FinancialsController.GetPendingPayments))]
+        [TestCase(nameof(FinancialsController.VerifyPayment))]
+        [TestCase(nameof(FinancialsController.RejectPayment))]
+        public void Pending_AsMember_IsAdminOnly(string action)
+        {
+            // A Member token fails the AdminOnly policy, so the framework answers 403 before the action runs.
+            var attr = typeof(FinancialsController).GetMethod(action)!
+                .GetCustomAttributes(typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), false)
+                .Cast<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>()
+                .Single();
+
+            Assert.That(attr.Policy, Is.EqualTo(GHCAA.Domain.Constants.Policies.AdminOnly));
+        }
     }
 }

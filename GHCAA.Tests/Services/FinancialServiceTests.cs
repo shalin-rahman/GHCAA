@@ -18,6 +18,7 @@ public class FinancialServiceTests : TestBase
     private FinancialService _service = null!;
     private Mock<ICommunicationService> _communicationMock = null!;
     private Mock<INotificationService> _notificationMock = null!;
+    private Mock<IActivityService> _activityMock = null!;
 
     [SetUp]
     public async Task Setup()
@@ -30,7 +31,7 @@ public class FinancialServiceTests : TestBase
         var loggerMock = new Mock<ILogger<FinancialService>>();
         var generalSettings = Options.Create(new GeneralSettingsOptions());
         var userMock = new Mock<IUserService>();
-        var activityMock = new Mock<IActivityService>();
+        _activityMock = new Mock<IActivityService>();
         var gamificationMock = new Mock<IGamificationService>();
         var orgConfigMock = new Mock<IOrgConfigService>();
 
@@ -43,7 +44,7 @@ public class FinancialServiceTests : TestBase
             loggerMock.Object,
             generalSettings,
             userMock.Object,
-            activityMock.Object,
+            _activityMock.Object,
             gamificationMock.Object,
             orgConfigMock.Object,
             new Mock<IServiceProvider>().Object);
@@ -483,6 +484,236 @@ public class FinancialServiceTests : TestBase
 
         var updated = await _context.PaymentHistories.FindAsync(payment.Id);
         updated!.GatewayPaymentId.Should().Be("gw-stamped");
+    }
+
+    private async Task<PaymentHistory> AddPaymentAsync(int memberId, string trx, decimal amount, Enums.PaymentStatus status, DateTime paidAt, Enums.FinancialCategory category = Enums.FinancialCategory.MembershipFee)
+    {
+        var payment = new PaymentHistory { MemberId = memberId, TransactionId = trx, Amount = amount, Status = status, PaidAt = paidAt, FinancialCategory = category, Notes = "member note" };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+        return payment;
+    }
+
+    private async Task<MembershipDue> AddDueAsync(int memberId, int year, decimal amount)
+    {
+        var due = new MembershipDue { MemberId = memberId, Year = year, Amount = amount, DueDate = new DateTime(year, 12, 31) };
+        _context.MembershipDues.Add(due);
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+        return due;
+    }
+
+    [Category("FR-21")]
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_PendingPayment_MarksDuePaid()
+    {
+        var member = await CreateMinimalMemberAsync("VR1");
+        var due = await AddDueAsync(member.Id, 2026, 1000);
+        await AddDueAsync(member.Id, 2025, 800);
+        var payment = await AddPaymentAsync(member.Id, "TRX-VR1", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow.AddDays(-1));
+
+        var result = await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Done);
+        result.DueId.Should().Be(due.Id);
+        _context.ChangeTracker.Clear();
+        var saved = await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id);
+        saved.Status.Should().Be(Enums.PaymentStatus.Completed);
+        saved.UpdatedByAdminId.Should().Be(42);
+        var savedDue = await _context.MembershipDues.SingleAsync(d => d.Id == due.Id);
+        savedDue.IsPaid.Should().BeTrue();
+        savedDue.PaymentDate.Should().NotBeNull();
+        savedDue.PaymentHistoryId.Should().Be(payment.Id);
+        (await _context.MembershipDues.CountAsync(d => d.MemberId == member.Id && d.IsPaid)).Should().Be(1);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_TwoDuesOfSameAmount_LeavesDuesAlone()
+    {
+        var member = await CreateMinimalMemberAsync("VR2");
+        await AddDueAsync(member.Id, 2025, 1000);
+        await AddDueAsync(member.Id, 2026, 1000);
+        var payment = await AddPaymentAsync(member.Id, "TRX-VR2", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+
+        var result = await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Done);
+        result.DueId.Should().BeNull();
+        (await _context.MembershipDues.AnyAsync(d => d.MemberId == member.Id && d.IsPaid)).Should().BeFalse();
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_SecondPaymentForSameDue_LeavesFirstLinkAlone()
+    {
+        var member = await CreateMinimalMemberAsync("VR4");
+        var due = await AddDueAsync(member.Id, 2026, 1000);
+        var first = await AddPaymentAsync(member.Id, "TRX-VR4A", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow.AddDays(-2));
+        var second = await AddPaymentAsync(member.Id, "TRX-VR4B", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow.AddDays(-1));
+
+        (await _service.VerifyPaymentAsync(first.Id, 42)).DueId.Should().Be(due.Id);
+        var result = await _service.VerifyPaymentAsync(second.Id, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Done);
+        result.DueId.Should().BeNull();
+        _context.ChangeTracker.Clear();
+        (await _context.MembershipDues.SingleAsync(d => d.Id == due.Id)).PaymentHistoryId.Should().Be(first.Id);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_EventPayment_DoesNotTouchDues()
+    {
+        var member = await CreateMinimalMemberAsync("VR3");
+        await AddDueAsync(member.Id, 2026, 500);
+        var payment = await AddPaymentAsync(member.Id, "TRX-VR3", 500, Enums.PaymentStatus.Pending, DateTime.UtcNow, Enums.FinancialCategory.Event);
+
+        var result = await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        result.DueId.Should().BeNull();
+        (await _context.MembershipDues.AnyAsync(d => d.MemberId == member.Id && d.IsPaid)).Should().BeFalse();
+    }
+
+    [Category("FR-21")]
+    [Category("FR-23")]
+    [Test]
+    public async Task Reject_StoresReasonAndSetsFailed()
+    {
+        var member = await CreateMinimalMemberAsync("RJ1");
+        var due = await AddDueAsync(member.Id, 2026, 1000);
+        var payment = await AddPaymentAsync(member.Id, "TRX-RJ1", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+
+        var result = await _service.RejectPaymentAsync(payment.Id, 42, "  TrxID not found in bKash statement  ");
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Done);
+        _context.ChangeTracker.Clear();
+        var saved = await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id);
+        saved.Status.Should().Be(Enums.PaymentStatus.Failed);
+        saved.Notes.Should().Be("member note | TrxID not found in bKash statement");
+        saved.UpdatedByAdminId.Should().Be(42);
+        (await _context.MembershipDues.SingleAsync(d => d.Id == due.Id)).IsPaid.Should().BeFalse();
+        _activityMock.Verify(x => x.LogActivityAsync(member.Id, Constants.PaymentReview.RejectedAuditType, It.IsAny<string>(), 42,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.Is<string?>(m => m!.Contains("\"OldStatus\":\"Pending\"") && m.Contains("\"NewStatus\":\"Failed\"")),
+            It.IsAny<CancellationToken>(), It.IsAny<DateTime?>()), Times.Once);
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(member.Id, Constants.TemplateCodes.PaymentStatusUpdated,
+            It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<string>(),
+            It.Is<Dictionary<string, string>>(v => v["Status"] == "Failed" && v["Reason"] == "TrxID not found in bKash statement"),
+            It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Category("FR-23")]
+    [TestCase("")]
+    [TestCase("  ")]
+    [TestCase(" a\t\n ")]
+    [TestCase("ab")]
+    public async Task Reject_TooShortReason_ReturnsInvalidReasonAndChangesNothing(string reason)
+    {
+        var member = await CreateMinimalMemberAsync("RJ2" + reason.Length);
+        var payment = await AddPaymentAsync(member.Id, "TRX-RJ2-" + reason.Length, 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+
+        var result = await _service.RejectPaymentAsync(payment.Id, 42, reason);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.InvalidReason);
+        (await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id)).Status.Should().Be(Enums.PaymentStatus.Pending);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_SettledPayment_ReturnsSettled()
+    {
+        var member = await CreateMinimalMemberAsync("ST1");
+        var due = await AddDueAsync(member.Id, 2026, 1000);
+        var payment = await AddPaymentAsync(member.Id, "TRX-ST1", 1000, Enums.PaymentStatus.Failed, DateTime.UtcNow);
+
+        var result = await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Settled);
+        (await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id)).Status.Should().Be(Enums.PaymentStatus.Failed);
+        (await _context.MembershipDues.SingleAsync(d => d.Id == due.Id)).IsPaid.Should().BeFalse();
+        _notificationMock.VerifyNoOtherCalls();
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Reject_SettledPayment_ReturnsSettled()
+    {
+        var member = await CreateMinimalMemberAsync("ST2");
+        var payment = await AddPaymentAsync(member.Id, "TRX-ST2", 1000, Enums.PaymentStatus.Completed, DateTime.UtcNow);
+
+        var result = await _service.RejectPaymentAsync(payment.Id, 42, "Duplicate entry");
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Settled);
+        var saved = await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id);
+        saved.Status.Should().Be(Enums.PaymentStatus.Completed);
+        saved.Notes.Should().Be("member note");
+    }
+
+    [Test]
+    public async Task Verify_UnknownPayment_ReturnsNotFound()
+    {
+        var result = await _service.VerifyPaymentAsync(987654, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.NotFound);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task GetPending_ReturnsOnlyPending_OldestFirst()
+    {
+        var member = await CreateMinimalMemberAsync("PD1");
+        var due = await AddDueAsync(member.Id, 2026, 1000);
+        var newer = await AddPaymentAsync(member.Id, "TRX-PD-NEW", 1000, Enums.PaymentStatus.Pending, new DateTime(2026, 11, 20, 0, 0, 0, DateTimeKind.Utc));
+        var older = await AddPaymentAsync(member.Id, "TRX-PD-OLD", 700, Enums.PaymentStatus.Pending, new DateTime(2026, 11, 1, 0, 0, 0, DateTimeKind.Utc));
+        await AddPaymentAsync(member.Id, "TRX-PD-DONE", 1000, Enums.PaymentStatus.Completed, new DateTime(2026, 10, 1, 0, 0, 0, DateTimeKind.Utc));
+        await AddPaymentAsync(member.Id, "TRX-PD-FAIL", 1000, Enums.PaymentStatus.Failed, new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Utc));
+
+        var result = await _service.GetPendingPaymentsAsync();
+
+        var mine = result.Where(r => r.MemberId == member.Id).ToList();
+        mine.Select(r => r.TransactionReference).Should().Equal("TRX-PD-OLD", "TRX-PD-NEW");
+        mine[0].Id.Should().Be(older.Id);
+        mine[0].DueId.Should().BeNull();
+        mine[0].SubmittedAt.Should().Be(older.PaidAt);
+        mine[1].Id.Should().Be(newer.Id);
+        mine[1].DueId.Should().Be(due.Id);
+        mine[1].MemberName.Should().Be("PD1");
+        mine[1].Amount.Should().Be(1000);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task Verify_NotifiesMember()
+    {
+        var member = await CreateMinimalMemberAsync("NT1");
+        var payment = await AddPaymentAsync(member.Id, "TRX-NT1", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+
+        await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(member.Id, Constants.TemplateCodes.PaymentStatusUpdated,
+            It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<string>(),
+            It.Is<Dictionary<string, string>>(v => v["Status"] == "Completed" && v["TrxID"] == "TRX-NT1"),
+            It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        _activityMock.Verify(x => x.LogActivityAsync(member.Id, Constants.PaymentReview.VerifiedAuditType, It.IsAny<string>(), 42,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<CancellationToken>(), It.IsAny<DateTime?>()), Times.Once);
+    }
+
+    [Test]
+    public async Task Verify_NotificationThrows_StillReturnsDone()
+    {
+        var member = await CreateMinimalMemberAsync("NT2");
+        var payment = await AddPaymentAsync(member.Id, "TRX-NT2", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+        _notificationMock.Setup(x => x.CreateNotificationFromTemplateAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(),
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("smtp down"));
+
+        var result = await _service.VerifyPaymentAsync(payment.Id, 42);
+
+        result.Outcome.Should().Be(PaymentReviewOutcome.Done);
+        (await _context.PaymentHistories.SingleAsync(p => p.Id == payment.Id)).Status.Should().Be(Enums.PaymentStatus.Completed);
     }
 }
 

@@ -140,13 +140,14 @@ class AdminService {
     }
   }
 
+  // Rethrows so the edit screen can show the server's reason, such as the academic record rule (84.104).
   Future<bool> updateMember(int id, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put('/admin/members/$id', data: data);
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('AdminService.updateMember failed: $e');
-      return false;
+      rethrow;
     }
   }
 
