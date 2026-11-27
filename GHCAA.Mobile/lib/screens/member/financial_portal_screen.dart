@@ -680,21 +680,23 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                                                   fontWeight: FontWeight.w900,
                                                   fontSize: 13,
                                                   color: AppTheme.royalGold)),
-                                          const SizedBox(height: 4),
-                                          GestureDetector(
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              _downloadReceipt(item['id']);
-                                            },
-                                            child: const Text('GET RECEIPT',
-                                                style: TextStyle(
-                                                    fontSize: 8.5,
-                                                    color: Colors.white38,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                    fontWeight: FontWeight.w900,
-                                                    letterSpacing: 0.5)),
-                                          )
+                                          if (item['hasReceipt'] == true) ...[
+                                            const SizedBox(height: 4),
+                                            GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                _downloadReceipt(item['id']);
+                                              },
+                                              child: const Text('GET RECEIPT',
+                                                  style: TextStyle(
+                                                      fontSize: 8.5,
+                                                      color: Colors.white38,
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      fontWeight: FontWeight.w900,
+                                                      letterSpacing: 0.5)),
+                                            ),
+                                          ],
                                         ]),
                                   ],
                                 ),

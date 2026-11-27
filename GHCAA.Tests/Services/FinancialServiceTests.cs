@@ -700,7 +700,47 @@ public class FinancialServiceTests : TestBase
         mine[1].Id.Should().Be(newer.Id);
         mine[1].DueId.Should().Be(due.Id);
         mine[1].MemberName.Should().Be("PD1");
+        mine[1].MemberArchived.Should().BeFalse();
         mine[1].Amount.Should().Be(1000);
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task PendingPayments_NameArchivedMember()
+    {
+        var member = await CreateMinimalMemberAsync("AR1");
+        var payment = await AddPaymentAsync(member.Id, "TRX-AR1", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+        await _context.Members.Where(m => m.Id == member.Id).ExecuteUpdateAsync(s => s.SetProperty(m => m.IsArchived, true));
+
+        var result = await _service.GetPendingPaymentsAsync();
+
+        var row = result.Single(r => r.Id == payment.Id);
+        row.MemberName.Should().Be("AR1");
+        row.MemberArchived.Should().BeTrue();
+    }
+
+    [Category("FR-23")]
+    [Test]
+    public async Task PendingPayments_GuestAndActiveRowsBesideArchived()
+    {
+        var archived = await CreateMinimalMemberAsync("AR2");
+        var active = await CreateMinimalMemberAsync("AC2");
+        var archivedPay = await AddPaymentAsync(archived.Id, "TRX-AR2", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+        var activePay = await AddPaymentAsync(active.Id, "TRX-AC2", 1000, Enums.PaymentStatus.Pending, DateTime.UtcNow);
+        var guest = new PaymentHistory { MemberId = null, TransactionId = "TRX-GU2", Amount = 500, Status = Enums.PaymentStatus.Pending, PaidAt = DateTime.UtcNow, FinancialCategory = Enums.FinancialCategory.Donation };
+        _context.PaymentHistories.Add(guest);
+        await _context.SaveChangesAsync();
+        await _context.Members.Where(m => m.Id == archived.Id).ExecuteUpdateAsync(s => s.SetProperty(m => m.IsArchived, true));
+
+        var result = await _service.GetPendingPaymentsAsync();
+
+        result.Single(r => r.Id == archivedPay.Id).MemberArchived.Should().BeTrue();
+        var activeRow = result.Single(r => r.Id == activePay.Id);
+        activeRow.MemberName.Should().Be("AC2");
+        activeRow.MemberArchived.Should().BeFalse();
+        var guestRow = result.Single(r => r.Id == guest.Id);
+        guestRow.MemberName.Should().BeNull();
+        guestRow.MemberArchived.Should().BeFalse();
     }
 
     [Category("FR-23")]

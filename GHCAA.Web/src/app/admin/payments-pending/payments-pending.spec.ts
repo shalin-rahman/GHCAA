@@ -48,6 +48,16 @@ describe('PaymentsPending', () => {
         expect(rows.length).toBe(1);
         expect(rows[0].textContent).toContain('Rahim Uddin');
         expect(rows[0].textContent).toContain('TX-77');
+        expect(rows[0].querySelector('[data-testid="archived-tag"]')).toBeNull();
+    });
+
+    it('tags an archived member by name', () => {
+        financial.getPendingPayments.mockReturnValue(of([{ ...payment, memberArchived: true }]));
+        component.load();
+        fixture.detectChanges();
+        const row = fixture.nativeElement.querySelector('tbody tr');
+        expect(row.textContent).toContain('Rahim Uddin');
+        expect(row.querySelector('[data-testid="archived-tag"]').textContent).toContain('Archived');
     });
 
     it('shows the empty state when nothing is pending', () => {

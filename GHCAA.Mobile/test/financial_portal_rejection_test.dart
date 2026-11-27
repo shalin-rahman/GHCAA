@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,14 +10,31 @@ import 'package:ghcaa_mobile/core/models/financial_models.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
+import 'package:ghcaa_mobile/features/financials/financial_service.dart';
 import 'package:ghcaa_mobile/screens/member/financial_portal_screen.dart';
 
 import 'helpers/fake_services.dart';
 
-Map<String, dynamic> _payment(String status, String? notes, String? reason) {
+// Answers every request with 200 and one JSON body.
+class _FixedAdapter implements HttpClientAdapter {
+  _FixedAdapter(this.body);
+
+  final Object body;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async =>
+      ResponseBody.fromString(jsonEncode(body), 200, headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      });
+}
+
+Map<String, dynamic> _payment(String status, String? notes, String? reason, {int id = 1, int amount = 500}) {
   final entry = LedgerEntry.fromJson({
-    'id': 1,
-    'amount': 500,
+    'id': id,
+    'amount': amount,
     'paidAt': '2026-11-20T10:00:00Z',
     'financialCategory': 'MembershipFee',
     'status': status,
@@ -25,8 +46,34 @@ Map<String, dynamic> _payment(String status, String? notes, String? reason) {
     'date': entry.raw['paidAt'],
     'description': 'MembershipFee',
     'isFailed': entry.isFailed,
+    'hasReceipt': entry.hasReceipt,
     'rejectionReason': entry.rejectionReason,
   };
+}
+
+Future<void> _pumpPortal(WidgetTester tester, List<Map<String, dynamic>> ledger) async {
+  tester.view.physicalSize = const Size(520, 900);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(ProviderScope(
+    overrides: [
+      ledgerProvider.overrideWith((ref) async => ledger),
+      duesProvider.overrideWith((ref) async => 0.0),
+      savedMethodsProvider.overrideWith((ref) async => []),
+      storageServiceProvider.overrideWith((ref) => FakeStorageService()),
+      authServiceProvider.overrideWith((ref) => FakeAuthService()),
+      roleProvider.overrideWith((ref) => Future.value('Member')),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.midnightTheme,
+      routerConfig: GoRouter(routes: [
+        GoRoute(path: '/', builder: (context, state) => const FinancialPortalScreen()),
+      ]),
+    ),
+  ));
+  await tester.pump();
+  await tester.pump();
 }
 
 void main() {
@@ -69,35 +116,56 @@ void main() {
     });
 
     testWidgets('shows the rejection reason on a failed payment', (tester) async {
-      tester.view.physicalSize = const Size(520, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(ProviderScope(
-        overrides: [
-          ledgerProvider.overrideWith((ref) async => [
-                _payment('Failed', 'Annual dues', 'Reference not found'),
-              ]),
-          duesProvider.overrideWith((ref) async => 0.0),
-          savedMethodsProvider.overrideWith((ref) async => []),
-          storageServiceProvider.overrideWith((ref) => FakeStorageService()),
-          authServiceProvider.overrideWith((ref) => FakeAuthService()),
-          roleProvider.overrideWith((ref) => Future.value('Member')),
-        ],
-        child: MaterialApp.router(
-          theme: AppTheme.midnightTheme,
-          routerConfig: GoRouter(routes: [
-            GoRoute(path: '/', builder: (context, state) => const FinancialPortalScreen()),
-          ]),
-        ),
-      ));
-      await tester.pump();
-      await tester.pump();
+      await _pumpPortal(tester, [_payment('Failed', 'Annual dues', 'Reference not found')]);
 
       await tester.scrollUntilVisible(find.text('Reason: Reference not found'), 200,
           scrollable: find.byType(Scrollable).first);
       expect(find.text('FAILED'), findsOneWidget);
       expect(find.text('Reason: Reference not found'), findsOneWidget);
+    });
+  });
+
+  group('84.106: receipt link', () {
+    Map<String, dynamic> json(Object status) =>
+        {'amount': 500, 'paidAt': '2026-11-20T10:00:00Z', 'financialCategory': 'MembershipFee', 'status': status};
+
+    test('Completed and Refunded have a receipt, by name, number or any case', () {
+      for (final s in <Object>['Completed', 'completed', 1, 'Refunded', 'REFUNDED', 3]) {
+        expect(LedgerEntry.fromJson(json(s)).hasReceipt, isTrue, reason: '$s');
+      }
+      for (final s in <Object>['Pending', 0, 'Failed', 'failed', 2]) {
+        expect(LedgerEntry.fromJson(json(s)).hasReceipt, isFalse, reason: '$s');
+      }
+    });
+
+    test('isFailed ignores case', () {
+      expect(LedgerEntry.fromJson(json('failed')).isFailed, isTrue);
+      expect(LedgerEntry.fromJson(json(2)).isFailed, isTrue);
+      expect(LedgerEntry.fromJson(json('Completed')).isFailed, isFalse);
+    });
+
+    test('getLedger passes hasReceipt to each row', () async {
+      final dio = Dio()
+        ..httpClientAdapter = _FixedAdapter([
+          {...json('Completed'), 'id': 1},
+          {...json('Pending'), 'id': 2},
+          {...json(3), 'id': 3},
+        ]);
+      final rows = await FinancialService(dio).getLedger();
+      expect(rows.map((r) => r['hasReceipt']).toList(), [true, false, true]);
+    });
+
+    testWidgets('receipt link only on paid rows', (tester) async {
+      await _pumpPortal(tester, [
+        _payment('Completed', null, null, id: 1, amount: 111),
+        _payment('Pending', null, null, id: 2, amount: 222),
+        _payment('Refunded', null, null, id: 4, amount: 444),
+        _payment('Failed', null, 'Reference not found', id: 3, amount: 333),
+      ]);
+
+      await tester.scrollUntilVisible(find.text('Reason: Reference not found'), 200,
+          scrollable: find.byType(Scrollable).first);
+      expect(find.text('GET RECEIPT', skipOffstage: false), findsNWidgets(2));
     });
   });
 }

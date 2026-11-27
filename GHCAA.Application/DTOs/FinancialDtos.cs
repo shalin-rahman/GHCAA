@@ -27,6 +27,7 @@ namespace GHCAA.Application.DTOs
         public int Id { get; set; }
         public int? MemberId { get; set; }
         public string? MemberName { get; set; }
+        public bool MemberArchived { get; set; }
 
         // A payment row has no due link, so this is the one unpaid membership due of the same
         // member and amount, or null when none or several fit.

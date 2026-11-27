@@ -22,7 +22,11 @@
             <tbody>
                 @for (p of payments(); track p.id) {
                 <tr>
-                    <td>{{ p.memberName || 'Unknown member' }}</td>
+                    <td>{{ p.memberName || 'Unknown member' }}
+                        @if (p.memberArchived) {
+                        <span class="status-badge neutral" data-testid="archived-tag">Archived</span>
+                        }
+                    </td>
                     <td>{{ p.amount | appCurrency }}</td>
                     <td class="mono">{{ p.transactionReference }}</td>
                     <td>{{ p.submittedAt | appDate }}</td>

@@ -24,7 +24,7 @@ IDs out of the active text (rule 9 in section 2).
   (`--state ONHOLD`).
 <!-- backlog-check: off -->
 - **Closed 2026-11-27 and committed:** S132 (84.103), S10 (84.92 backend; the item stays PARTIAL
-  for S11) and S133 (84.104). S11 (84.92 clients) closed 2026-11-28. See the progress log.
+  for S11) and S133 (84.104). S11 (84.92 clients), S134 (84.105) and S135 (84.106) closed 2026-11-28. See the progress log.
 <!-- backlog-check: on -->
 - **Added 2026-11-17:** Work Package 100 (public site, admin and member experience gaps), 20 items,
   19 of them open. Owner, 2026-11-17: place its sessions by their dependencies, not last. The rows
@@ -239,8 +239,8 @@ summary text and link in sync with that card. Run top to bottom.
 | S92 | 84.66 | [Limit pending archive requests and explain refusals](#s92) | M | API, both clients | | |
 | S93 | 51.5 | [Configure file storage and add admin settings](#s93) | M | API, web | | S80 |
 | S94 | 84.98 | [Close theme gaps and verify both color modes](#s94) | M | web, mobile | | |
-| S134 | 84.105 | [Name or settle pending payments of archived members](#s134) | S | API, web | | |
-| S135 | 84.106 | [Show the mobile receipt link only on paid rows](#s135) | S | mobile | | |
+| S134 | done 2026-11-28, see log | [Completed; see progress log](#12-progress-log) | | | | |
+| S135 | done 2026-11-28, see log | [Completed; see progress log](#12-progress-log) | | | | |
 | S95 | 90.1, 90.2 | [Add saved-report storage and query service](#s95) | L | API | 15 | S18 |
 | S96 | 90.3, 90.5 | [Add saved-report API endpoints](#s96) | M | API | | S95 |
 | S97 | 90.4 | [Build the saved-report web page](#s97) | M | web | | S96 |
@@ -3623,51 +3623,6 @@ the code does not have, or already has:
 - Stop and ask if: changing Dart's hex order breaks stored themes (check the seed and OrgConfig
   values first).
 
-<a id="s134"></a>
-**S134 · 84.105 · S**
-- Goal: an archived member's pending payment no longer shows as "Unknown member" on
-  `admin/payments-pending`.
-- Before you start: no card dependency. Ask the owner first: should archiving reject the member's
-  pending payments with a reason, or should the pending list keep them and name the member?
-- Read (only these): `GHCAA.Infrastructure/Services/FinancialService.cs` (`GetPendingPaymentsAsync`,
-  `RejectPaymentAsync`); the member service's `ArchiveMemberAsync`; the `Member` global query filter
-  in `ApplicationDbContext`; `GHCAA.Web/src/app/admin/payments-pending/payments-pending.html`.
-- Change (only these files): `FinancialService.cs` or the member service, by the owner's answer;
-  `payments-pending.html` and `.spec.ts` if the list shows an archived tag;
-  `GHCAA.Tests/Services/FinancialServiceTests.cs`; `docs/TODO.md`.
-- Do not touch: the `Member` query filter itself; the reject rule of 3 to 500 visible characters.
-- Steps:
-  1. Keep and name: read the member name with `IgnoreQueryFilters()` in the pending query and mark
-     the row archived. -> check: the test sees the archived member's name.
-  2. Or settle on archive: reject each Pending payment of the member with a fixed reason from
-     `Constants`, in the archive transaction. -> check: the test sees no Pending row left.
-- Contract: if the pending DTO gains a field, record it in `docs/API_CONTRACT_REGISTRY.md`.
-- Tests: `FinancialServiceTests` :: `PendingPayments_NameArchivedMember` or
-  `ArchiveMember_RejectsPendingPayments`, by the owner's answer.
-- Run: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~FinancialService"`;
-  web spec when the page changes.
-- Done when: the chosen case has a test and 84.105 closes.
-- Stop and ask if: settling on archive would also need a member notice the owner did not ask for.
-
-<a id="s135"></a>
-**S135 · 84.106 · S**
-- Goal: the mobile financial portal shows "GET RECEIPT" only on Completed payments.
-- Before you start: no card dependency.
-- Read (only these): `GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart` (the history
-  row and `_downloadReceipt`); `GHCAA.Mobile/test/financial_portal_rejection_test.dart` (how it
-  builds the screen).
-- Change (only these files): `financial_portal_screen.dart`;
-  `GHCAA.Mobile/test/financial_portal_rejection_test.dart`; `docs/TODO.md`.
-- Do not touch: the receipt route; the web payments page.
-- Steps:
-  1. Build the link only when the row's status is Completed. -> check: a Failed and a Pending row
-     have no link.
-- Contract: none.
-- Tests: `financial_portal_rejection_test.dart` :: `receipt link only on completed payments`.
-- Run: `cd GHCAA.Mobile; flutter analyze; flutter test test/financial_portal_rejection_test.dart --exclude-tags golden`.
-- Done when: the test passes and 84.106 closes.
-- Stop and ask if: the status in the history map is not the enum name the test expects.
-
 <a id="s95"></a>
 **S95 · 90.1, 90.2 · L · migration 15**
 - Goal: saved reports are stored, and `ReportService` runs a whitelisted, capped query per entity and
@@ -5624,6 +5579,8 @@ brief asks for it.
 | 2026-11-27 | 84.92 backend (S10) | Three AdminOnly routes: GET `financials/pending`, POST `{id}/verify` (200 `{ dueId }`, not 204, so the admin sees whether a due was settled), POST `{id}/reject` (204, reason of 3 to 500 visible characters). A payment has no due link, so the due is the single open membership due of the same member and amount (owner choice). Code review fixes: verify claims the payment and the due in one transaction, a due already linked is never relinked, and both reject 400s share the validation problem shape. `update-status` deprecated in the registry. Focused fixtures 61 of 61, ci-local backend 7 of 7 and contract 4 of 4 after the swagger snapshot was regenerated. Walkthrough step type-checks; not run, S11 runs it with the screen | `FinancialsController.cs`, `FinancialService.cs`, `FinancialDtos.cs`, `IFinancialService.cs`, `Constants.cs`, tests, membership walkthrough and README, `docs/api/swagger.json`, authorization catalog, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
 | 2026-11-27 | 84.104 (S133) | The error log write clears the change tracker first, so a failed request's edits are not saved with the error row; safe while `ExceptionMiddleware` is the only caller. Admin member edit checks the Lifelong Patron and academic rules before changing the member, and records a membership type change only after the committee seat checks. Mobile admin edit shows the server's reason. Card filter 64/64, `ci-local.py --only backend` 7 of 7, `--only mobile` 2 of 2, new widget test passed | `ErrorLogService.cs`, `MemberService_Search.cs`, `admin_service.dart`, `profile_edit_screen.dart`, tests, `docs/TODO.md`, this file |
 | 2026-11-28 | 84.92 clients (S11); 84.105 and 84.106 (added), S134 and S135 (added) | Admin web page `admin/payments-pending` verifies and rejects declared payments; the member sees the reason on web and mobile. Owner, 2026-11-27: the reason gets its own `PaymentHistory.RejectionReason` column, so the session also changed the API, DTO and tests and added a migration that copies older reasons from their audit rows; the card listed only client files. Membership walkthrough passed with the reason check; CI backend, web, mobile and contract all pass. Register form loading flag fixed. Archived members' pending payments (84.105) and the mobile receipt link on unpaid rows (84.106) logged | `docs/TODO.md`, this file, `docs/API_CONTRACT_REGISTRY.md`, `docs/PROJECT_MAP.md` |
+| 2026-11-28 | 84.105 (S134) | Owner chose keep and name: archiving leaves pending payments in place, and `GetPendingPaymentsAsync` reads names with `IgnoreQueryFilters()`, so an archived member's row shows the name and an Archived tag. `PendingPaymentDto` gains `memberArchived`. Verify still settles no due for such a member, since the due query filter hides archived members | `FinancialDtos.cs`, `FinancialService.cs`, `FinancialServiceTests.cs`, `financial.service.ts`, `payments-pending.html` and spec, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md`, this file |
+| 2026-11-28 | 84.106 (S135) | GET RECEIPT shows only on Completed and Refunded rows (review follow-up: a refund was paid first). `LedgerEntry.hasReceipt` reads the status by name in any case or by number, and the ledger map carries it, so `financial_models.dart` and `financial_service.dart` changed too, outside the card's file list | `financial_models.dart`, `financial_service.dart`, `financial_portal_screen.dart`, `financial_portal_rejection_test.dart`, `docs/TODO.md`, this file |
 <!-- backlog-check: on -->
 
 ## 13. History

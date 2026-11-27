@@ -38,7 +38,14 @@ class LedgerEntry {
 
   static String? _nonBlank(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
 
-  bool get isFailed => status == 'Failed' || status == '2';
+  // Status arrives as the PaymentStatus name or its number (Completed 1, Failed 2, Refunded 3).
+  bool _isStatus(String name, String number) =>
+      status?.toLowerCase() == name.toLowerCase() || status == number;
+
+  bool get isFailed => _isStatus('Failed', '2');
+
+  // A refunded payment was paid first, so it keeps its receipt.
+  bool get hasReceipt => _isStatus('Completed', '1') || _isStatus('Refunded', '3');
 }
 
 class DueItem {

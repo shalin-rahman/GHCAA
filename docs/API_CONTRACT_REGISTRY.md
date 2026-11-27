@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-28 — GET /api/financials/pending
+- Change: additive. `PendingPaymentDto` gains `memberArchived` (bool). `memberName` is now filled for a member who was archived after paying; before, it was null.
+- Reason: TODO 84.105, plan session S134. Owner chose to keep these payments in the list and name the member.
+- Web: the admin pending payments page shows an Archived tag next to the name.
+- Mobile: no admin review screen, so no change.
+
 ### 2026-11-27 — GET /api/financials/my-history, POST /api/financials/{id}/reject
 - Change: additive. `PaymentHistoryDto` gains `rejectionReason` (string or null), so the my-history rows and the transaction snapshot carry it. POST `{id}/reject` now stores the trimmed reason in the new `PaymentHistories.RejectionReason` column and leaves `notes` as the member wrote it; it no longer appends " | reason" to `notes`. A gateway failure keeps `rejectionReason` null.
 - Migration `20261127120000_AddPaymentRejectionReason` adds the column and fills it for payments already rejected, from the reason in each payment's latest "Payment Rejected" activity row. When `notes` ends with exactly " | reason" (or equals the reason), that suffix is removed so the reason does not show twice. A malformed activity row is skipped. A payment rejected with no activity row keeps the reason in `notes` and gets no `rejectionReason`. Down writes the reason back into `notes` before the column goes.

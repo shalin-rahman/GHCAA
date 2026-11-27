@@ -27,6 +27,7 @@ export interface PendingPayment {
     id: number;
     memberId?: number;
     memberName?: string;
+    memberArchived?: boolean;
     dueId?: number | null;
     amount: number;
     transactionReference: string;

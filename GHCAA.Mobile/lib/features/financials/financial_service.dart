@@ -40,6 +40,7 @@ class FinancialService {
           'description': item['financialCategory']?.toString() ?? item['notes'] ?? 'Alumni Contribution',
           'amount': item['amount'],
           'isFailed': entry.isFailed,
+          'hasReceipt': entry.hasReceipt,
           'rejectionReason': entry.rejectionReason,
         };
       }).toList();

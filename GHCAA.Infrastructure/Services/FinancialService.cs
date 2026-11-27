@@ -216,7 +216,6 @@ namespace GHCAA.Infrastructure.Services
                 {
                     p.Id,
                     p.MemberId,
-                    MemberName = p.Member != null ? p.Member.FullName : null,
                     p.Amount,
                     p.TransactionId,
                     p.ReceiptPath,
@@ -226,6 +225,13 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
 
             var memberIds = pending.Where(p => p.MemberId.HasValue).Select(p => p.MemberId!.Value).Distinct().ToList();
+            // The Member query filter hides archived members, which left their pending rows nameless.
+            var members = await _db.Members
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(m => memberIds.Contains(m.Id))
+                .Select(m => new { m.Id, m.FullName, m.IsArchived })
+                .ToDictionaryAsync(m => m.Id, cancellationToken);
             var openDues = await _db.MembershipDues
                 .AsNoTracking()
                 .Where(d => memberIds.Contains(d.MemberId) && !d.IsPaid && d.PaymentHistoryId == null)
@@ -241,11 +247,13 @@ namespace GHCAA.Infrastructure.Services
                     if (fits.Count == 1) dueId = fits[0].Id;
                 }
 
+                var member = p.MemberId.HasValue && members.TryGetValue(p.MemberId.Value, out var m) ? m : null;
                 return new PendingPaymentDto
                 {
                     Id = p.Id,
                     MemberId = p.MemberId,
-                    MemberName = p.MemberName,
+                    MemberName = member?.FullName,
+                    MemberArchived = member?.IsArchived ?? false,
                     DueId = dueId,
                     Amount = p.Amount,
                     TransactionReference = p.TransactionId,
